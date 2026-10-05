@@ -1,0 +1,1807 @@
+[
+  {
+    "id": 1,
+    "zh_title": "计数排序",
+    "en_title": "Counting sort",
+    "kind": "algorithm",
+    "zh_alias": "计数式直方图排序；与鸽巢排序相关但不等同",
+    "en_alias": "Counting-based histogram sort; related to, but distinct from, pigeonhole sort",
+    "zh": {
+      "foundation": [
+        "先把“值”和“位置”分开：输入 [3,1,2,1] 中有四条记录，但值 1 出现两次。排序不能删掉其中一个。若数字旁边还带着姓名，数字叫排序键，姓名必须随数字一起移动。",
+        "计数表是一排小格，每个格有固定标签。标签为 1 的格只记 1 出现几次，标签为 2 的格只记 2 出现几次；格里存的是数量，不是原输入的那条记录。"
+      ],
+      "idea": "如果要排的数只能是几个整数，为什么还要反复比较它们？我们先数清每种数有几份，就知道前面该留多少位置。这就是计数排序。比如已有两个 1，那么任何 2 都必须排在这两个 1 后面。",
+      "steps": [
+        "先找输入中的最小键和最大键。给这个范围内的每个整数开一个计数格，全部写 0。若最小键是负数，可以用“键减最小键”当格号，例如 −2 对应格 0，−1 对应格 1。",
+        "读一条记录，就把它对应格的数量加 1。读完后从小标签往大标签累加：把前面各格的数量加到当前格。这个累计值表示“当前键以及更小的键总共占多少位置”。",
+        "另准备一排输出格。为了不把相等记录的先后顺序颠倒，从原输入右端开始处理。若某键的累计值是 t，把当前记录放到输出下标 t−1，再把该键的累计值减 1。减 1 的意思是这个键的最后一个可用位置已被占用。",
+        "一直处理到原输入最左端，输出就完成了。若只是裸整数，没有需要保留的其他字段，也可以按标签从小到大直接写出计数规定的份数；但这不是保存完整记录的实现。"
+      ],
+      "example": [
+        "给两个 1 加标签以便观察：输入 [3,1甲,2,1乙]。依次读取后，标签 1、2、3 的数量是 [2,1,1]。累计数量变成 [2,3,4]，所以输出的下标 0–1 给 1，下标 2 给 2，下标 3 给 3。",
+        "先读右端的 1乙：累计数为 2，放输出下标 1，得到 [空,1乙,空,空]，键 1 的累计数降为 1。再读 2，放下标 2，得到 [空,1乙,2,空]。",
+        "再读 1甲，放下标 0；最后把 3 放下标 3。结果 [1甲,1乙,2,3]。甲仍在乙前面；去掉观察标签就是 [1,1,2,3]。"
+      ],
+      "cost": "实际工作是读输入、扫计数格、再写输出，各只做一遍。设 n 是记录数，k 是最大键减最小键再加 1；k 包括没有出现的整数。标准版本最好、通常、最坏都为 Θ(n+k)，表示工作随这两项的和增长。额外空间 Θ(n+k) 用于计数及输出。完整记录版稳定，即相等键保留原先后。若十个数跨越几十亿个整数格，扫描空格会很贵。",
+      "why": "快的原因是键直接指出计数格和输出区间，免去反复寻找。慢的情况是可能的键太多：少量输入并不能抵消巨大的计数表。",
+      "use": "适合分数、年龄和有限编号。也适合充当基数排序的一轮，但那时一定要用保留相等项次序的版本。",
+      "details": "空输入直接返回；单元素也无须建表。数值必须能准确对应离散整数格。只有“出现/未出现”的位图不能代替计数，它会丢掉重复项。把稀疏键压成连续编号需要先把不同键排好，这项准备工作也要计时。"
+    },
+    "en": {
+      "foundation": [
+        "An item and its value are different things. In [3,1,2,1], four items must remain four items. The two ones cannot be collapsed. A record may also contain a name; its sorting value is called its key, and the name must move with it.",
+        "A counting table has labeled slots. Slot 1 stores how many keys equal 1, slot 2 stores how many equal 2, and so on. These slots contain quantities, not the original records."
+      ],
+      "idea": "Suppose the keys can only be a few small integers. We can count their copies instead of repeatedly comparing pairs. Once we know that there are two ones, we know that every two must come after two occupied positions. Counting sort turns that observation into exact destinations.",
+      "steps": [
+        "Find the minimum and maximum keys. Make a zero counter for every integer in between. Negative keys are fine: subtract the minimum to obtain a nonnegative slot number.",
+        "For each input record, increase its counter. Next, add the counters from left to right. A running total tells us how many records have this key or a smaller one, so it marks the end of this key's output region.",
+        "Prepare an output array. Read the original records backward. If a key's running total is t, place the record at index t−1 and reduce that total by one. The reduction reserves the preceding position for another copy of the key.",
+        "Stop after the first original record has been placed. For plain integers, an alternative is to write each labeled value as many times as its count. That simpler reconstruction does not carry names or other record fields."
+      ],
+      "example": [
+        "Label the equal records: [3,1A,2,1B]. Counts for 1,2,3 become [2,1,1], then running totals [2,3,4]. Ones own indices 0–1, the two owns index 2, and the three owns index 3.",
+        "Read 1B first. Its total is 2, so write it at index 1: [empty,1B,empty,empty]. Reduce the ones' total to 1. Read 2 and write it at index 2: [empty,1B,2,empty].",
+        "Place 1A at index 0, then 3 at index 3. The answer [1A,1B,2,3] keeps A before B. Removing the labels gives [1,1,2,3]."
+      ],
+      "cost": "The main jobs are scanning the records, scanning the counters, and writing the records once. Let n be the record count and k=max−min+1, including unused key values. Best, usual, and worst work for this full version are Θ(n+k). Additional storage is Θ(n+k). It is stable: equal-key records keep their original order. Ten widely separated integers can still require an impractically large table.",
+      "why": "A key points directly to its counter and destination region. The advantage disappears when most of the table is empty but still has to be allocated and scanned.",
+      "use": "Good for scores, ages, small category numbers, and stable passes inside radix sorting.",
+      "details": "Return immediately for an empty or singleton input. Keys need exact discrete slots. A presence-only bitmap loses repeated records. Compressing a sparse key range requires an ordered key map; constructing that map is additional work."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: Counting sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/countingsort.html"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "zh_title": "鸽巢排序",
+    "en_title": "Pigeonhole sort",
+    "kind": "algorithm",
+    "zh_alias": "鸽笼排序；按完整键值分格的分配排序",
+    "en_alias": "Hole-based distribution sort; not another name for the general bucket-sort family",
+    "zh": {
+      "foundation": [
+        "把记录放进容器和给记录计数是两回事。一个容器里能保存完整数字、姓名等内容；相等数字仍是多条独立记录。这里容器可用列表：从尾部加入，稍后从头到尾读出。",
+        "巢的标签本来就有次序。先取标签 2 的全部记录，再取标签 3 的全部记录，就能保证不同键的大小次序；巢内只有同一种键。"
+      ],
+      "idea": "想象准备一排贴好整数标签的小盒子。每条记录只需走到自己的盒子，再按盒子标签从小到大收回。这个方法叫鸽巢排序。与计数排序的区别是：它先真的把记录装进去，而不只是统计份数再计算最终地址。",
+      "steps": [
+        "找最小键和最大键，为中间每个整数建一个空巢。不要只准备“一个数字位置”：某个键可能有很多条记录，同一巢必须装得下它们。",
+        "从左向右读输入。读到键 x，就把整条记录追加到标签 x 的巢末尾。追加而不是放到最前面，是为了保留同键记录的原先后。",
+        "从最小标签的巢开始，依次读出该巢的所有记录，追加到输出。这个巢空了再去下一标签；不用比较不同巢中的记录，标签已经决定它们的先后。",
+        "最大标签的巢也收完后结束。整数为负时，把标签减去最小键就能转换成数组格号。如果只保存每巢的计数再重写裸整数，这就是它的简化键值变体。"
+      ],
+      "example": [
+        "输入 [4,2甲,3,2乙]，建标签 2、3、4 的巢。读 4 后，巢 4=[4]；读 2甲后，巢 2=[2甲]；读 3后，巢 3=[3]；读 2乙后，巢 2=[2甲,2乙]。",
+        "输出最初为空。收巢 2，得到 [2甲,2乙]；收巢 3，得到 [2甲,2乙,3]；收巢 4，得到 [2甲,2乙,3,4]。每次是搬一整条记录，不是只给输出改一个数字。"
+      ],
+      "cost": "每条记录搬进巢一次、搬出巢一次，还要走过全部巢。n 为记录数，k 为从最小到最大键包含的整数格数，标准最好、通常、最坏均 Θ(n+k)。存完整记录要 Θ(n+k) 额外空间；纯整数计数式可用 Θ(k)。按输入顺序追加并收集的版本稳定。",
+      "why": "小键域里，直接找标签很省事；巢很多时，空容器的建立和访问会浪费时间。多个容器的分配成本也可能高于一张连续计数表。",
+      "use": "适合按少量整数类别整理完整记录。它也很好地说明“先分配、后收集”的排序思路。",
+      "details": "同一巢不能被后来的记录覆盖。普通桶排序一桶可以含多个不同键，鸽巢却一巢对应一个键。若用哈希表省去空巢，表的遍历顺序通常不是键的顺序；还得排列实际标签。空输入直接结束。"
+    },
+    "en": {
+      "foundation": [
+        "A container can hold whole records, including names or other fields. Several records may have the same key, so one labeled hole needs a list rather than a single replaceable slot.",
+        "Appending means adding at the end. If records enter a hole in input order and later leave in that order, equal keys keep their original sequence."
+      ],
+      "idea": "Put a row of labeled boxes on the table. Each record goes straight into the box bearing its integer key. Empty the boxes in label order, and the records come out ordered. This is pigeonhole sort. Counting sort calculates destination positions from quantities; pigeonhole sort first moves the actual records into containers.",
+      "steps": [
+        "Find the minimum and maximum keys. Create one empty hole for every integer in that range. A hole must be able to store all records with its label.",
+        "Read the input from left to right. Append a complete record to its matching hole. Do not replace a previous record just because its key is equal.",
+        "Visit the holes from the smallest label upward. Copy every record from the current hole to the output before visiting the next hole. The ordered labels establish the order between different keys.",
+        "Finish after emptying the largest-label hole. To use negative keys as array indices, subtract the minimum. A plain-integer version may store counts instead of record lists, but that is a simplified key-only form."
+      ],
+      "example": [
+        "For [4,2A,3,2B], prepare holes 2,3,4. Reading 4 makes hole 4=[4]. Reading 2A makes hole 2=[2A]. Reading 3 makes hole 3=[3]. Reading 2B extends hole 2 to [2A,2B].",
+        "The output starts empty. Empty hole 2 to obtain [2A,2B], then hole 3 to obtain [2A,2B,3], then hole 4 to obtain [2A,2B,3,4]. Each move carries the record's accompanying information."
+      ],
+      "cost": "Every record enters and leaves a hole once, and every hole is visited. With n records and k integer labels from minimum through maximum, best, usual, and worst work are Θ(n+k). Record containers need Θ(n+k) extra space; a count-only integer version needs Θ(k). Ordered appending and collection make it stable.",
+      "why": "Direct labels save searching. Huge numbers of empty containers waste both storage and scanning, and separate containers can be more costly than a flat counting table.",
+      "use": "Useful for grouping whole records by a narrow integer domain, and for understanding distribution sorting.",
+      "details": "A general bucket can contain several different keys; a pigeonhole represents exactly one. A sparse hash table saves empty holes but does not usually give ordered labels. Those labels must still be arranged. Empty input returns immediately, and every duplicate must survive."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: Pigeonhole sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/pigeonholeSort.html"
+      },
+      {
+        "title": "NIST DADS: Counting sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/countingsort.html"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "zh_title": "低位优先基数排序",
+    "en_title": "LSD radix sort",
+    "kind": "variant",
+    "zh_alias": "最不重要位优先基数排序；LSD 表示 least significant digit",
+    "en_alias": "Least-significant-digit radix sort; LSD is a radix-sort direction",
+    "zh": {
+      "foundation": [
+        "十进制数位的分量不同：21 的十位是 2、个位是 1。这里先把所有正整数写成同样宽度，7 可写成 07；加前导零不改变数值。",
+        "一轮“稳定分组”的操作是：按当前数位准备标签 0–9 的容器，从左向右追加记录，再从容器 0 到 9 顺序收回。数位相同的记录保留这一轮输入中的先后。这一点叫稳定性，不是可有可无的优化。"
+      ],
+      "idea": "先排个位真的能帮助排整个数吗？单独一轮当然不够。诀窍是下一轮按十位分组时，保住已经排好的个位顺序。这样十位先决定谁在前，同十位内部再由个位决定次序。这个从较小分量往较大分量处理的方法，就是低位优先基数排序。",
+      "steps": [
+        "确定共同位数 d，并决定一位的表示。十进制每位有 10 种值；程序也常把一个字节当一位，便有 256 种值。这里用十进制方便看过程。",
+        "只看个位做一次稳定分组。不要看整数字大小，也不要在同一桶里任意交换。收回结果只是按个位排好，可能看起来比原来更乱，这是正常中间状态。",
+        "在这份新顺序上只看十位，再做同样的稳定分组。十位相等的记录按进桶次序收回，因此它们保留了上一轮的个位顺序。",
+        "继续向左，每次在上一轮结果上处理下一位。处理完最左位才宣布完整有序。可用稳定计数排序实现每轮：计数、累计位置、保序写到输出缓冲，再交换两份数组的角色。"
+      ],
+      "example": [
+        "输入 [21,13,12,11,22]。个位为 1 的记录依次是 21、11；个位为 2 是 12、22；个位为 3 是 13。收回得 [21,11,12,22,13]。注意 21 还在 11 前面，因此不是最终结果。",
+        "在这个新顺序上看十位。十位 1 的记录现在依次是 11、12、13；十位 2 的是 21、22。收回得 [11,12,13,21,22]。11、12、13 的个位次序没有被第二轮打乱。",
+        "如果第二轮把十位 1 的组倒过来，结果会含 [13,12,11]，上一轮成果就丢了。这解释了为什么每一轮必须稳定，而不是碰巧在本例稳定。"
+      ],
+      "cost": "每轮读写全部记录，还要整理当前位的计数表。n 为记录数，d 为位数，r 为一位可能取值数，完整版本最好、通常、最坏均 Θ(d(n+r))。d 和 r 固定时，工作随 n 线性增长。额外空间 Θ(n+r)。各轮稳定，则整体稳定；已经有序通常也要跑所有轮。",
+      "why": "一轮只判断一个小数位，免去反复比较完整键。键很长时，来回读写多轮也可能比比较排序昂贵；基数过大还会浪费计数空间。",
+      "use": "大量固定宽度整数、等长编号和可按字节编码的键。",
+      "details": "负数不能直接把负号当普通数字排；需把键转成保持数值次序的固定宽度编码。有符号机器整数可翻转符号位后按无符号顺序处理。变长字符串的字典序另需结束标记或规范表示。重复键各自参加所有轮，不能合并成一条。"
+    },
+    "en": {
+      "foundation": [
+        "Digits have different importance. In 21, the tens digit is 2 and the units digit is 1. Use a common width: 7 can be written 07 without changing its value.",
+        "A stable digit pass puts records into digit-labeled groups in their incoming order and collects the groups from 0 upward. Equal digits keep that incoming order. Stability is the mechanism that connects the passes."
+      ],
+      "idea": "Sorting units alone does not sort whole numbers. The useful trick is to sort tens afterward without disturbing the units order among equal tens. Tens then decide the large groups, while units decide the order inside each group. Repeating this from right to left is LSD radix sort.",
+      "steps": [
+        "Choose a common number of digit positions d and a radix, the number of values one digit can have. Decimal has ten; byte-based programs often use 256. Use decimal here so the passes are visible.",
+        "Perform a stable pass using only units. Append records to digit groups in their current order and collect groups in digit order. This is an intermediate order, not a complete numeric order.",
+        "Use that result as input to a stable tens pass. Records with equal tens keep the units order established previously.",
+        "Continue leftward, always using the preceding pass's output. Finish after the most important digit. A practical stable counting pass counts digits, calculates regions, writes records to a buffer in preserved order, and makes that buffer the next input."
+      ],
+      "example": [
+        "Start [21,13,12,11,22]. Units-1 receives 21 then 11; units-2 receives 12 then 22; units-3 receives 13. Collection produces [21,11,12,22,13]. It still places 21 before 11, so this is not the answer.",
+        "Now inspect tens in that new sequence. Tens-1 receives 11,12,13; tens-2 receives 21,22. Collection gives [11,12,13,21,22]. The units ordering inside each tens group survives.",
+        "If the second pass reversed its tens-1 group into [13,12,11], it would destroy the first pass's work. That is why stability is required, not merely convenient."
+      ],
+      "cost": "Each pass reads and writes all records and manages a digit table. For n records, d positions, and radix r, best, usual, and worst work are Θ(d(n+r)) for the complete procedure. Fixed d and r make this linear in n. Extra space is Θ(n+r). Stable passes give stable output. Already sorted inputs normally still take all passes.",
+      "why": "Small digit decisions replace repeated whole-key comparisons. Very long keys require many full-data passes, and an oversized radix table wastes memory.",
+      "use": "Good for large fixed-width integer batches and equal-width identifiers.",
+      "details": "Negative values need an order-preserving encoding rather than ordinary sign characters. Fixed-width signed integers can flip their sign bit. Variable-length strings need a suitable end marker or representation. Keep every duplicate record throughout every pass."
+    },
+    "sources": [
+      {
+        "title": "Sedgewick and Wayne: String sorts",
+        "url": "https://algs4.cs.princeton.edu/51radix/"
+      },
+      {
+        "title": "Princeton LSD implementation",
+        "url": "https://algs4.cs.princeton.edu/51radix/LSD.java.html"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "原始输入；先看个位",
+          "en": "Input: inspect units first",
+          "values": [
+            21,
+            13,
+            12,
+            11,
+            22
+          ],
+          "active": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "个位稳定分组后的中间结果",
+          "en": "Stable units pass: intermediate order",
+          "values": [
+            21,
+            11,
+            12,
+            22,
+            13
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "zh": "按十位稳定分组，保留个位顺序",
+          "en": "Stable tens pass preserves units order",
+          "values": [
+            11,
+            12,
+            13,
+            21,
+            22
+          ],
+          "active": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "fixed": [],
+          "moved": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "zh": "两位都处理完，完整数值有序",
+          "en": "Both digits processed: fully sorted",
+          "values": [
+            11,
+            12,
+            13,
+            21,
+            22
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "moved": []
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "zh_title": "高位优先基数排序",
+    "en_title": "MSD radix sort",
+    "kind": "variant",
+    "zh_alias": "最重要位优先基数排序；MSD 表示 most significant digit",
+    "en_alias": "Most-significant-digit radix sort",
+    "zh": {
+      "foundation": [
+        "本例把整数写成相同位数，所以最高位较小，完整数字一定较小。字符串则按字典序：先看第一字符，不同就决定大小；相同再看下一字符。",
+        "一个组的位置可以用起点和结束点记住。例如下标 [0,2) 包含 0、1，不含 2，称为半开区间。递归的意思是在某个较小区间里再次执行相同分组动作，并先检查它是否已经无需处理。"
+      ],
+      "idea": "与其给所有记录每一位都排一遍，不如先看最重要的一位。最高位不同的记录已经分清前后，后面的工作只留给同组记录。这就是高位优先基数排序。一个单元素组已经没有同伴需要比较，可直接停止，即使它还有很多位未读。",
+      "steps": [
+        "在当前区间统计最高待处理位的各类数量。累计数量得到每组应占的连续输出区间；准备一份临时输出，保证不会在读取原记录时把它覆盖。",
+        "按当前输入顺序把记录放入各组区间，再复制回当前区间。这样同位值的记录聚在一起；按顺序放也使这一版稳定。",
+        "依次处理各组：空组和单元素组停止；已经到末位的组也停止。其余组把待处理位向右移一位，再执行上述统计、分配、处理组的步骤。不同高位组之间绝不混回去。",
+        "变长字符串需要一个“字符串在这里结束”的特殊类别，排在任何实际字符前面。例如 '2' 与 '21' 共有开头 2，但 '2' 到此结束，应先输出；结束类别不再递归，否则会不停读不存在的字符。"
+      ],
+      "example": [
+        "输入 [31,12,32,11,22]。十位 1 收 [12,11]，十位 2 收 [22]，十位 3 收 [31,32]，分配后 [12,11,22,31,32]。第一组只占下标 0–1，第二组占 2，第三组占 3–4。",
+        "[22] 只有一项，立即停止。处理 [12,11] 的个位：个位 1 的 11 先于个位 2 的 12，变 [11,12]。处理 [31,32] 的个位，仍是 [31,32]。",
+        "把已处理的小区间放在原组的位置，得 [11,12,22,31,32]。没有必要拿 11 和 32 比较：十位已经保证第一组在第三组之前。"
+      ],
+      "cost": "工作取决于实际读了多少字符，以及处理了多少组。n 为记录数、d 为最大键长、r 为一位的取值数、I 为执行分组的节点数，通用上界 O(nd+rI)。固定小字母表时常写 O(nd)。最好一轮就分开各键，Θ(n+r)；通常快慢依赖共同前缀。缓冲与逐层计数信息用 O(n+rd) 空间。这个保序缓冲版稳定。",
+      "why": "高位一旦分开，后续就不用为两组互相比较；单元素组还可早停。大量键有长共同前缀时，要逐位读过同样的开头，优势会减小。",
+      "use": "适合字符串、长编号和容易从开头分组的键。",
+      "details": "'12' 按字典序在 '2' 前面，按数值序却在后面；要先决定哪种次序，数值字符串可补同宽前导零。完全相同的键处理到结束位就停，但保留每条记录。小组可调用插入排序：保有序左部，逐个插入剩余项，减少分组开销。"
+    },
+    "en": {
+      "foundation": [
+        "For equal-width positive integers, a smaller leading digit guarantees a smaller whole value. Strings instead use lexicographic order: inspect the first unequal character; if there is none, the shorter string comes first.",
+        "A region such as [0,2) contains indices 0 and 1, excluding 2. Recursion means performing the same procedure on a smaller region, with explicit stopping conditions."
+      ],
+      "idea": "Why examine every digit of every key when some keys separate immediately? MSD radix sort begins with the most important digit. Different leading digits settle the order between groups; only ties need the next digit. A group containing one record can stop without reading the remainder of its key.",
+      "steps": [
+        "Count the current digit values in the current region. Running totals give each group's consecutive destination region. Use an output buffer so writing a record cannot overwrite one still waiting to be read.",
+        "Distribute records in their incoming order, then copy the region back. Equal digits are now together. Preserving incoming order makes this buffered version stable.",
+        "For each group, return if it is empty, contains one record, or has no digit left. Otherwise move one digit rightward and repeat the same counting and distribution within that group. Never mix groups with different earlier digits again.",
+        "For variable-length strings, use a special end-of-string category smaller than every actual character. After the shared '2', key '2' ends while '21' continues. The ending key comes first, and its category must not recurse further."
+      ],
+      "example": [
+        "For [31,12,32,11,22], tens-1 collects [12,11], tens-2 [22], and tens-3 [31,32]. The intermediate array is [12,11,22,31,32], with regions 0–1, 2, and 3–4.",
+        "The singleton [22] stops. Inside [12,11], the units pass puts 11 before 12. Inside [31,32], the units pass leaves the order unchanged.",
+        "The answer is [11,12,22,31,32]. There is no need to compare 11 with 32: their tens groups already establish the order."
+      ],
+      "cost": "Count the characters actually inspected and the groups processed. With n records, maximum length d, radix r, and I grouping nodes, an upper bound is O(nd+rI), commonly O(nd) for a fixed small alphabet. Best is Θ(n+r) when one pass separates the keys. Usual cost depends on common prefixes. The buffered implementation uses O(n+rd) extra space and is stable.",
+      "why": "Separated groups never compare again, and singletons stop early. A long common prefix makes many records traverse many levels before they separate.",
+      "use": "Useful for strings, long identifiers, and keys that separate near their beginning.",
+      "details": "String '12' precedes '2' lexicographically, but not numerically. Normalize representations if numeric order is wanted. Keep repeated full keys and stop at their end. Small groups can use insertion sort: maintain an ordered prefix and insert the remaining records into it."
+    },
+    "sources": [
+      {
+        "title": "Princeton MSD implementation",
+        "url": "https://algs4.cs.princeton.edu/51radix/MSD.java.html"
+      },
+      {
+        "title": "McIlroy, Bostic, McIlroy: Engineering radix sort",
+        "url": "https://www.usenix.org/publications/compsystems/1993/win_mcilroy.pdf"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "原始输入；比较十位",
+          "en": "Input: inspect tens",
+          "values": [
+            31,
+            12,
+            32,
+            11,
+            22
+          ],
+          "active": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "十位分组：1 | 2 | 3",
+          "en": "Tens groups: 1 | 2 | 3",
+          "values": [
+            12,
+            11,
+            22,
+            31,
+            32
+          ],
+          "active": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "fixed": [
+            2
+          ],
+          "moved": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "zh": "只在十位为 1 的组内排个位",
+          "en": "Sort units inside tens-1 only",
+          "values": [
+            11,
+            12,
+            22,
+            31,
+            32
+          ],
+          "active": [
+            0,
+            1
+          ],
+          "fixed": [
+            2
+          ],
+          "moved": [
+            0,
+            1
+          ]
+        },
+        {
+          "zh": "各组完成，合起来有序",
+          "en": "All groups complete",
+          "values": [
+            11,
+            12,
+            22,
+            31,
+            32
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "moved": []
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "zh_title": "美国旗排序",
+    "en_title": "American flag sort",
+    "kind": "variant",
+    "zh_alias": "原地多路 MSD 基数排序；名称来自连续色块般的分区",
+    "en_alias": "In-place multiway MSD radix sort",
+    "zh": {
+      "foundation": [
+        "分好组不等于组内有序。我们先保证十位 1 的记录都在十位 2 前，再处理各组个位。这里仍从最高位开始。",
+        "交换必须保住被挤走的值：先暂存一个位置的记录，再将另一个写过去，最后写回暂存记录。next[c] 只是记录“第 c 组下一格尚未确认的位置”的整数，不是额外一份数据。"
+      ],
+      "idea": "高位分组常用一整排临时输出。内存紧时，能否直接在原数组里把各组摆成连续区间？美国旗排序的办法是先数清每组需要几格，再把放错组的记录交换到正确组的空位。最后的组像一条条色带，名称由此而来。",
+      "steps": [
+        "统计当前位各类数量，按小位值到大位值划出互不重叠的区间。记固定起止边界，再给每组一个 next，初始指向该组起点。",
+        "从第一组的 next 位置检查记录。若它确实属于本组，这一格可确认，next 加 1。若它属于别组，就与目标组 next 位置上的记录交换，并把目标组 next 加 1：至少一个记录已送进正确组。",
+        "刚换回当前格的记录还没有确认，必须继续检查，不能直接跳过。若它又属于另一组，再送过去。当前组所有格确认后处理下一组；桶边界和 next 能告诉我们哪些位置已经完成，无须为每条记录添标记。",
+        "所有组分配完后，在含两条以上记录且仍有下一位的组内继续同样过程。单元素、最后一位、字符串结束类别都是停止条件。可以用一张待处理区间清单代替函数递归。"
+      ],
+      "example": [
+        "输入 [21,12,11,22]。十位 1 与 2 各有两条，所以组 1 的下标是 [0,2)，组 2 是 [2,4)，next 为 [0,2]。",
+        "检查组 1 的下标 0：21 属于组 2，与其 next=2 上的 11 交换，得 [11,12,21,22]，组 2 的 next 变 3。再检查当前格 11，它属于组 1，所以组 1 的 next 变 1。",
+        "下标 1 的 12 也正确，组 1 完成。组 2 的 next=3 上是 22，也正确。接着在 [11,12]、[21,22] 中分别看个位，均无需改变。最终 [11,12,21,22]。"
+      ],
+      "cost": "主要成本是每层统计、交换、扫桶表。n 为记录数、d 为最大键长、r 为基数、I 为处理的分组数，上界 O(nd+rI)，固定小基数时 O(nd)。最好一层便分开时 Θ(n+r)，通常依赖共同前缀。深度优先实现的桶表和任务信息可用 O(rd) 空间，无需第二份 n 条记录的数组。通常不稳定：远距离交换可改变同键记录先后。",
+      "why": "它用原数组内的交换省去大输出缓冲。不过交换的内存访问不如连续写出规律，许多小组也带来管理成本，所以省内存并不自动等于更快。",
+      "use": "适合可以逐位读取的长键、内存受限且不要求稳定的任务。",
+      "details": "next 不得越过本组终点。已确认的格不能再当空位使用。原地表示没有按 n 分配第二份记录数组，不表示没有计数表或任务清单。实际实现通常用插入排序完成很小的组；字符串结束类别须排在字符之前并停止处理。"
+    },
+    "en": {
+      "foundation": [
+        "Putting records into the right groups is only the first job. Their order inside a group may still need work. This method, like MSD radix sort, proceeds from important digits to less important ones.",
+        "An exchange saves one record temporarily so neither record is lost. A next pointer is simply an integer position: the next slot of a bucket not yet confirmed. It is not a second copy of the data."
+      ],
+      "idea": "A buffered digit sort needs another array of records. American flag sort avoids that large array. Count the groups first, reserve their consecutive regions, then exchange misplaced records into those regions. The groups become stripes; later passes finish the order inside each stripe.",
+      "steps": [
+        "Count current digit values. In increasing digit order, assign each bucket a fixed start and end. Set its next position to its start.",
+        "Inspect the record at the current bucket's next position. If its digit belongs here, confirm the slot and advance next. Otherwise exchange it with the next unconfirmed slot of its destination bucket and advance that destination's next.",
+        "Inspect the record brought back into the current slot. It is still unconfirmed and may need another exchange. Continue until the bucket is full, then move to the next bucket. Boundaries and next positions identify completed areas without a marker on every record.",
+        "After distribution, process the next digit separately inside each bucket containing at least two records. Stop at a singleton, the final digit, or an end-of-string bucket. A list of pending regions can replace recursive function calls."
+      ],
+      "example": [
+        "For [21,12,11,22], both tens digits occur twice. Bucket 1 owns [0,2), bucket 2 owns [2,4), and their next positions are 0 and 2.",
+        "At index 0, 21 belongs to bucket 2. Exchange it with 11 at index 2: [11,12,21,22]. Bucket 2's next becomes 3. Recheck the current record, 11; it belongs to bucket 1, whose next becomes 1.",
+        "Confirm 12 at index 1, completing bucket 1. Confirm 22 at bucket 2's remaining index 3. Units passes on [11,12] and [21,22] finish the result [11,12,21,22]."
+      ],
+      "cost": "Each level counts, exchanges, and scans bucket tables. For n records, maximum key length d, radix r, and I processed groups, work is O(nd+rI), or O(nd) for fixed small radix. Best is Θ(n+r) when one pass separates keys; usual cost depends on prefixes. Depth-first tables and task information can use O(rd) extra space without an n-record output buffer. Ordinary exchanges make it unstable.",
+      "why": "It saves a large buffer, but exchanges can access memory less regularly than sequential writes. Managing tiny buckets can also cost more than their useful work.",
+      "use": "Useful for digit-readable keys when memory is limited and equal-key order is unimportant.",
+      "details": "Never advance beyond a bucket's end or reuse confirmed slots. In-place does not mean zero bookkeeping. Small buckets often use insertion sort. String endings form a category before characters and must stop further processing."
+    },
+    "sources": [
+      {
+        "title": "McIlroy, Bostic, McIlroy: Engineering radix sort",
+        "url": "https://www.usenix.org/publications/compsystems/1993/win_mcilroy.pdf"
+      },
+      {
+        "title": "Princeton AmericanFlag implementation",
+        "url": "https://algs4.cs.princeton.edu/51radix/AmericanFlag.java.html"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "zh_title": "桶排序",
+    "en_title": "Bucket sort",
+    "kind": "family",
+    "zh_alias": "箱排序；bin sort；分桶策略是一族算法",
+    "en_alias": "Bin sort; a family of distribution strategies",
+    "zh": {
+      "foundation": [
+        "桶是一个能保存多条记录的容器。不同于计数格或鸽巢，一个桶可装多个不同值，例如区间 10–19 的桶装 11 和 13。",
+        "一个桶的区间必须在下一桶区间之前；如果前桶最大可能值小于后桶最小可能值，两个桶的记录就不必交叉比较。但同桶的 13 和 11 仍要整理。"
+      ],
+      "idea": "如果知道数字的大致分布，可以先把大问题切成许多小问题：小数放小范围桶，大数放大范围桶，再在每个桶里整理。这叫桶排序。省下的工作来自每个桶很短，并不是“进桶就排完”。",
+      "steps": [
+        "先定义有序的数值区间及边界归属。例如整数 0–99 可按十位分十桶。也可用不等宽区间，让常见范围分得更细。每个值必须恰好属于一个桶。",
+        "从左到右读输入，按区间把整条记录追加到相应桶。记录与附带信息一起存；重复值也全部加入。",
+        "把每个桶内部排好。本例用插入法：第一项暂当有序；取下一项，向右挪动比它大的前项，再把它插入空出的正确位置。重复到桶尾。只有一条的桶不需要这个步骤。",
+        "从最小区间桶开始，顺序输出其排好的全部记录，再输出下一桶。这样桶内有序、桶间也有序。追加保序，且同值插到旧值之后时，整套方法保持稳定。"
+      ],
+      "example": [
+        "输入 [42,13,35,11,41]，用 10–19、20–39、40–49 三个桶。42 入最后桶；13 入首桶；35 入中桶；11 追加到首桶；41 追加到最后桶。得到 [13,11] | [35] | [42,41]。",
+        "首桶取 11，13 比它大，先把 13 右移，再写 11，变 [11,13]。中桶 [35] 不动。最后桶取 41，把 42 右移，变 [41,42]。",
+        "依桶顺序连接 [11,13]、[35]、[41,42]，得到 [11,13,35,41,42]。若省掉桶内整理，连接出来的 [13,11,35,42,41] 仍错。"
+      ],
+      "cost": "分配和收集都走一遍数据，另有各桶内部的工作。n 是记录数，b 是桶数，mᵢ 是第 i 桶大小。插入法给上界 O(n+b+Σmᵢ²)；按桶内逆序对 Iᵢ 更精确是 Θ(n+b+ΣIᵢ)。最好 Θ(n+b)。独立均匀分布且 b 与 n 同阶时，期望也为 Θ(n+b)。最坏所有记录挤一桶并逆序，Θ(n²+b)。额外空间 Θ(n+b)，稳定性取决于桶内方法。",
+      "why": "分散得好，每个桶只有很少记录，小整理相加也少。分散得差，大桶就保留了原来的大难题。换成最坏 O(m log m) 的桶内排序可保护最坏情况，但成本模型随之改变。",
+      "use": "已知范围、分布比较平滑的数值或空间坐标。先确认范围假设，再选择桶数。",
+      "details": "最大值必须进最后桶，不能算出不存在的下标。仅按哈希值分桶不能直接按桶编号输出，因为哈希编号没有大小意义。桶过多会增加空桶费用。特殊值如 NaN 要先规定顺序，不能假设普通大小比较有效。"
+    },
+    "en": {
+      "foundation": [
+        "A bucket is a container, not a single counter. One bucket can contain several different values: the interval 10–19 includes both 11 and 13.",
+        "Ordered, nonoverlapping intervals settle the order between buckets. They do not settle the order within a bucket. Putting 13 and 11 together still leaves work."
+      ],
+      "idea": "When we know roughly where values fall, we can turn one large sorting job into many small ones. Send records to range buckets, sort each bucket, then join them. Bucket sort is fast only when the remaining local jobs are small enough; distribution alone is not sorting.",
+      "steps": [
+        "Choose ordered intervals and define boundary ownership. Integers 0–99 could use tens buckets. Unequal-width intervals are also possible if dense areas need finer divisions. Every record must match exactly one interval.",
+        "Read records in input order and append each whole record to its bucket. Keep associated fields and every duplicate.",
+        "Order each bucket internally. For this example, treat its first item as ordered. Hold the next item, shift preceding larger items right, and insert it in the opened slot. Repeat to the bucket's end. Singletons need no internal work.",
+        "Collect the finished buckets from the smallest interval upward. Both the internal and inter-bucket order are now correct. Preserving arrival order and inserting after equal keys makes this version stable."
+      ],
+      "example": [
+        "For [42,13,35,11,41], use 10–19, 20–39, and 40–49. Records enter these buckets as [13,11] | [35] | [42,41].",
+        "In the first bucket, hold 11, shift 13 right, then insert 11: [11,13]. Leave [35] alone. In the last bucket, shift 42 to insert 41 before it: [41,42].",
+        "Joining these buckets gives [11,13,35,41,42]. Joining the original bucket contents without local sorting would give [13,11,35,42,41], which is incorrect."
+      ],
+      "cost": "Distribution and collection each scan the records; local sorting adds work. Let n be record count, b bucket count, and mᵢ bucket i's size. Insertion-sorted buckets give upper bound O(n+b+Σmᵢ²), more exactly Θ(n+b+ΣIᵢ) for their inversion counts Iᵢ. Best is Θ(n+b). Independent uniform keys with b proportional to n give expected Θ(n+b). One reversed bucket permits worst Θ(n²+b). Extra space is Θ(n+b); stability depends on local sorting.",
+      "why": "Good spread creates tiny tasks. Clustering leaves a large task nearly unchanged. A guaranteed O(m log m) local sorter protects the worst case but changes the algorithm's cost.",
+      "use": "Useful for numerical ranges and distributions known in advance, including some spatial coordinates.",
+      "details": "Assign the maximum to a valid final bucket. Hash buckets cannot generally be collected by bucket number to obtain numeric order. Too many buckets waste initialization work. Define an order for special values such as NaNs before using ordinary comparisons."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: Bucket sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/bucketsort.html"
+      },
+      {
+        "title": "MIT 6.006: Linear-time sorting",
+        "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/resources/lecture-7-counting-sort-radix-sort-lower-bounds-for-sorting/"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "zh_title": "闪排序",
+    "en_title": "Flashsort",
+    "kind": "algorithm",
+    "zh_alias": "FlashSort；按类别原地循环分配的直方图排序",
+    "en_alias": "FlashSort; in-place classification and permutation sort",
+    "zh": {
+      "foundation": [
+        "数组是一排按下标定位的格子，本例下标从 0 数。类别区间 [2,4) 是下标 2、3。它们只是属于某一数值范围的两格，格里的两个值仍可能倒着。",
+        "start 是每类固定起点，end 是移动的结束指针。向 end−1 写入一条正确类别记录后，把 end 减 1；这样右侧已放好的部分扩大，左侧待分配的部分缩小。暂存被挤出的记录能防止覆盖导致丢数据。"
+      ],
+      "idea": "如果不想把每个桶另放在一份大数组里，可以先算出各类应占的区间，再在原数组里做一串搬运：一个数占用自己的类位置，同时接过被挤走的数，接着安置它。Flashsort 用数值范围估计类别，并用这种闭合搬运循环完成分配。它只把数据放到大致正确的区域，最后仍须整理区域内部。",
+      "steps": [
+        "找最小值 min 和最大值 max。若相等，已经全体同值，结束。否则选 m 类，用 c(x)=floor((m−1)(x−min)/(max−min)) 分类；floor 是向下取整，比如 1.4 变 1。每类只代表一段范围，不代表某个记录的最终名次。",
+        "数各类数量，累计得到 end；从这些累计数得到固定 start。若 start[c]<end[c]，该类还有待分配的格。从第一个这样的区间起点取出一条记录，暂存在手中，该位置成为循环起点。",
+        "看手中记录所属类，把它写到该类 end−1，先保住那里原来的记录，再将 end 减 1。现在手中换成被挤出的记录，按它的类别继续。写回最初起点时，循环闭合，不再重复处理起点旧值。",
+        "继续寻找还有待分配格的类。若取出的数本来就在其类最后一个待填格，确认这一格并减 end 即可。所有 end=start 时类别分配完成。接着对各类用插入排序：逐个插入，右移比当前值大的前项。未经这步不能说排序完成。"
+      ],
+      "example": [
+        "输入 [40,20,32,10,31]，min=10，max=40，m=3。10、20 属于类 0，31、32 属于类 1，40 属于类 2。数量 [2,2,1]，start=[0,2,4]，end=[2,4,5]。",
+        "从下标 0 暂取 40。40 写入下标 4，接过 31，end[2]=4；31 写入下标 3，接过 10，end[1]=3；10 写入下标 1，接过 20，end[0]=1；20 写回下标 0，循环闭合，end[0]=0。数组为 [20,10,32,31,40]。",
+        "类 0、2 的 end 已等于 start。类 1 还剩 [2,3)；32 正好占这类最后待填位置，确认后 end[1]=2。注意类别正确但仍有 20>10、32>31。分别插入 10 和 31 后才得到 [10,20,31,32,40]。"
+      ],
+      "cost": "分类要读全部记录，分配也逐条安置，再付类内整理费用。n 为记录数、m 为类数，前两阶段 Θ(n+m)。m 与 n 同阶且数据适当分散时，典型期望接近 Θ(n)；最好 Θ(n+m)，全同值可 Θ(n) 结束。插入收尾最坏 Θ(n²+m)。start/end 表用 Θ(m) 空间；循环搬运通常不稳定。线性速度依赖分布，不能推广到任意数值输入。",
+      "why": "估计类别能把全局混乱限制到小范围，循环搬运又省去整份记录缓冲。离群值会拉大数值范围，让多数数据落入少数类，导致收尾很重。",
+      "use": "适合分布较平滑的大批数值，尤其在不要求同键保序且希望节省记录缓冲时。",
+      "details": "本说明保留 start 与 end 两张小表，使未分配区域容易判断；更省表的实现有专门领头规则。要防 max=min 除零、浮点舍入和类别下标越界。Flashsort 的名称曾用于其他算法，这里专指 Neubert 的数值分类方法。"
+    },
+    "en": {
+      "foundation": [
+        "Array indices identify positions, starting at zero here. Region [2,4) contains slots 2 and 3. Assigning those slots to a class does not order their contents.",
+        "Keep fixed class starts and moving ends. Placing a record at end−1 and decreasing end expands the completed suffix of that class. Save a displaced record before overwriting its slot; otherwise data would be lost."
+      ],
+      "idea": "Can we group values without storing separate arrays of records for every bucket? Flashsort reserves regions inside the original array and moves records around in cycles. One placement displaces another record, which is placed next. Numerical interpolation estimates a class, not an exact final position, so local finishing is essential.",
+      "steps": [
+        "Find min and max. Equal values need no rearrangement. Otherwise choose m classes and compute c(x)=floor((m−1)(x−min)/(max−min)); floor discards the fractional part downward. A class represents a range, not a record's final rank.",
+        "Count classes and accumulate exclusive ends. Retain their fixed starts. A class is unfinished when start[c]<end[c]. Hold the record at the first unfinished class's start as the cycle leader.",
+        "Place the held record at its class's end−1, saving the record displaced there, then decrease that end. The displaced record becomes the next held record. Repeat until a placement returns to the leader's original position, closing the cycle.",
+        "Find another unfinished class. A record already at its own class's last unfinished slot can simply be confirmed by decreasing end. When all ends equal starts, distribution is complete. Then insertion-sort each class by holding the next value, shifting larger predecessors right, and filling the opening."
+      ],
+      "example": [
+        "Use [40,20,32,10,31], min=10, max=40, m=3. Class 0 contains 10,20; class 1 contains 31,32; class 2 contains 40. Counts [2,2,1] give starts [0,2,4] and ends [2,4,5].",
+        "Hold 40 from index 0. Put 40 at 4 and retain 31; end[2]=4. Put 31 at 3 and retain 10; end[1]=3. Put 10 at 1 and retain 20; end[0]=1. Put 20 at 0 to close the cycle; end[0]=0. State: [20,10,32,31,40].",
+        "Classes 0 and 2 are complete. Class 1 still has [2,3); 32 already belongs in that last unfinished slot, so end[1] becomes 2. The classes are correct, but 20,10 and 32,31 remain reversed. Local insertions produce [10,20,31,32,40]."
+      ],
+      "cost": "Classification reads all records, cyclic placement settles them, and local ordering adds work. For n records and m classes, the first two phases take Θ(n+m). With m proportional to n and favorable spread, expected total work can approach Θ(n). Best is Θ(n+m), or Θ(n) for an all-equal shortcut. Insertion finishing permits worst Θ(n²+m). Tables use Θ(m) space. The cycles normally make it unstable.",
+      "why": "Classification shrinks global disorder into local tasks while cycles avoid a full record buffer. Outliers can stretch the range and crowd most keys into a few classes.",
+      "use": "Useful for fairly smooth numerical distributions when equal-record order is not required.",
+      "details": "This clear variant retains starts and ends; versions using fewer tables need more careful leader rules. Guard division by zero, rounded class indices, and bounds. The entry means Neubert's numerical classification algorithm, not other algorithms sharing the name."
+    },
+    "sources": [
+      {
+        "title": "Karl-Dietrich Neubert: The FlashSort algorithm",
+        "url": "https://www.neubert.net/FSOIntro.html"
+      },
+      {
+        "title": "Neubert: Flashsort implementations",
+        "url": "https://www.neubert.net/Flacodes/FLACodes.html"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "原始输入；暂取下标 0 的 40",
+          "en": "Input: hold 40 from index 0",
+          "values": [
+            40,
+            20,
+            32,
+            10,
+            31
+          ],
+          "active": [
+            0
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "40 到下标 4，手中变成 31",
+          "en": "40 goes to index 4; hold 31",
+          "values": [
+            "—",
+            20,
+            32,
+            10,
+            40
+          ],
+          "active": [
+            3
+          ],
+          "fixed": [],
+          "moved": [
+            4
+          ]
+        },
+        {
+          "zh": "31 到下标 3，手中变成 10",
+          "en": "31 goes to index 3; hold 10",
+          "values": [
+            "—",
+            20,
+            32,
+            31,
+            40
+          ],
+          "active": [
+            1
+          ],
+          "fixed": [],
+          "moved": [
+            3
+          ]
+        },
+        {
+          "zh": "10 到 1，20 回到 0；32 确认，分类完成",
+          "en": "10 to 1, 20 to 0; confirm 32: classified",
+          "values": [
+            20,
+            10,
+            32,
+            31,
+            40
+          ],
+          "active": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fixed": [
+            4
+          ],
+          "moved": [
+            0,
+            1
+          ]
+        },
+        {
+          "zh": "类内插入排序收尾，全体有序",
+          "en": "Insertion finish within classes: sorted",
+          "values": [
+            10,
+            20,
+            31,
+            32,
+            40
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "moved": []
+        }
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "zh_title": "字典树排序",
+    "en_title": "Trie sort",
+    "kind": "family",
+    "zh_alias": "前缀树排序；trie 读作 try；数字树排序的相关形式",
+    "en_alias": "Prefix-tree sorting; digital-tree sorting forms",
+    "zh": {
+      "foundation": [
+        "字符串就是按次序排的一串字符，例如 '21' 有字符 '2'、'1'。字典序先比较开头，不同便决定顺序；相同再往后看；前面全相同则较短字符串在前。它与数值大小不是同一规则。",
+        "树由节点和连接组成，根是起点。这里每条连接写一个字符。沿根到某节点的连接读出来，就是一个前缀；同样开头的字符串共用这条路。节点还要保存“哪些记录在这里结束”，不能只保存孩子。"
+      ],
+      "idea": "如果很多键开头一样，能不能把共同开头只安排一次？把每个字符当作岔路选择，所有字符串就能装入前缀树，也叫字典树。输出时沿较小字符的岔路先走，自然就得到字典序。",
+      "steps": [
+        "建立一个空根。每个节点要能按字符找到孩子，并有一个终点记录列表。孩子可用固定字符格，也可用带标签的连接；无论哪种，输出时必须能按标签大小访问。",
+        "插入一个字符串，从根读第一字符，找对应孩子；不存在就新建。再读下一字符继续，直到字符串结束，把整条记录追加到当前节点终点列表。重复键共享路径，但终点列表保存每条记录。",
+        "输出时先读当前节点的终点列表，再从最小字符孩子走到最大字符孩子。对孩子重复同样动作。先终点后孩子，是因为 '2' 应在 '21' 前，不是因为终点数值更小。",
+        "节点没有终点也没有孩子就返回上一级，继续下一个未访问孩子。根及所有分支走完后结束。可以把“还要回来走哪条分支”记在任务栈里；不允许只保留一条路径然后忘记其他分支。"
+      ],
+      "example": [
+        "插入 ['21','12','2','12']。'21' 建根→2→1，在末节点存一条记录；'12' 建根→1→2；'2' 不再建新路，只在根的孩子 2 存终点记录；第二个 '12' 在原终点追加。",
+        "输出先走字符 1 路，到 '12' 终点连续输出两份。再走字符 2 路，先输出这个节点的 '2'，再走孩子 1，输出 '21'。得 ['12','12','2','21']。",
+        "若要数值大小，先规范为两位 ['21','12','02','12']。分支 0 先输出 '02'，再分支 1 输出两份 '12'，最后 '21'，代表 [2,12,12,21]。"
+      ],
+      "cost": "主要动作是读取字符、建或走节点，再输出记录。S 为全部输入字符数，n 为记录数；固定小字符集且按字符直接找孩子时可 O(S+n)。若每个节点都有 r 个格且遍历全部格，还需 O(rV)，V 是节点数。稀疏孩子若要排序，也另有费用。空间通常 O(S+n)，密集节点可更大。终点保序列表使它稳定。",
+      "why": "共同前缀共享结构，免去反复完整字符串比较。但节点和指针占空间，分散访问也可能比连续数组慢。",
+      "use": "适合字符串排序和同时需要前缀查找的任务。",
+      "details": "空字符串结束在根节点，输出时先取。只存唯一键的集合式字典树会丢重复项，必须改为计数或记录列表。只有一个孩子的长路径可以压成一条带多字符标签的边，但比较和输出规则仍相同。"
+    },
+    "en": {
+      "foundation": [
+        "A string is a sequence of characters. Lexicographic order checks the first unequal character; if one string ends after an otherwise equal prefix, the shorter comes first. This differs from numeric order.",
+        "A tree has connected nodes and a starting root. Here every connection bears a character. Reading connections from the root spells a prefix. A node must also hold records ending there, not just links to children."
+      ],
+      "idea": "Many strings repeat the same beginning. A trie gives that beginning one shared path, with characters choosing branches. After insertion, exploring smaller-character branches first produces lexicographic order. The name 'prefix tree' describes exactly what is shared.",
+      "steps": [
+        "Create an empty root. Each node needs character-labeled children and a list of ending records. Direct character slots or labeled links can work, but output must visit child labels in sorted order.",
+        "Insert a string by following its characters from the root. Create a missing child when necessary. At the end, append the whole record to that node's ending list. Repeated keys share a path but retain separate ending records.",
+        "Output a node's ending list first, then visit children from the smallest label upward, doing the same at each child. Ending first places '2' before its extension '21'.",
+        "Return to the previous node when a branch finishes and visit its next child. Finish after all root branches. Recursive calls or an explicit task stack remember unfinished branches; remembering only the current path would lose them."
+      ],
+      "example": [
+        "Insert ['21','12','2','12']. '21' creates root→2→1 and an ending record. '12' creates root→1→2. '2' ends at the existing node 2. The second '12' appends another record at the existing terminal node.",
+        "Explore branch 1 and emit both '12' records. Explore branch 2, emit its ending '2', then its child 1's '21'. Output: ['12','12','2','21'].",
+        "For numeric order, normalize to equal width ['21','12','02','12']. Branch 0 emits '02' first, followed by both '12' records and '21': numbers [2,12,12,21]."
+      ],
+      "cost": "The main work reads characters, visits or creates nodes, and emits records. Let S be total input characters and n record count. A fixed small alphabet with direct children allows O(S+n). Scanning all r slots at V dense nodes adds O(rV); ordering sparse child labels also costs work. Typical storage is O(S+n), possibly larger with dense nodes. Ordered terminal lists make it stable.",
+      "why": "Shared prefixes avoid repeated full-key comparisons. Nodes, pointers, and scattered memory accesses can nevertheless be expensive.",
+      "use": "Good for string sorting combined with prefix lookup.",
+      "details": "An empty string ends at the root. A set-style trie needs counts or lists to preserve duplicates. Single-child paths can be compressed into multi-character edges, with the same ordering rules."
+    },
+    "sources": [
+      {
+        "title": "Sedgewick and Wayne: Tries",
+        "url": "https://algs4.cs.princeton.edu/52trie/"
+      },
+      {
+        "title": "Princeton TrieST implementation",
+        "url": "https://algs4.cs.princeton.edu/52trie/TrieST.java.html"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "zh_title": "爆裂排序",
+    "en_title": "Burstsort",
+    "kind": "family",
+    "zh_alias": "动态桶字典树字符串排序；含 C-burstsort、采样 Burstsort 变体",
+    "en_alias": "Burst-trie string sorting; includes copying and sampled variants",
+    "zh": {
+      "foundation": [
+        "字典树的一个节点表示共同前缀，按下一字符分岔。桶是暂时存许多记录的列表；记录指针只是指向原字符串的位置，不必复制整串文字。",
+        "高速缓存是处理器附近较小但读得快的存储。数据能集中在小范围里处理，往往比到大内存里来回找更省时间。桶容量阈值是决定何时拆桶的数量，不是排序正确性的条件。"
+      ],
+      "idea": "完整字典树可能建太多节点；直接比较字符串又可能一遍遍看相同开头。Burstsort 先只建少量前缀节点，下面挂桶。桶不大就先收着，太大才按下一字符拆成更细的桶，这个拆开动作叫“爆裂”。最后每个小桶单独排序。",
+      "steps": [
+        "开始时只有一个根桶。把字符串沿已经存在的前缀分支走到叶桶，追加其记录指针。这个桶里的字符串已共享沿路前缀，桶内比较以后可以从前缀之后开始。",
+        "桶内记录数超过阈值时，把该桶换成一个下一字符分支节点。依次读桶中每个键尚未处理的字符，按字符送到孩子桶。键已在这里结束的，存终点列表；不能把不存在的下一字符继续分下去。",
+        "如果某个孩子桶仍很大，继续拆它。全部输入加入后，按字符从小到大遍历分支，终点记录先于其延长字符串输出。",
+        "遇到保留的叶桶时，把它的未处理后缀完整排好再输出。可用比较归并：分成小份至单项，然后反复比较两份当前最前项、取较小者；相等保原序。这里只要正确后缀排序，不得把桶直接当成有序。"
+      ],
+      "example": [
+        "输入 ['21','12','11','22','12']，教学阈值 2。最初 '21'、'12' 都进根桶。加入 '11' 后有三项，根爆裂：字符 1 桶=['12','11']，字符 2 桶=['21']。",
+        "加入 '22' 后，字符 2 桶=['21','22']。加入第二个 '12' 后，字符 1 桶变三项，再按第二字符拆成路径 11=['11'] 与路径 12=['12','12']。重复终点保留两条，不再为它们无限拆桶。",
+        "遍历先输出 '11'，再两份 '12'。字符 2 的叶桶共享开头 2，只需比较后缀 1、2，输出 '21','22'。结果 ['11','12','12','21','22']。"
+      ],
+      "cost": "实际费用有两块：沿树读共同前缀，以及给各叶桶排后缀。D 是前缀处理动作数，mᵢ 是桶大小，cᵢ 是一次后缀比较的字符读取成本，比较收尾可写 O(D+Σcᵢmᵢ log mᵢ)。n 为记录数、d 为最大键长时，常规比较收尾上界可达 O(nd log n)。最好和通常不能仅由 n 决定，取决于键长、前缀和阈值。桶、指针和节点一般有 O(n+S) 空间上界，S 是总字符数。基本实现通常不承诺稳定。",
+      "why": "它减少重复读前缀，并让最后的局部工作更容易留在缓存。桶阈值、机器缓存、字符串分布不合适时，拆桶和分配节点也可能抵消收益。",
+      "use": "适合大型字符串集合，尤其是字符读取和慢内存访问占主要成本时。",
+      "details": "保序分配加稳定桶内排序可构造稳定版。C-burstsort 会复制剩余后缀以改善局部性；采样变体先估计分支结构。论文中的倍数加速是具体实验结果，不是每种输入都固定快几倍。"
+    },
+    "en": {
+      "foundation": [
+        "A trie node represents a shared prefix and branches on the next character. A leaf bucket temporarily holds many records. A record pointer names the stored string; it need not copy the whole string.",
+        "A processor cache is small, fast nearby storage. Keeping a local sorting job small can avoid repeated slow memory access. The bucket threshold chooses when to split, not whether output is correct."
+      ],
+      "idea": "A complete trie may allocate too many nodes, while ordinary string comparisons repeatedly reread common beginnings. Burstsort keeps a small prefix tree with buckets below it. Only an oversized bucket becomes a deeper branching node: it bursts. The remaining small buckets are sorted locally.",
+      "steps": [
+        "Begin with one root bucket. Follow existing prefix branches to a leaf and append each string's record pointer. The path already establishes a common prefix, so later local comparisons can skip it.",
+        "When the threshold is exceeded, replace the bucket with a next-character node. Read that character from each stored key and redistribute into child buckets. Keys ending here go into a terminal list; never try to subdivide nonexistent characters.",
+        "Split oversized children as needed. After all insertion, traverse character branches in order, outputting ending records before extensions.",
+        "At a retained leaf bucket, fully sort the unexamined suffixes before emitting records. A comparison merge can split to singleton pieces, then repeatedly take the smaller current head from two pieces. Bucket membership alone does not establish suffix order."
+      ],
+      "example": [
+        "Use ['21','12','11','22','12'] with teaching threshold 2. The first two enter the root bucket. The third bursts it into character-1 bucket ['12','11'] and character-2 bucket ['21'].",
+        "Adding '22' makes the latter ['21','22']. Another '12' overfills the first, which splits by its second character into path 11=['11'] and path 12=['12','12']. Keep both ending records rather than splitting forever.",
+        "Traversal emits '11', then both '12' records. The remaining prefix-2 leaf compares suffixes 1 and 2, emitting '21','22'. Answer: ['11','12','12','21','22']."
+      ],
+      "cost": "There is prefix work and local suffix work. Let D count prefix operations, mᵢ bucket sizes, and cᵢ character work per suffix comparison. Comparison finishing gives O(D+Σcᵢmᵢ log mᵢ), potentially O(nd log n) for n records of maximum length d. Best and usual behavior cannot be stated from n alone: lengths, prefixes, and thresholds matter. Pointers, buckets, and nodes have a conventional O(n+S) space bound for total characters S. Basic implementations normally make no stability promise.",
+      "why": "It reduces repeated prefix reads and aims to keep local work in cache. Poor thresholds or data distributions can instead make splitting and allocation expensive.",
+      "use": "Designed for large string collections where character reading and memory locality dominate.",
+      "details": "Order-preserving distribution plus stable local sorting can make a stable version. C-burstsort copies suffixes; sampled variants estimate the tree first. Published speed ratios describe particular experiments, not a universal multiplier."
+    },
+    "sources": [
+      {
+        "title": "Sinha and Zobel: Cache-conscious sorting of large sets of strings with dynamic tries",
+        "url": "https://people.eng.unimelb.edu.au/jzobel/fulltext/acmjea04.pdf"
+      },
+      {
+        "title": "Sinha and Zobel: Efficient trie-based sorting",
+        "url": "https://people.eng.unimelb.edu.au/jzobel/fulltext/acsc03sz.pdf"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "zh_title": "Spreadsort 混合分布排序",
+    "en_title": "Spreadsort",
+    "kind": "family",
+    "zh_alias": "混合基数/比较排序；含整数、浮点和字符串专用版本",
+    "en_alias": "Hybrid radix/comparison sorting; integer, float, and string variants",
+    "zh": {
+      "foundation": [
+        "把整数右移 s 位，就是丢掉二进制末尾 s 位；对非负整数等同除以 2ˢ 后向下取整。例如右移 3 位就是按每 8 个整数一组分段。低位仍决定组内次序。",
+        "混合算法是在不同规模选择不同动作。这里大区间按键的高位分配，小区间调用有最坏保证的比较排序。比较归并可把区间分至单项，再把两份有序记录从头逐项取较小者合成一份。"
+      ],
+      "idea": "固定每轮处理同样多位，有时桶太多，有时又分得太粗。Spreadsort 先看这一批数到底跨多大范围、还剩多少条，再选择分组位数。它也会承认小任务没必要建桶，直接用比较法结束。",
+      "steps": [
+        "扫描当前区间，找最小键、最大键并记录大小。全部键相同就停；区间很小，就调用比较收尾。调用意味着对当前这一段得到完整有序结果，而不是只再分一次组。",
+        "大区间根据大小和不同高位范围选右移量 s，让桶表不过大。按“右移后的键减去右移后的最小键”编号，统计每桶需要几格，再累计成桶的连续区域。",
+        "在原数组里交换错放记录：当前记录送目标桶的下一未填格，被挤回的记录继续安置；推进相应位置计数，直到桶区域正确。不同桶的高位关系已决定它们的先后。",
+        "对仍很大的桶处理剩余不同位。某桶继续分配不划算时，换用有 O(m log m) 最坏保证的比较方法完成它。最后每个桶区间都有序，全数组才有序。选择位数和切换阈值是具体实现的策略，不是任意设置都能继承同一个复杂度证明。"
+      ],
+      "example": [
+        "教学输入 [17,2,18,1,9,8]，右移三位即除以 8 后取整，得到桶 0 收 2、1，桶 1 收 9、8，桶 2 收 17、18。各有两项，所以它们的区域为 [0,2)、[2,4)、[4,6)，下一未填编号为 [0,2,4]。",
+        "第 0 格的 17 属于桶 2，与该桶下一格第 4 格的 9 交换，成为 [9,2,18,1,17,8]，桶 2 的下一位置改成 5。第 0 格带回的 9 属于桶 1，与第 2 格的 18 交换，成为 [18,2,9,1,17,8]，桶 1 的下一位置改成 3。",
+        "仍看第 0 格：18 去桶 2 的第 5 格，换回 8，得到 [8,2,9,1,17,18]；8 再去桶 1 的第 3 格，换回 1，得到 [1,2,9,8,17,18]。现在第 0 格的 1 和第 1 格的 2 都属于桶 0，确认即可。另两桶的未填位置也已走到各自末尾，分配结束。",
+        "桶 1 仍是 [9,8]，内部比较后换为 [8,9]；另两桶无需改动。拼成 [1,2,8,9,17,18]。真实实现可能直接对这么小的输入使用比较排序；本例是把大输入才会触发的分配动作放大展示。"
+      ],
+      "cost": "实际工作是在每层统计和搬运，再对剩余小问题比较。n 为记录数，K 为固定整数键位数。Boost 文档给最好 O(n)、平均性能模型 O(n√log n)、最坏 O(n·min(log n,K))；平均模型并非任意分布保证，也不自动适用于任何自造阈值。桶表和递归信息随键长、配置变化，不是 n 条稳定输出缓冲。普通版本不稳定；字符串另计字符读取。",
+      "why": "大任务可以靠键结构快速分开，小任务避免建表管理费用，比较后备保护困难情况。缓存和位提取成本仍能影响实际速度。",
+      "use": "适合大批整数、可正确编码的浮点或字符串，而且不要求同键记录保持原先后。",
+      "details": "自定义位提取必须与比较次序一致：不能比较按一种规则，桶编号却按另一种。浮点须用数值有序编码，并规定 NaN、正负零。Spreadsort 是具体混合族；普通“分桶后小组排序”不能直接采用其文档性能界。"
+    },
+    "en": {
+      "foundation": [
+        "For a nonnegative integer, shifting right s binary bits is division by 2ˢ with the fraction discarded. Shifting three bits groups consecutive values in ranges of eight; discarded bits still determine order inside a group.",
+        "A hybrid chooses different actions for different jobs. The comparison fallback must fully sort its region. One guaranteed method splits down to singletons, then merges two ordered pieces by repeatedly choosing their smaller current head."
+      ],
+      "idea": "One fixed digit size can be wasteful: too many buckets for a small job, or too little separation for a large one. Spreadsort examines the current range and population before choosing its bit grouping. It switches to comparisons when more distribution is not worth its overhead.",
+      "steps": [
+        "Find the current minimum, maximum, and record count. Equal keys can stop. A sufficiently small region is sent directly to complete comparison sorting.",
+        "For a large region, choose a shift s that keeps the bucket table manageable. Number buckets by shifted key minus shifted minimum. Count records and accumulate consecutive destination regions.",
+        "Exchange misplaced records into their bucket's next unfilled slot, then deal with the displaced record. Advance the appropriate position counters until every region contains the correct bucket. Leading bits now settle the order between regions.",
+        "Recurse on large buckets with differing bits left. Switch an unsuitable or small bucket to a worst-case O(m log m) comparison sorter. Finish only when every region is internally ordered. Digit choice and thresholds belong to the implementation's strategy; arbitrary replacements need their own analysis."
+      ],
+      "example": [
+        "Take [17,2,18,1,9,8] and shift three bits, meaning divide by eight and discard the fraction. Buckets 0,1,2 each receive two records, so their regions are [0,2), [2,4), [4,6), with next positions [0,2,4].",
+        "At position 0, move 17 into bucket 2 by exchanging it with 9 at position 4. The array becomes [9,2,18,1,17,8], and bucket 2's next position is 5. The returned 9 belongs in bucket 1: exchange it with 18 at position 2, giving [18,2,9,1,17,8]. Bucket 1's next is now 3.",
+        "Recheck position 0. Exchange 18 with 8 at position 5: [8,2,9,1,17,18]. Then exchange 8 with 1 at position 3: [1,2,9,8,17,18]. Finally confirm 1 and 2 in bucket 0. The other buckets' next positions have reached their ends, so distribution is complete.",
+        "Bucket 1 still contains [9,8]. Local comparison sorting changes it to [8,9]; the other two regions need no change. The answer is [1,2,8,9,17,18]. A production version may comparison-sort six items immediately. This example exposes the distribution used on larger regions."
+      ],
+      "cost": "Count distribution scans, movement, and fallback comparisons. For n integer records of bit length K, Boost lists best O(n), average performance model O(n√log n), and worst O(n·min(log n,K)). The average model does not describe every distribution, and arbitrary threshold choices do not inherit the bound. Bucket and recursion storage depends on key length and configuration. Ordinary Spreadsort is unstable. Strings also require character-reading costs.",
+      "why": "It exploits structure on large jobs, avoids bucket overhead on small jobs, and uses a protected fallback for difficult cases.",
+      "use": "Large integer, floating, or string collections with suitable encodings and no equal-record order requirement.",
+      "details": "Bit extraction and comparisons must agree on order. Floating keys need an ordered encoding and policies for NaNs and signed zeros. This named family is more specific than any generic bucket-then-sort design."
+    },
+    "sources": [
+      {
+        "title": "Boost.Sort: Spreadsort documentation",
+        "url": "https://www.boost.org/doc/libs/1_69_0/libs/sort/doc/html/sort/single_thread/spreadsort.html"
+      },
+      {
+        "title": "Steven Ross: Original Spreadsort paper",
+        "url": "https://www.boost.org/doc/libs/1_61_0/libs/sort/doc/papers/original_spreadsort06_2002.pdf"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "zh_title": "插入排序",
+    "en_title": "Insertion sort",
+    "kind": "algorithm",
+    "zh_alias": "直接插入排序；线性插入排序",
+    "en_alias": "Straight insertion sort; linear insertion sort",
+    "zh": {
+      "foundation": [
+        "把数组想成一排有编号的小格子。本章格号从 0 开始：第 0 格是从左数第一格，第 1 格是从左数第二格，依次类推。格号是位置，不是里面的数值。移动一个数，是把它写入另一格；交换两个数，必须先暂存其中一个，否则第一次写入就会盖掉原值。",
+        "这里的已排部分只是内部顺序正确。后来出现的小数仍可能挤到它前面，因此它还不是最终位置。"
+      ],
+      "idea": "你已经把手中的几张牌从小到大摆好了，又拿到一张新牌。最直接的办法是找出它该站的位置，把挡路的牌往右挪一格，再把新牌放进去。插入排序就重复这个动作：左边始终保持有序，右边每次交出一个数。它不需要先知道全体数据的范围，也不需要额外建一整排格子。",
+      "steps": [
+        "只有一个数时，它自己就是有序的，所以先把第一格当作已排部分。从第二格开始处理；把当前数 x 暂存在手里。它原来的格子现在可视为一个空位，虽然实际数组里可能还留着旧数。",
+        "看空位左边的数。如果它比 x 大，它站在 x 左边就错了，便把它复制到空位，空位向左走一格。继续做同样的比较。必须从右往左移动，才能先保住尚未搬走的数。",
+        "遇到一个不大于 x 的数，就不再往左走：它和左边那些数都可以留在 x 前面。如果已经走到数组开头，也停止。把手里的 x 写进当前空位。",
+        "现在左边又多了一个数，而且仍然有序。转向右边下一个数，重复取出、让位、放入。处理完最后一格，已排部分就覆盖了整个数组。为了保留相同值的原来顺序，只移动严格大于 x 的数，不能把等于 x 的也挤过去。"
+      ],
+      "example": [
+        "输入 [4,2,3,1]。先认定 [4] 有序，取出 2。4 比 2 大，于是把 4 从第 0 格搬到第 1 格，形成 [空位,4,3,1]。空位已到开头，把 2 放进去，得到 [2,4,3,1]。",
+        "接着取出第 2 格的 3。4 比 3 大，右移为 [2,空位,4,1]。空位左边是 2，它不大于 3，停止移动，填入 3： [2,3,4,1]。这里不是交换一次就结束，而是在为新数腾出位置。",
+        "最后取出 1。依次把 4、3、2 往右搬，空位经过第 2、1、0 格。填入 1，得到 [1,2,3,4]。每次完成一次插入，已排部分恰好多一个数。",
+        "若输入中有 2A 和 2B，A 原来在前。插入 2B 时遇到 2A 就停止，因为两者相等；2B 放在 2A 后面，所以不会打乱相同值的先后。"
+      ],
+      "cost": "主要花费来自向左比较和向右搬动。已经有序时，每个新数只看一次左邻居，几乎不搬，最好 Θ(n)。反序时，第 2 个数搬 1 个、第 3 个搬 2 个，直到搬 n−1 个，总量约为 n²/2，所以最坏 Θ(n²)；随机排列通常也要搬动平方数量级的数。更准确地说是 Θ(n+I)：n 是记录数，I 是逆序对数，即原来排在前面却比后面大的两条记录组成的对数，每搬一次恰好消除一对。额外空间 Θ(1)，只需暂存值和几个位置编号。上述严格大于才移动的版本稳定。",
+      "why": "它快不快，取决于每张新牌要挤过多少张旧牌。接近有序时，很多新数已经在合适位置，比较一下就能继续；反序时，每个新数都得走到最左边，前面的数一遍遍搬家。",
+      "use": "适合数量不多、基本有序，或者边收到记录边维持顺序的场景。很多大型排序会让它收拾短小片段，因为简单的循环在这种规模下很省事。",
+      "details": "空数组和单元素数组直接结束。可以把是否已排的边界记成一个编号，不必复制左半边。数组中插入意味着实际搬动；即使提前找到位置，这些搬动也不会凭空消失。链表可通过改连接来插入，但寻找位置仍要花时间。"
+    },
+    "en": {
+      "foundation": [
+        "An array is a row of numbered slots. Indices here start at zero: index 0 is the first slot from the left, index 1 the second, and so on. An index is a position, not its stored value. Moving a value means writing it into another slot. Keep a temporary copy before overwriting the slot that holds the value you are inserting.",
+        "An ordered prefix is the left part of the row in the correct internal order. Its items may still move when a smaller item arrives later."
+      ],
+      "idea": "Imagine holding some cards in order, then picking up one more card. You slide the larger cards to the right and place the new card in the opening. Insertion sort uses that same small operation throughout an array. It starts with one ordered item, adds the next item, and keeps growing the ordered part until nothing remains outside it.",
+      "steps": [
+        "Treat the first item as ordered: a single item cannot be out of order with itself. Starting at the second slot, save the next value x in a temporary variable. Think of its old position as a hole, even if the old bits are still there.",
+        "Compare x with the item immediately left of the hole. If that item is greater, copy it one slot right into the hole. The hole has moved left. Repeat. Working backward preserves every value before its slot is overwritten.",
+        "Stop when the left neighbor is no greater than x, or when the hole reaches the start. Everything farther left is also small enough, because that part was already ordered. Write x into the hole.",
+        "The ordered prefix now contains one additional item. Take the next item and do the same thing. After the last insertion, the prefix is the whole array. Move strictly greater items only; leaving equal items in place preserves their arrival order."
+      ],
+      "example": [
+        "Start with [4,2,3,1]. The first prefix is [4]. Hold 2. Since 4 is greater, copy 4 right: [hole,4,3,1]. There is no item left of the hole, so write 2 there: [2,4,3,1].",
+        "Now hold 3. Move 4 right to make [2,hole,4,1]. The next comparison is with 2. It is smaller, so leave it alone and fill the hole with 3: [2,3,4,1].",
+        "Hold the final 1. Move 4, then 3, then 2 one slot right. Only after those moves do you write 1 in the first slot. The array becomes [1,2,3,4]. Each completed insertion adds exactly one record to the ordered prefix.",
+        "With labeled duplicates 2A and 2B, an arriving 2B does not push an existing 2A aside. Equality stops the search, so A stays before B."
+      ],
+      "cost": "Count the comparisons and the items shifted. Ordered input needs about one comparison per arriving item and no shifts: best Θ(n). On reversed input, the shifts add up to 1+2+…+(n−1), making the worst Θ(n²). Random input usually has quadratic movement too. A more precise bound is Θ(n+I), where n is the number of records and I is the number of inversions: an earlier record greater than a later one. Each shift removes one such pair. Extra space is Θ(1) for a saved record and position counters. The strict-greater shifting rule is stable.",
+      "why": "A nearly ordered row gives each new item only a short journey. In a reversed row, every new item travels all the way to the beginning and moves every earlier item again. That repeated movement, rather than a complicated operation, explains the difference.",
+      "use": "Good for small arrays, nearly ordered data, and short pieces inside a larger sorting method. It can also maintain an ordered collection as new items arrive, provided the collection is not too large.",
+      "details": "Empty and one-item inputs finish immediately. Track the prefix with a boundary index; there is no need to copy it. A linked list avoids moving whole array sections, but it still needs to find the insertion position. Finding a position quickly and physically making room are separate costs."
+    },
+    "sources": [
+      {
+        "title": "Princeton: Elementary sorts",
+        "url": "https://algs4.cs.princeton.edu/21elementary/"
+      },
+      {
+        "title": "Princeton Insertion implementation",
+        "url": "https://algs4.cs.princeton.edu/21elementary/Insertion.java.html"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "取出 2，和前面的 4 比较",
+          "en": "Hold 2 and compare with 4",
+          "values": [
+            4,
+            2,
+            3,
+            1
+          ],
+          "active": [
+            0,
+            1
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "2 插入后，前两项内部有序",
+          "en": "Insert 2: first two internally ordered",
+          "values": [
+            2,
+            4,
+            3,
+            1
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": [
+            0,
+            1
+          ]
+        },
+        {
+          "zh": "3 插入：4 右移一格",
+          "en": "Insert 3: shift 4 right",
+          "values": [
+            2,
+            3,
+            4,
+            1
+          ],
+          "active": [
+            1,
+            2
+          ],
+          "fixed": [],
+          "moved": [
+            1,
+            2
+          ]
+        },
+        {
+          "zh": "1 插入到开头，全体才最终有序",
+          "en": "Insert 1 at the start: fully sorted",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "moved": []
+        }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "zh_title": "二分插入排序",
+    "en_title": "Binary insertion sort",
+    "kind": "variant",
+    "zh_alias": "折半插入排序；用二分查找选插入位置",
+    "en_alias": "Insertion sort with binary position search",
+    "zh": {
+      "foundation": [
+        "二分查找不是逐格寻找，而是利用已经有序这一点：看中间的数，一次排除肯定不可能的半边。只有待查部分有序时，这个推理才成立。",
+        "下文用从 0 开始的编号。区间 [lo,hi) 包含 lo，不包含 hi；当两个边界相等，区间里没有待检查的格子。"
+      ],
+      "idea": "插入排序搬东西很容易理解，但找位置时可能一格一格向左看很久。既然左半边已经有序，就可以先问中间的数：新数应该在它左边还是右边？不断把寻找范围缩成一半，就是二分插入排序。它改进的是找位置的比较次数；为了插入，新数后面的记录仍要搬开。",
+      "steps": [
+        "按普通插入排序的办法，把左边保持有序，暂存下一个数 x。如果左边有 i 个数，就设 lo=0、hi=i，搜索的只是这 i 个数，不包含 x 的旧位置。",
+        "取 mid=floor((lo+hi)/2)，也就是两个边界的平均值向下取整。若 x 小于第 mid 格的值，插入点不能在它后面，将 hi 改成 mid。若 x 大于或等于它，则将 lo 改成 mid+1。把相等情况送到右边，才能把新来的相同值放在旧值后面。",
+        "只要 lo<hi，就继续检查新的中间位置。每轮至少去掉一个格子；最终 lo=hi，这个编号就是插入位置。它可能是 0，也可能是左半边末尾的后一格。",
+        "从左半边最右格开始，倒着把插入位置及其右边的数各搬一格。再把 x 写到插入位置，扩大已排边界，处理下一个数。可以先比较 x 和左半边最后的值：若 x 已经不小于它，直接留在末尾，省掉搜索。"
+      ],
+      "example": [
+        "完整输入 [1,3,5,7,4]。前四个数依次加入时都可以直接接在末尾。处理最后的 4 时，左边是 [1,3,5,7]，设 lo=0、hi=4。",
+        "第一轮中间编号为 2，那里是 5。4 应在 5 前面，于是 hi=2，剩余范围 [0,2)。第二轮中间编号为 1，那里是 3；4 应在它后面，于是 lo=2。现在 lo 和 hi 都是 2，搜索结束。",
+        "找到第 2 格不等于已经插进去了。先把 7 搬到第 4 格，再把 5 搬到第 3 格，形成 [1,3,空位,5,7]，最后把 4 写入空位，得到 [1,3,4,5,7]。",
+        "若待插入的是另一个 3，遇到已有的 3 时继续搜右半边，最后插在所有旧 3 之后。不同记录不会因为值相同而丢失。"
+      ],
+      "cost": "每次搜索把范围减半，长度 i 的左半边只需约 log₂ i 次比较；n 次插入通常共 Θ(n log n) 次比较。但每次可能还要搬 i 个记录，典型和最坏总搬动量 Θ(n²)，因此整个数组算法的典型与最坏时间仍为 Θ(n²)。若不先检查末尾，即使原来有序也做 Θ(n log n) 次比较；加上末尾检查，最好可为 Θ(n)。n 为记录数。额外空间 Θ(1)。按相等向右的规则稳定。",
+      "why": "比较昂贵时，少问很多次很有价值，例如比较长字符串。但数组里的空位必须靠搬动腾出来。二分不能让夹在中间的 4 穿过 5 和 7，所以它没有消除平方级移动。",
+      "use": "适合短片段、比较比搬动更贵的记录，以及需要稳定插入的混合排序。TimSort 常用它扩展较短的有序段。",
+      "details": "始终用同一种边界约定，尤其不要把 hi 当成包含在内的格子。向后搬动可以避免覆盖尚未保存的记录。若使用普通有序数组，不应仅凭比较次数把总时间写成 O(n log n)。"
+    },
+    "en": {
+      "foundation": [
+        "Binary search uses an ordered row to rule out half the possibilities at a time. Looking at the middle tells you which side could contain the insertion point.",
+        "Positions begin at zero here. The interval [lo,hi) includes lo and excludes hi. When lo equals hi, there are no unchecked slots left."
+      ],
+      "idea": "Ordinary insertion sort may inspect many old items just to discover where the next one belongs. Binary insertion sort asks a better sequence of questions. It checks the middle of the ordered part, keeps the relevant half, and repeats. The new record still needs an opening in the array, so this method saves comparisons rather than eliminating movement.",
+      "steps": [
+        "Keep the left prefix ordered, as in insertion sort, and save the next record x. If the prefix has i items, start with lo=0 and hi=i. Only this ordered prefix is searched.",
+        "Compute mid as the average of lo and hi rounded down. If x is smaller than the value at mid, set hi=mid: x must be inserted at that position or earlier. Otherwise set lo=mid+1. Taking the right branch on equality puts a new equal record after older equal records.",
+        "Repeat while lo<hi. Every comparison shrinks the interval, so it must eventually become empty. Its remaining boundary lo is the insertion position, which can be the start or the position just after the prefix.",
+        "Move the prefix items at and after that position one slot right, starting at the right end. Write x into the opening. Then extend the prefix and process the next record. An optional check against the prefix's last record can skip the search when x already belongs at the end."
+      ],
+      "example": [
+        "Use the full input [1,3,5,7,4]. The first four values can each join the ordered prefix at its end. When 4 arrives, search [1,3,5,7] with [lo,hi)=[0,4).",
+        "The middle position is 2, holding 5. Since 4<5, change the interval to [0,2). Its middle is now position 1, holding 3. Since 4≥3, move lo to 2. The interval [2,2) is empty, so the opening belongs at position 2.",
+        "The search did not create that opening. Copy 7 to position 4, then 5 to position 3. Now [1,3,hole,5,7] has room for the saved 4, giving [1,3,4,5,7].",
+        "If another 3 arrived instead, the equality branch would continue to the right of the existing 3. That choice preserves duplicate records and their original order."
+      ],
+      "cost": "A search through i ordered items takes about log₂ i comparisons because the remaining range halves each time. Across n insertions, typical and worst comparison counts are Θ(n log n). However, an insertion can still shift i items. Typical and worst movement is Θ(n²), so total array time is still Θ(n²). Without an end check, ordered input also needs Θ(n log n) comparisons. With the end check, best time becomes Θ(n). Here n is the record count. Extra space is Θ(1), and inserting after equal records makes this version stable.",
+      "why": "It helps when comparing two records is expensive, such as comparing long text. It helps much less when moving records dominates the work. Quickly locating the place between 3 and 5 does not remove the need to move 5 and 7.",
+      "use": "Useful for short ordered prefixes, expensive comparisons, and stable insertion inside hybrid methods. TimSort uses this operation to extend short runs.",
+      "details": "Keep the same half-open interval convention throughout. Move items backward when opening a slot to avoid overwriting them. Do not report O(n log n) total time merely because the search uses that many comparisons."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: Binary insertion sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/binaryinsort.html"
+      },
+      {
+        "title": "CPython: List sorting design notes",
+        "url": "https://github.com/python/cpython/blob/main/Objects/listsort.txt"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "zh_title": "图书馆排序",
+    "en_title": "Library sort",
+    "kind": "variant",
+    "zh_alias": "留空插入排序；gapped insertion sort",
+    "en_alias": "Gapped insertion sort",
+    "zh": {
+      "foundation": [
+        "空位不代表某个特别大的数或小的数，而是格子附带的空/非空标记。读取时只看非空格，按它们从左到右的顺序判断是否有序。",
+        "随机打乱到达顺序是把记录以随机次序逐个插入；它不改变最终应按什么值排序。概率保证是在这种随机到达和固定预留比例等条件下成立。",
+        "支撑位置是一次重新铺开时已有记录所占的格子编号。在下一轮里，这些编号一直有记录，虽然该处的记录可能因搬动而改变。"
+      ],
+      "idea": "一排书挤得满满的，插一本书常常要搬半个书架。若在书与书之间留些空格，新书通常只需把附近几本推到一个空格。图书馆排序把这种办法用于数组：非空记录始终从小到大，定期把它们重新分散，让空位回到各处。不过，留下空位本身并不保证快；原论文还让记录随机到达，并按安排好的轮次重铺。",
+      "steps": [
+        "先知道最终记录数 n，选择一个固定备用比例 ε>0，预留约 (1+ε)n 个格子。随机排列到达次序。按轮次工作：已有 m 个记录时，本轮最多再插 m 个，人数大致翻倍；最后一轮可提前在 n 个处结束。",
+        "每轮开始，把已有 m 个记录按顺序均匀铺在能容纳本轮目标数量的活动区域里。记下这些已有记录的格子编号，称为支撑位置。二分查找这些位置上的当前值，找到新记录 x 夹在哪两个支撑值之间；再在两位置之间从左到右检查非空记录，找出准确的前驱和后继。两端没有支撑值时，使用活动区域的边界。",
+        "若前驱和后继之间有空格，把 x 放进去即可。否则搜索附近的空格。空格在右边时，从它左边开始向右搬连续记录，直到在后继原位置腾出格子，再写 x；空格在左边时，向左搬挡路的连续记录，最后把 x 写在前驱后面。每次都保留所有非空记录的顺序。",
+        "这些搬动不会使原来占用的支撑位置变空，因此本轮还能继续二分查它们的当前值。达到本轮的目标数量后，扩大活动范围并均匀重铺，重新记录支撑位置。扩大的只是预先保留数组的使用范围，不是让定长数组无条件长大。",
+        "全部插入后，从左到右把非空记录抄到连续位置，得到普通有序数组。若要稳定输出，比较键必须同时包含原来的编号；否则最初的随机打乱会改变相同值的顺序。"
+      ],
+      "example": [
+        "让记录按 [4,1,7,3,2] 到达。4 先进入空架。插 1 时找到 4 左边的位置，让出一格后得到有序记录 [1,4]；7 放在它们右边，记录顺序变成 [1,4,7]。书架上的空格不是记录。",
+        "为了看清插入动作，画出这三个记录的一次均匀铺开状态 [1,空,4,空,7,空]，支撑编号为 0、2、4。此图展示机制，不声称正式轮次恰在插完三个时重铺。3 位于支撑值 1 和 4 之间，第 1 格为空，直接放入： [1,3,4,空,7,空]。",
+        "接着插 2。支撑编号上的当前值仍是 1、4、7，所以二分把范围缩在 1 和 4 之间；顺序检查发现它应该在 1 与 3 之间。这里没有空格，右侧第 3 格有空位。先把第 2 格的 4 搬到第 3 格，再把第 1 格的 3 搬到第 2 格，最后写入 2： [1,2,3,4,7,空]。",
+        "若下一次安排重铺，可以变成 [1,空,2,空,3,空,4,空,7,空]；最后去掉空位就是 [1,2,3,4,7]。为五个记录保留十格可示意 ε=1。实际轮次按数量近似翻倍结束，所需容量从开始就预留好。"
+      ],
+      "cost": "查找支撑值要约 log n 次比较，重铺时每个记录只搬一次。关键问题是两次重铺之间要找多远的空位、搬多长的连续段。在随机到达、固定 ε 和论文轮次规则下，这些局部拥挤受到概率控制，期望总时间 O(n log n)，并且以高概率也是 O(n log n)；高概率指失败机会随规模增长而变小，不表示绝不失败。逆着这些条件安排到达次序，或遇到罕见的坏随机结果，仍可有 Θ(n²) 工作。普通每次二分的版本最好一般也用 O(n log n) 工作，额外空间 Θ(n)。n 为记录数。基本随机版不稳定；加入原编号作为相等值的第二比较键可稳定。",
+      "why": "它把整排大搬迁改成了走到附近空位的小搬迁。随机到达有助于避免总向同一小段挤书；定期重铺把已经被吃掉的空隙重新分散。二分搜索仍保留对数成本。",
+      "use": "适合研究带空隙的有序数组和概率型数据结构。当随机化、备用空间、重铺和空位管理的复杂度值得承担时可以考虑；普通小数组往往用插入排序更简单。",
+      "details": "不能把空位作为普通值参与二分，也不能只写有空就插而省略定位方法。支撑位置二分之后仍需检查局部区间。备用比例必须固定且大于零；所有数组范围和最后不足一轮的情况都要受预留容量约束。变体的额外索引、轮次或空间策略需要自己的分析，不能自动继承论文结论。"
+    },
+    "en": {
+      "foundation": [
+        "A gap is an empty-slot flag, not a special numerical value. Read occupied slots from left to right to obtain the current ordered sequence.",
+        "Random arrival means shuffling the records before insertion. The final ordering rule stays the same; randomness spreads the pressure from insertions.",
+        "At a redistribution, record the positions of the existing items. These support positions stay occupied for the next round, even though shifting may change which records occupy them."
+      ],
+      "idea": "Picture a crowded bookshelf. Adding a book near the beginning requires moving many books. If there are gaps along the shelf, you can often move a short section into a nearby gap instead. Library sort maintains an ordered sequence in a partly empty array and occasionally spreads the records out again. Its speed guarantee comes from a particular randomized procedure, not from gaps alone.",
+      "steps": [
+        "Determine the final count n and reserve about (1+ε)n slots, for a fixed positive spare fraction ε. Shuffle the arrival order. Work in rounds: a round starting with m records inserts up to m more, roughly doubling the population. Stop the final round early when all n records have arrived.",
+        "At the start of a round, spread the m existing records evenly over the active area sized for that round's target population. Save their slot numbers as support positions. Binary-search the current values at these occupied positions to bracket a new x. Within the bracket, inspect occupied slots in order to find the exact predecessor and successor. At the outer edges, use the active area's boundaries.",
+        "If a gap already lies between that predecessor and successor, put x there. Otherwise look for a nearby gap. For a gap on the right, shift the intervening consecutive records right, beginning next to the gap. For a gap on the left, shift them left, beginning next to that gap. Place x in the resulting opening between its ordered neighbors.",
+        "A shift followed by insertion never leaves an originally occupied support position empty. Their current values therefore remain safe to search during the round. At the scheduled population limit, redistribute over a larger active area and record fresh support positions. This activates more of the array reserved initially; a fixed array does not grow by itself.",
+        "After the last insertion, collect occupied slots from left to right into a packed output. To preserve original order among equal keys despite shuffling, compare the original position after comparing the key."
+      ],
+      "example": [
+        "Let the arrival order be [4,1,7,3,2]. Four starts the shelf. Make room to its left for 1, giving occupied records [1,4]. Seven follows them, so the record sequence is [1,4,7]. Empty slots do not enter this sequence.",
+        "To isolate the local insertion mechanism, show those three records spread as [1,gap,4,gap,7,gap], with support positions 0,2,4. This is an illustrative spread, not a claim that a formal round ends after three insertions. Three belongs between 1 and 4 and can use the gap directly: [1,3,4,gap,7,gap].",
+        "For 2, searching the support values 1,4,7 identifies the interval between 1 and 4. Inspecting that interval locates the exact position between 1 and 3. There is no gap there, but position 3 is empty. Copy 4 from position 2 to 3, then 3 from 1 to 2. Write 2 at position 1: [1,2,3,4,7,gap].",
+        "A later scheduled spread could look like [1,gap,2,gap,3,gap,4,gap,7,gap]. Collecting the records produces [1,2,3,4,7]. Ten reserved slots for five records illustrate ε=1. The actual rounds follow their doubling schedule and stay within the reserved capacity."
+      ],
+      "cost": "Searching support values costs about log n comparisons per insertion. Redistribution moves each existing record once. The uncertain part is how far an insertion must search for a gap and how many records it shifts. With randomized arrivals, fixed spare fraction, and the paper's rounds, congestion is controlled: expected total time is O(n log n), and the same bound holds with high probability. This means a shrinking probability of failure as size grows, not certainty. Adverse arrivals or rare unlucky outcomes can still require Θ(n²) work. A standard version that always binary-searches generally has O(n log n) best work too. Extra space is Θ(n). The shuffled basic method is unstable; key-plus-original-position comparisons restore stability.",
+      "why": "Nearby empty space turns a large move into a small one. Random arrivals help avoid repeatedly crowding the same region. Redistribution replenishes gaps where earlier insertions consumed them. Position searches still carry a logarithmic cost.",
+      "use": "Useful for studying ordered arrays with spare space and randomized performance guarantees. In practice, the extra storage and gap management must justify their complexity; ordinary insertion sort is simpler for small inputs.",
+      "details": "Do not binary-search gaps as though they were keys. Search occupied support positions, then inspect the bounded local region. Keep a fixed positive spare fraction, respect active boundaries, and handle a partial final round. Different indexing or redistribution schemes need their own analysis rather than borrowing the original theorem."
+    },
+    "sources": [
+      {
+        "title": "Bender, Farach-Colton, Mosteiro: Insertion sort is O(n log n)",
+        "url": "https://arxiv.org/abs/cs/0407003"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "zh_title": "线股排序",
+    "en_title": "Strand sort",
+    "kind": "algorithm",
+    "zh_alias": "抽取有序子序列再归并；不是连续自然段归并",
+    "en_alias": "Repeated monotone-subsequence extraction and merging",
+    "zh": {
+      "foundation": [
+        "子序列是按原先顺序挑出的若干记录，中间允许跳过一些。例如 [4,1,3,2,5] 中挑 4、5 可以组成子序列，它们不必相邻。",
+        "合并两个有序队列时，只需比较各自最前面的数，拿走较小的那个。因为同一队列后面的数都不更小，没必要现在逐个看它们。"
+      ],
+      "idea": "从乱序记录里挑出一条能从小到大接下去的链，把暂时接不上的数留着，下一轮再处理。挑出的链已经有序，可以和前面做好的结果合并。这就是链式排序。它找的是可以跳过记录的有序子序列；自然归并排序找的是连续相邻的有序段，两者不要混为一谈。",
+      "steps": [
+        "准备一个空的有序结果。只要还有未处理记录，就取走其中最前面的一条，作为本轮链的开头。取走意味着以后不能再重复处理它。",
+        "从左到右查看余下记录。如果当前值不小于链尾，把它取走并接到链尾；否则把它留在余下队列中。跳过的记录仍保持原有相对顺序。每次接入都保证链尾没有下降，所以整条链有序。",
+        "将这条链与现有结果合并。各用一个位置指向尚未使用的最前记录，比较两个当前值，输出较小者，然后只推进它的指针。一边用完，把另一边剩余记录依次接上。相等时优先选择较早建立的结果，保留旧记录先于本轮新记录的顺序。",
+        "把本轮剩下的队列作为下一轮输入，直到它为空。使用数组时，可以在扫描中另建一个余下队列，不要每取走一个值就移动整条数组尾巴；链表则可改动连接而不搬动后续记录。"
+      ],
+      "example": [
+        "输入 [4,1,3,2,5]，结果为空。取 4 开头。1、3、2 都比链尾 4 小，先留下；5 能接在 4 后面。本轮得到链 [4,5] 和余下 [1,3,2]，结果先变成 [4,5]。",
+        "第二轮从 1 开始。3 不小于 1，接上；2 小于当前链尾 3，留下。新链 [1,3] 与旧结果 [4,5] 合并：1 和 4 比选 1，3 和 4 比选 3，然后旧结果还有 4、5，依次接上。结果 [1,3,4,5]，余下 [2]。",
+        "最后一条链只有 [2]。合并时先比较 1 和 2，取 1；再比较 3 和 2，取 2；新链耗尽，接上 3、4、5。最终 [1,2,3,4,5]。",
+        "这里允许相等值接到链尾，因此重复值不会被漏掉。较早一轮有相同值时，合并先取旧结果；再配合每轮不打乱跳过项的顺序，这个版本稳定。"
+      ],
+      "cost": "每轮要扫描余下记录，还要把本轮链与越来越长的结果合并。若一轮就能选走所有记录，只扫描和输出一次，最好 Θ(n)。反序时每轮只选走一个，余下扫描长度为 n−1、n−2……，合并结果也反复经过旧记录，最坏 Θ(n²)。典型成本取决于输入能形成怎样的链，这里不假设一个通用平均界。n 为记录数。通常需 Θ(n) 输出或余下存储；链表可重用节点。上述保持顺序且旧结果优先的版本稳定。",
+      "why": "一条长链一次就处理很多记录，轮数少；很多短链让同一批记录反复被看、旧结果反复被合并，所以慢。它不保证每轮把问题减半。",
+      "use": "适合讲解从已有顺序提取子序列和合并的思想，也可用于本来含有少数长链的链表数据。一般通用数组排序更多选用有明确 O(n log n) 最坏界的方法。",
+      "details": "传统描述有时只允许严格更大的值接入，也能排序，但重复值会分散到更多轮。明确本书用不小于规则。空输入无需抽链。比较失败的记录必须留下，而不是丢弃；合并时必须推进刚输出的那一边。"
+    },
+    "en": {
+      "foundation": [
+        "A subsequence keeps the original order of selected items but may skip items between them. Selecting 4 and 5 from [4,1,3,2,5] is allowed even though they are not neighbors.",
+        "To merge two ordered sequences, compare their first unused items. The smaller one is the smallest remaining item overall, because neither sequence hides a smaller item behind its front."
+      ],
+      "idea": "Walk through the input and collect a chain that keeps going upward. Leave any item that cannot follow the chain for a later walk. Each collected chain is already ordered, so merge it into the ordered result. Strand sort uses these possibly separated subsequences; natural mergesort instead discovers consecutive stretches.",
+      "steps": [
+        "Begin with an empty result. If unprocessed items remain, remove their first item and use it to start a new strand. A selected item must leave the remainder so it cannot be selected again.",
+        "Scan the other remaining items from left to right. If an item is at least the strand's last value, remove it and append it. Otherwise retain it in the remainder. Keep retained items in their original order.",
+        "Merge the strand into the old result. Keep one pointer at each sequence's first unused record. Output the smaller front and advance only that pointer. When one sequence ends, copy the other tail. On equal values, choose the old result first.",
+        "Repeat with the remainder until it is empty. For an array, build the next remainder during the scan rather than deleting each selected element with a separate tail shift. A linked list can detach and reconnect nodes instead."
+      ],
+      "example": [
+        "Start with [4,1,3,2,5]. Four begins the first strand. Values 1,3,2 are too small to follow 4, so retain them. Five fits. Strand [4,5] becomes the first result, and [1,3,2] remains.",
+        "The next strand starts with 1. Append 3, but retain 2 because it is smaller than the current last value 3. Merge [1,3] with [4,5]: select 1 against 4, then 3 against 4, then copy 4 and 5. The result is [1,3,4,5], with remainder [2].",
+        "The last strand is [2]. During its merge, select 1 against 2, then select 2 against 3. The strand ends, so copy 3,4,5. Final output: [1,2,3,4,5].",
+        "Allowing equality within a strand keeps duplicate records. Choosing older result records first on a merge tie, together with order-preserving extraction, preserves their original order."
+      ],
+      "cost": "Each round scans the remainder and merges with the growing result. If the first strand takes everything, only one scan and output are needed: best Θ(n). A reversed input gives one-item strands. The repeated scans have lengths n−1,n−2,…, and merging repeatedly revisits the old result, giving worst Θ(n²). Typical work depends on the available subsequences; no universal average bound is assumed. Here n is the record count. Conventional output and remainder storage use Θ(n) extra space; lists can reuse nodes. The stated extraction and tie rules make this version stable.",
+      "why": "Long strands remove many records per round. Short strands force repeated visits to nearly the same records and repeated merges of an already large result. There is no rule ensuring that every round halves the remaining work.",
+      "use": "Helpful for learning subsequence extraction and merging, or for lists that naturally contain a few long increasing strands. General array sorting usually benefits from a method with a guaranteed O(n log n) worst case.",
+      "details": "Some original descriptions require a strictly greater value before appending. That also sorts correctly but puts equal values into more strands. This entry uses at-least instead. Empty input needs no strand, and every skipped record must remain available. During merging, advance the side you actually selected."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: Strand sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/strandSort.html"
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "zh_title": "自然归并排序",
+    "en_title": "Natural mergesort",
+    "kind": "family",
+    "zh_alias": "自然合并排序；连续有序段自适应归并",
+    "en_alias": "Natural merge sort; run-adaptive mergesort",
+    "zh": {
+      "foundation": [
+        "连续段是数组中挨在一起的记录。这里的有序段允许相等，例如 [1,1,4]；一旦后一个数更小，这一段就结束。",
+        "合并不是把两段直接拼接。各看最前面的未用记录，取较小者并推进它那边的位置；某边用完，再复制另一边的尾巴。"
+      ],
+      "idea": "有些乱序数组不是处处混乱，它们已经有几段排得很好。例如 [1,4,2,3,0,5] 里，1 到 4、2 到 3、0 到 5 都在上升。自然归并排序先认出这些现成的连续有序段，不把它们拆散，再两两合并成更长的段，直到只剩一段。",
+      "steps": [
+        "从左边开始扫描。只要下一个数不小于当前数，就继续当前段；遇到下降，记下段的起点和终点，开始新段。扫完最后一格也要记下最后一段。这样得到的每段已经内部有序。",
+        "本轮依次配对相邻段：第 1 与第 2 段、第 3 与第 4 段……。对一对段，准备输出缓冲区和两个位置。比较两个位置上的记录，把较小者写到缓冲区末尾，只前进被选中一边。相等时取左段，使原来靠左的相同值继续在前。",
+        "一边到头后，另一边的尾部已经有序，直接接上。将合并结果写回原来的两段区域，记成一个新段。若段数为奇数，本轮最后一段没有伙伴，就原样带到下一轮。",
+        "完成这一轮后，段数大致减半。按相同办法做下一轮。只有一段且覆盖整个数组时停止。本条用简单的两两配对；TimSort、Powersort、Peeksort 会更细致地安排哪些相邻段先合并。"
+      ],
+      "example": [
+        "输入 [1,4,2,3,0,5]。1≤4，但 4>2，因此第一段 [1,4] 到此结束。2≤3，但 3>0，第二段是 [2,3]。最后的 [0,5] 为第三段。段状态：[1,4] | [2,3] | [0,5]。",
+        "第一轮合并前两段：1 与 2 比，取 1；4 与 2 比，取 2；4 与 3 比，取 3。右段已用完，接上 4，得到 [1,2,3,4]。最后的 [0,5] 没有伙伴，保留。状态：[1,2,3,4] | [0,5]。",
+        "第二轮先比 1 与 0，取 0；随后左段的 1、2、3、4 都小于右段当前的 5，依次取走；左段用完，接上 5。状态成为 [0,1,2,3,4,5]，现在只有一个完整段，结束。",
+        "已排段不等于最终位置：第三段本来有序，但其中的 0 仍在最后一次合并时搬到全数组最前面。"
+      ],
+      "cost": "找初始段要看一遍输入。每轮合并中，每个记录最多读写一次，花 O(n)；r 个初始段经过约 log₂ r 轮变成一个，所以总上界 O(n+n log r)。n 是记录数，r 是初始有序段数。只有一段时最好 Θ(n)；无明显顺序的典型输入和最坏情形为 O(n log n)。普通数组合并需 Θ(n) 额外缓冲区，链表可用改连接来合并。上述左段先取相等值的版本稳定。",
+      "why": "现成的长段减少了需要合并的轮数。相比从单元素开始归并，它省掉了早已正确的小范围工作。但简单配对遇到长度差异很大的段时，可能让同一个长段被多搬几次。",
+      "use": "适合已有连续顺序的记录、链表和按段合并的文件处理。它也是理解自适应归并家族的入口：自适应表示会利用输入原有的顺序。",
+      "details": "可扩展扫描器，识别严格下降段后反转；必须严格下降，含相等记录的一段不能整体反转，否则破坏稳定性。本例只扫描不下降段。合并必须处理所有尾部记录；若采用从后向前写的优化，遇到相等值要先写右段，才与左段优先的前向规则一致。"
+    },
+    "en": {
+      "foundation": [
+        "A run is a consecutive stretch already in order. Equal neighbors are allowed: [1,1,4] is a nondecreasing run. A drop starts a new run.",
+        "Merging means repeatedly selecting the smaller of two current fronts, not merely joining the sequences end to end. Once one side ends, the other tail can be copied directly."
+      ],
+      "idea": "An input can be partly ordered even when the whole row is not. In [1,4,2,3,0,5], three short stretches already rise. Natural mergesort notices those stretches and keeps them intact. It merges neighboring runs into longer ordered runs until one run covers the input. The word natural refers to using order that was already there.",
+      "steps": [
+        "Scan left to right. Keep extending the current run while the next value is at least the current value. At a drop, record the run's boundaries and start another. Remember to record the final run when the input ends.",
+        "Pair adjacent runs throughout a round: first with second, third with fourth, and so on. For each pair, use a buffer and one position in each run. Compare their current records, write the smaller to the buffer, and advance only the selected position. On a tie, take the left record first.",
+        "When one run is exhausted, append the unused tail of the other. Write the merged records back over the two original runs and record one new run. An odd final run has no partner and passes to the next round unchanged.",
+        "Repeat the pairing rounds. Each round roughly halves the run count. Stop when a single run spans the array. This entry uses simple pairwise rounds; TimSort, Powersort, and Peeksort choose more carefully among neighboring merges."
+      ],
+      "example": [
+        "Scan [1,4,2,3,0,5]. The rise 1≤4 continues the first run, but 4>2 ends it. Likewise, 2≤3 followed by 3>0 gives the second run. The final rise gives [0,5]. State: [1,4] | [2,3] | [0,5].",
+        "Merge the first pair. Select 1 against 2, then 2 against 4, then 3 against 4. The right run ends, so copy 4. The unpaired last run remains: [1,2,3,4] | [0,5].",
+        "In the next merge, select 0 against 1. Values 1,2,3,4 then beat the right front 5 in turn. Copy the remaining 5. The single run is [0,1,2,3,4,5], so sorting is complete.",
+        "Notice that an ordered run is not a final location. Zero started in the last run but eventually moved to the beginning of the whole output."
+      ],
+      "cost": "Finding runs reads the input once. A merging round reads and writes each record at most once, costing O(n). Starting with r runs takes about log₂ r rounds, for O(n+n log r) total work. Here n is the record count and r is the initial run count. One run gives best Θ(n). Unstructured typical data and the worst case need O(n log n). A conventional array merge uses Θ(n) extra buffer space; lists can merge by reconnecting nodes. Left-first equality makes the stated version stable.",
+      "why": "Long existing runs reduce the number of rounds and avoid redoing order that was already correct. Simple pairing can still move a very long run repeatedly when its neighbors have very different lengths, which motivates better merge schedules.",
+      "use": "A good starting point for adaptive merging, meaning sorting that uses existing order. It suits partly ordered arrays, linked lists, and run-based file processing.",
+      "details": "A scanner may also recognize strictly decreasing runs and reverse them. Strictness matters: reversing equal records would reverse their original order. The example scans nondecreasing runs only. Never lose an unfinished tail during a merge. If writing backward, choose the right record first on equality to preserve the same stable order."
+    },
+    "sources": [
+      {
+        "title": "Munro and Wild: Nearly-optimal mergesorts",
+        "url": "https://www.wild-inter.net/publications/munro-wild-2018.pdf"
+      },
+      {
+        "title": "Princeton: Mergesort",
+        "url": "https://algs4.cs.princeton.edu/22mergesort/"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "三个连续有序段：[1,4] | [2,3] | [0,5]",
+          "en": "Three runs: [1,4] | [2,3] | [0,5]",
+          "values": [
+            1,
+            4,
+            2,
+            3,
+            0,
+            5
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "合并前两段，0 所在段仍待处理",
+          "en": "Merge first two; the run with 0 waits",
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            0,
+            5
+          ],
+          "active": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fixed": [],
+          "moved": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "zh": "下一轮先取右段的 0",
+          "en": "Next merge selects the right run's 0 first",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "active": [
+            0
+          ],
+          "fixed": [],
+          "moved": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "zh": "一个段覆盖全体，排序结束",
+          "en": "One run covers the input: finished",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "moved": []
+        }
+      ]
+    }
+  },
+  {
+    "id": 16,
+    "zh_title": "TimSort",
+    "en_title": "TimSort",
+    "kind": "algorithm",
+    "zh_alias": "Timsort；自然归并、二分插入与跳跃合并的混合算法",
+    "en_alias": "Timsort; an adaptive merge/insertion hybrid",
+    "zh": {
+      "foundation": [
+        "有序段是一段相邻且不下降的记录。合并两段时各看最前面的未用项，输出较小者；相等时先取左段。这个动作本身和自然归并相同。",
+        "栈可以想成一摞纸。新纸压在顶上，取纸也从顶上拿。这里栈里放的是段的起点和长度等说明，不是把整段记录搬到纸堆里。",
+        "二分插入是先不断比较有序部分的中间值来找位置，再倒着右移记录腾出空位。它用于补长短段，不能省掉实际搬动。"
+      ],
+      "idea": "实际数据常常有现成的顺序，但段可能有长有短。把一个很长的段同许多短段一条条合并，会反复搬动长段。TimSort 一方面保留已经有序的段，一方面给过短的段补几条记录，再用一套规则决定何时合并。合并时如果一边连续提供较小值，它还能一次找出一整块直接复制。先理解这三个动作：找段、安排合并、成块复制。它不是一种只靠神奇名称就能完成的比较。",
+      "steps": [
+        "从未处理位置找下一段：连续相等或上升就继续；若一开始严格下降，则继续找严格下降的末尾，再从两头交换把它反转。含相等值的下降段不能这样反转。每一段最后都成为不下降段。",
+        "选定一个短段目标 minrun，真实实现通常选几十个记录。如果找到的段不足 minrun，就把后面几条尚未处理记录逐条二分插入这个段，直到达到目标或输入结束。插入时找旧相等值后面的位置，再从右向左搬动。因此补长后的段仍有序且稳定。",
+        "把段的起点和长度压入栈。下面是修正后的经典合并规则：将栈顶四个长度按从老到新叫 W、X、Y、Z。若 X≤Y+Z 或 W≤X+Y，需要合并；让 Y 与两边较短的 X 或 Z 合并。如果前两个条件都不成立，但 Y≤Z，则合并 Y、Z。缺少某段时忽略含它的条件。两段合并后，用新长度和起点替换它们，重新检查，直到没有条件要求继续合并。",
+        "合并的必须是相邻段。最直接的方法是各设一个当前位置和输出缓冲区，反复取较小值，最后接上尾部。常见节省空间办法只暂存较短段：若左段较短，从左往右写；若右段较短，从右往左写，比较较大的末尾值。前向遇到相等先取左，后向遇到相等先写右，两种方向都保持原顺序。",
+        "如果连续多次都是同一边胜出，先不逐个比较，改用跳着找边界：检查距离 1、2、4、8……处的值，直到发现不能继续胜出的值或到达末尾；再在最后两次检查之间二分查出准确边界，把已确认的连续块复制过去。这称为 galloping，也叫疾驰搜索。随后继续普通合并；实际实现会调整启用它的门槛。",
+        "读完输入后，即使栈上长度条件没有触发，也必须完成剩余合并。经典版本持续在栈顶选择相邻伙伴，通常让倒数第二段与两边较短的一段合并，直到栈上只有一段。"
+      ],
+      "example": [
+        "为让小例子显示段结构，教学目标取 minrun=2，输入 [1,4,2,3,0,5]。先找到 [1,4]，长度栈 [2]。再找到 [2,3]，栈 [2,2]。此时最新两段一样长，满足 Y≤Z，因此合并。",
+        "合并时先取 1，再取 2、3，最后接上 4，数组前四格成为 [1,2,3,4]，栈变成 [4]。随后找到 [0,5]，栈为 [4,2]。4 不小于等于 2，不需立即合并。输入已经结束，于是强制最终合并，取 0、1、2、3、4、5，得到 [0,1,2,3,4,5]。",
+        "补长动作可以单独看 [2,5,1,4]，教学目标为 4。现成段只有 [2,5]。取 1，找位置后把 5、2 右移，成为 [1,2,5,4]；再取 4，右移 5，成为 [1,2,4,5]。这四格才可以作为一个完整段入栈。",
+        "疾驰动作另看 [1,2,3,4,8] 与 [5,6,7,9]。右边当前值是 5。左边第 1、2、4 项分别是 1、2、4，都能先输出；第 8 项不存在，于是将搜索限制在第 4 项之后到末尾。二分确认 8 是第一个不能先出的值，一次复制 [1,2,3,4]。剩下继续按头比较。小例只展示动作，不保证真实门槛会在四次胜出后启动。"
+      ],
+      "cost": "找段先读一遍数据。补长只在短片段里做插入；合并规则防止许多长段被无节制地重复搬动。每个记录经过的合并层数受到控制，典型与最坏总时间 O(n log n)；一个现成段最好 Θ(n)。以 r 个初始段衡量，可给出 O(n+n log r) 自适应上界，n 为记录数。疾驰减少某些合并中的逐项比较，但不能免去输出记录的动作。常见额外空间 O(n)，包括较短段缓冲区；栈只保存段说明。算法稳定。",
+      "why": "现成顺序不用重排，短段补长减少管理开销，长度规则减少长段的反复搬家。疾驰适合一边连续占优的合并；两边交替胜出时，它未必省事，所以会调整门槛。",
+      "use": "适合一般记录、文本、已有部分顺序且需要稳定输出的数据。理解它时可先掌握普通合并和二分插入，再学习长度规则；初学者不必先背栈上的不等式。",
+      "details": "本条解释修正后的经典 TimSort 调度，检查四段条件很重要，旧的不完整规则出现过栈问题。现代 CPython 保留找段、插入和疾驰机制，但合并顺序改用 Powersort，不应把所有实现都当作旧规则。minrun=2、4 是教学值。空输入直接返回；最后不足目标长度的段保留实际长度。"
+    },
+    "en": {
+      "foundation": [
+        "A run is a consecutive stretch in nondecreasing order. A stable merge repeatedly takes the smaller unused front, choosing the left front on equality.",
+        "A stack works like a pile of papers: add a paper on top and remove from the top. Here each paper describes a run's start and length; the actual records remain in the array.",
+        "Binary insertion finds a position by halving an ordered search interval, then shifts records backward to create an opening. TimSort uses it only to extend short runs."
+      ],
+      "idea": "A real input often contains order already, but its ordered stretches may have very different lengths. Repeatedly merging one long run with tiny neighbors can move the same long run many times. TimSort keeps the existing stretches, extends very short ones, and controls the order of neighboring merges. During a merge, it can also discover a whole winning block instead of comparing every item separately. These are three concrete operations to learn: find runs, schedule merges, and copy confirmed blocks.",
+      "steps": [
+        "Find the next run at the first unprocessed position. Continue through equal or increasing neighbors. If it begins by decreasing, follow strictly decreasing neighbors and reverse that stretch by exchanging its outer items inward. Do not reverse equal items: their order would change. Either route produces a nondecreasing run.",
+        "Choose a short-run target called minrun, usually a few dozen records in real implementations. If the run is shorter, take following records one at a time and binary-insert them until the target or the input end is reached. Insert after older equal values and shift from right to left. The extended run remains ordered and stable.",
+        "Push the run's location and length onto the stack. For the corrected classic policy, call the top four lengths W,X,Y,Z, from older to newer. If X≤Y+Z or W≤X+Y, merge Y with the shorter neighbor X or Z. If neither condition holds but Y≤Z, merge Y and Z. Ignore a condition if one of its runs is missing. Replace the two descriptions with their merged description and check again until no rule requests another merge.",
+        "Only adjacent runs may merge. A full buffer and two front pointers provide the simplest implementation. A usual optimization buffers only the smaller run. If it is the left run, write forward; if it is the right run, write backward while comparing the larger remaining ends. Forward ties choose the left record; backward ties write the right record first. Both preserve the original order of equals.",
+        "When one side wins repeatedly, search for a whole winning block. Probe at distances 1,2,4,8,… until a record stops winning or the run ends. Binary-search inside the last bracket to find the exact boundary, then copy the confirmed block. This expanding search is called galloping. Resume ordinary merging when appropriate; production versions adjust the threshold for using it.",
+        "At the end of input, finish the pending neighboring merges even if no length rule currently fires. A classic final collapse repeatedly pairs the second-from-top run with its shorter available neighbor until only one run remains."
+      ],
+      "example": [
+        "Use teaching minrun=2 for [1,4,2,3,0,5]. The first run [1,4] gives length stack [2]. The next run [2,3] makes [2,2]. The newest two lengths satisfy Y≤Z, so merge them.",
+        "Take 1, then 2 and 3, and copy 4. The first four slots become [1,2,3,4], and the stack is [4]. Adding [0,5] gives [4,2]. No immediate two-run rule fires. Input has ended, so the final collapse merges them into [0,1,2,3,4,5].",
+        "For a separate extension example, use target 4 on [2,5,1,4]. The natural run is only [2,5]. Insert 1 by shifting 5 and 2 right: [1,2,5,4]. Insert 4 before 5: [1,2,4,5]. Only then does the four-item run go onto the stack.",
+        "To see galloping, merge [1,2,3,4,8] with [5,6,7,9]. The current right value is 5. Left items at one-based distances 1,2,4 are 1,2,4, all eligible to come first. Distance 8 is beyond the run, which brackets the boundary between the fourth item and the end. Binary search finds 8 as the first item that cannot precede 5. Copy [1,2,3,4] together, then continue merging. A real threshold need not start galloping on this tiny case."
+      ],
+      "cost": "Run discovery reads the array once. Extension performs insertion only inside short pieces. The length policy controls how many merge levels each record travels through, giving O(n log n) typical and worst time. One existing run gives best Θ(n). A run-sensitive upper bound is O(n+n log r), where n is the record count and r the initial run count. Galloping can reduce comparisons but cannot remove the work of writing records. Conventional extra space is O(n), mainly a buffer for a shorter merge partner; the stack stores only descriptions. TimSort is stable.",
+      "why": "Existing order avoids unnecessary sorting. Extending tiny runs reduces overhead, and the length rules prevent careless repeated movement of long runs. Galloping helps when one side supplies many consecutive winners; alternating winners offer much less opportunity.",
+      "use": "Useful for general records, text, and partly ordered data requiring stability. Learn ordinary merging and binary insertion first; the stack inequalities are an advanced scheduling detail rather than the first idea to memorize.",
+      "details": "This is the corrected classic scheduling policy. Its four-run check matters; incomplete older rules caused stack problems. Modern CPython retains run discovery, insertion, and galloping but uses Powersort for scheduling. Teaching targets 2 and 4 are not production choices. An empty input returns immediately, and a final short run retains its actual length."
+    },
+    "sources": [
+      {
+        "title": "Tim Peters and contributors: CPython listsort notes",
+        "url": "https://github.com/python/cpython/blob/main/Objects/listsort.txt"
+      },
+      {
+        "title": "Auger, Jugé, Nicaud, Pivoteau: On the worst-case complexity of TimSort",
+        "url": "https://arxiv.org/abs/1805.08612"
+      },
+      {
+        "title": "CPython 3.10 classic collapse implementation",
+        "url": "https://github.com/python/cpython/blob/3.10/Objects/listobject.c"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "zh_title": "Powersort",
+    "en_title": "Powersort",
+    "kind": "variant",
+    "zh_alias": "按节点层级安排归并的自然归并变体；含多路 Powersort",
+    "en_alias": "Power-based natural merge scheduling; multiway Powersort is a related variant",
+    "zh": {
+      "foundation": [
+        "合并两条已排队列时，比较各自最前未用项，输出较小者；一边用尽后接上另一边。合并 a 与 b 个记录大约要处理 a+b 个记录，因此先后顺序会影响累计搬动量。",
+        "栈只保存尚待合并的左段和一个边界编号。压入是在顶上加一项，弹出是取走顶上一项。段的真实记录留在数组中。",
+        "相对位置是把整条数组当作长度 1 的尺子。下文的中点说的是一段在尺子上的位置，不是那段数值的平均数。floor 表示向下取整，如 floor(2.7)=2。"
+      ],
+      "idea": "想把短队伍和长队伍并成一支大队伍，先并哪两支会影响大家要重新走几次。Powersort 用各段在输入里的长度和位置来安排，而不是比较段中数值的大小。它把整条数组想成反复对半划分的尺子：两段的中点在哪一层分到不同格子，就给它们之间的边界一个层数。这个层数叫 power。层数大表示靠下的小范围合并，应较早做；层数小表示靠上的大合并，应稍后做。",
+      "steps": [
+        "本条基础版只找最大的不下降连续段。记段的起点 s 和长度 L，编号从 0 开始。总长为 n 时，相对中点 μ=(s+L/2)/n。保留最近发现的原始段，下一条边界的层数必须用它和下一原始段计算，不是拿已经合并后的大段重算。",
+        "为相邻两个原始段找 power。先把尺子分成两格，编号 0、1；看两个中点是否分在不同格。若不是，再分成四格，然后八格，直到第一次分开。分成 2ᵖ 格时，格子编号为 floor(2ᵖμ)，第一次不同的正整数 p 就是 power。两个不同位置总会被足够细的格子分开。",
+        "实现栈调度时，另保留一个当前段 C。开始 C 是第一段。发现下一段 N，算它与前一原始段之间的 p。只要栈顶保存的旧 power 大于 p，就弹出该项，把它保存的左段与 C 稳定合并，并让合并结果成为新的 C。这样较深的小合并在较浅的大边界进入前先完成。",
+        "没有需要弹出的项后，将一项 (当前 C, p) 压栈，再把 C 改成新段 N。继续读下一原始段。栈底到栈顶的待办层数保持递增；记录的是待合并边界，不是元素优先级。",
+        "输入结束时，栈项仍是当前段左边的待办段。逐项从顶上弹出，将它的左段与 C 合并，更新 C。最后 C 覆盖全数组。普通稳定合并用两头指针，遇到相等先取左边记录。",
+        "计算层数可用整数避免小数舍入：把中点写成 (2s+L)/(2n)，按每一层比较两个整数商 floor(2ᵖ(2s+L)/(2n))。实现中也可逐位处理这些分数，避免整数溢出；数学上的格子规则不变。"
+      ],
+      "example": [
+        "输入 [1,8,2,0,3,4,5,6]。只扫描不下降段，得到 R1=[1,8]、R2=[2]、R3=[0,3,4,5,6]，长度分别为 2、1、5，起点为 0、2、3，总长 n=8。中点是 1/8、2.5/8、5.5/8。",
+        "R1 与 R2 的中点都在左半边，分两格时编号都是 0；分四格时分别落在编号 0、1，所以第一条边界 power=2。R2 在左半边，R3 在右半边，第二条边界 power=1。这里比较的是位置，绝不是拿 8 与 2 比较来算层数。",
+        "开始 C=R1。发现 R2 时，栈为空，将 (R1,2) 压入，C=R2。发现 R3 时，新 p=1，栈顶的 2 更大，先弹出 R1 与 C=[2] 合并：取 1、2、8，C=[1,2,8]。然后压入 ([1,2,8],1)，将 C 改为 R3。",
+        "已经没有输入，弹出最后一项并合并。右段的 0 先出，然后左段的 1、2，再右段的 3、4、5、6，最后左段的 8。得到 [0,1,2,3,4,5,6,8]。两次合并共处理 3+8=11 个记录；若先合并后两段，则处理 6+8=14 个。"
+      ],
+      "cost": "读入和识别段要 O(n)。每次合并都要走过参与的记录，因此主要成本是所有合并长度之和。Powersort 将这份成本安排得接近最佳的相邻段合并计划，典型与最坏 O(n log n)，一个段时最好 Θ(n)。更细的上界为 O(n(1+H))，其中 n 是记录数，Lᵢ 是第 i 段长度，r 是段数，H=Σ(Lᵢ/n)log₂(n/Lᵢ)。这只是按各段长度给出的层数尺度：一段时 H=0，r 段等长时 H=log₂r，总有 H≤log₂r。常规缓冲区 O(n)，调度栈 O(log n)。稳定。接近最佳仍允许额外 O(n) 合并成本，并非每个例子都绝对最优。",
+      "why": "它让小范围合并先做，再逐渐做大范围合并，避免只因扫描先后而把某个长段反复卷入合并。长段在尺子上占更大位置，这个长度信息自然进入层数安排。",
+      "use": "适合已经掌握普通合并之后，研究不同长度有序段如何高效合并。它可与 TimSort 的补长和疾驰机制组合；初学者先懂普通归并，再查此条。",
+      "details": "本例固定只认不下降段。如果正式实现还识别并反转严格下降段，那么 [2,0] 会成为另一种段，例子的段边界和 power 也要重算。相等值不得因反转而交换。多路 Powersort 把二格划分推广为多格，并做多路合并；那是另一种调度变体。"
+    },
+    "en": {
+      "foundation": [
+        "Merging runs of a and b records visits about a+b records. A different order of merges can therefore change how often the same records move.",
+        "A stack stores pending left runs and boundary numbers. Push adds an entry on top; pop removes the top. Records remain in the array, not inside the scheduling stack.",
+        "Relative positions treat the whole array as a ruler of length one. A run midpoint is a location on that ruler, not the average of its values. Floor rounds down, for example floor(2.7)=2."
+      ],
+      "idea": "Suppose several ordered queues must become one queue. Joining two short queues before adding a long one can save repeated work. Powersort chooses neighboring merges from the lengths and positions of the original runs. Imagine dividing the input ruler into halves, then quarters, then eighths. For each boundary, ask when the neighboring run midpoints first land in different cells. That level is the boundary's power. A larger power represents a deeper, smaller merge to perform sooner; a smaller power represents a higher merge to leave until later.",
+      "steps": [
+        "This basic version discovers maximal nondecreasing runs only. For a run starting at zero-based position s with length L, compute its relative midpoint μ=(s+L/2)/n, where n is the total length. Keep the previous original run: the next boundary power is calculated from two neighboring original runs, not from an enlarged merged run.",
+        "Start with two equal ruler cells, numbered 0 and 1. If the midpoints share a cell, try four cells, then eight, and so on. With 2ᵖ cells, a midpoint's cell number is floor(2ᵖμ). The first positive p producing different numbers is the power. Distinct midpoints eventually separate.",
+        "Keep a current run C in addition to the stack. Initially C is the first run. When the next run N arrives, calculate boundary power p from N and its original predecessor. While the stack's top power is greater than p, pop that entry and stably merge its saved left run with C. The merged run becomes C. This finishes deeper merges before introducing the new higher-level boundary.",
+        "When no top entry needs removal, push (C,p), then set C=N. Continue scanning. Pending powers increase from the bottom toward the top; they describe boundaries, not the numerical priority of records.",
+        "At end of input, repeatedly pop a saved left run and merge it with C. Update C after each merge. When the stack is empty, C covers the whole input. Use ordinary stable merging: compare the two unused fronts, choose the smaller, favor the left on equality, and append the unfinished tail.",
+        "Avoid floating-point boundary mistakes by writing each midpoint as (2s+L)/(2n). At a level p, compare the integer quotients floor(2ᵖ(2s+L)/(2n)). A careful implementation may work through fraction bits instead of forming huge products, but it must preserve the same ruler-cell test."
+      ],
+      "example": [
+        "Use [1,8,2,0,3,4,5,6]. Scanning nondecreasing runs gives R1=[1,8], R2=[2], R3=[0,3,4,5,6], with lengths 2,1,5 and starts 0,2,3. Since n=8, their relative midpoints are 1/8, 2.5/8, 5.5/8.",
+        "R1 and R2 share the left half, but their quarter-cell numbers are 0 and 1. Their boundary power is 2. R2 is in the left half and R3 in the right half, so their boundary power is 1. The test uses positions, not a comparison between values 8 and 2.",
+        "Initially C=R1. On finding R2, push (R1,2) and set C=R2. On finding R3, its new power 1 is smaller than the saved 2. Pop and merge [1,8] with [2], selecting 1,2,8. Push ([1,2,8],1) and make R3 the current run.",
+        "Input has ended. Pop the last left run and merge it with [0,3,4,5,6]. Select 0, then 1,2, then 3,4,5,6, and finally 8. Output is [0,1,2,3,4,5,6,8]. The merge lengths total 3+8=11. Merging the last two original runs first would total 6+8=14."
+      ],
+      "cost": "Finding runs reads n records. The major remaining cost is the sum of all merge lengths, since each merge visits its participants. Powersort keeps that cost close to the best adjacent-run schedule. Typical and worst time are O(n log n); one run gives best Θ(n). More precisely, the bound is O(n(1+H)), with H=Σ(Lᵢ/n)log₂(n/Lᵢ), where Lᵢ is run i's length and r is the run count. H measures a length-based merge-level scale: it is zero for one run, log₂r for r equal-length runs, and never exceeds log₂r. Conventional extra space is O(n) for merging and O(log n) for scheduling. Stable. Near optimality permits an additive O(n) difference rather than claiming the perfect schedule for every input.",
+      "why": "Small neighboring regions combine before large ones. Run length affects position on the ruler, so the schedule avoids repeatedly dragging a long run into merges merely because it happened to be encountered first.",
+      "use": "An advanced continuation after ordinary merging, especially for uneven run lengths. It can be combined with TimSort's extension and galloping operations. Beginners can return here after understanding natural mergesort.",
+      "details": "The example deliberately recognizes nondecreasing runs only. An implementation that also reverses strict descents could recognize [2,0] as a run, changing the boundaries and powers. Equal records must not be reversed. Multiway Powersort uses a multi-cell hierarchy and multiway merging rather than this binary schedule."
+    },
+    "sources": [
+      {
+        "title": "Munro and Wild: Nearly-optimal mergesorts",
+        "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ESA.2018.63"
+      },
+      {
+        "title": "Authors' Powersort implementations",
+        "url": "https://github.com/sebawild/powersort"
+      },
+      {
+        "title": "Gelling, Nebel, Smith, Wild: Multiway Powersort",
+        "url": "https://arxiv.org/abs/2209.06909"
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "zh_title": "Peeksort",
+    "en_title": "Peeksort",
+    "kind": "variant",
+    "zh_alias": "探看中点附近自然段的归并排序",
+    "en_alias": "Midpoint-peeking natural mergesort",
+    "zh": {
+      "foundation": [
+        "递归就是把同一个任务交给更小的一块，等小块处理完再组合结果。必须说明何时不用再拆，否则会无休止调用自己。",
+        "有序前缀是当前区域最左端已知有序的一段，有序后缀是最右端已知有序的一段。这里只记录它们的边界，避免下次重复扫描已经确认的记录。",
+        "一次稳定合并使用两个当前位置，反复输出较小值，相等时先取左边；只需合并相邻区域，不能跨过中间未参与的记录。"
+      ],
+      "idea": "普通自顶向下归并总在中间切一刀，可能把本来很长的有序段切碎。Peeksort 先向中间看一眼，沿两边找出中间所在的完整有序段，再把刀移到它较近的一侧边界。已经排好的一段就保留下来。它从整个问题往小问题拆；Powersort 则从左往右收集段并用栈决定合并，两者是不同的安排办法。",
+      "steps": [
+        "处理一个区域 [l,r]，编号包括两端。若空、只有一个数，或已经知道一条有序段覆盖整个区域，直接返回。调用时同时携带左边已知有序前缀的末尾 e、右边已知有序后缀的开头 s；初始可只认最左和最右的单元素段。",
+        "取中间编号 m=floor((l+r)/2)。若 m 已落在已知前缀里，不必重新找它的段：保留 [l,e]，只递归处理 [e+1,r]，再合并。若 m 落在已知后缀里，则只处理 [l,s−1]，再与 [s,r] 合并。边界保证这次切分没有拆开已知的整段。",
+        "否则 m 在中间尚未知的部分。向左检查邻居，只要左值≤右值就扩展；到已知前缀边上时，只比较它的末项与新段首项：若能接上，就把新段起点直接改成 l，无需再走过整个前缀。向右同理，到已知后缀边上只检查接缝，能接上就直接把终点改成 r。遇到下降则停止。这样找到包含 m 的完整不下降段 [i,j]，也跳过了已经确认的内部记录。",
+        "比较 m−i 与 j−m。若左边距离较短，即 m−i<j−m，就在 i 前切，得到 [l,i−1] 和 [i,r]；否则在 j 后切，得到 [l,j] 和 [j+1,r]。若这一段接触区域外端，只用另一侧的内部边界；若覆盖整个区域，直接返回。不得切出同样大的问题再次调用。",
+        "递归处理左右两块。把新发现的整段边界交给拥有它的那一块：切在 i 前时，它成为右块的已知前缀；切在 j 后时，它成为左块的已知后缀。其余已知边界随各自子区域传下去。于是后续调用可以跳过重复扫描。",
+        "两块分别排好后，用稳定合并将它们写回原区域。到最外层合并结束时，整个数组有序。实现可设一个共用缓冲区，递归只改变处理边界，不必每层复制完整输入。"
+      ],
+      "example": [
+        "输入 [1,8,2,0,3,4,5,6]，区域编号 0 到 7，只识别不下降段。中间 m=3，值为 0。向左遇到 2>0，立即停；向右 0≤3≤4≤5≤6 一直延伸，找到 [i,j]=[3,7]，内容 [0,3,4,5,6]。",
+        "中间到左端距离为 0，到右端为 4，所以在第 3 格前切。左块 [1,8,2] 尚需排序；右块完整地是一条已知段，不必再拆。把右块的已知前缀末尾设为 7，下次调用立刻返回。",
+        "左块区域 0 到 2，中间编号为 1，值为 8。它的完整不下降段是 [1,8]，编号 0 到 1，接触左端，因此在第 1 格后切。左块 [1,8] 已知有序，右块 [2] 是单元素。合并时取 1、2、8，得到 [1,2,8]。",
+        "返回最外层，将 [1,2,8] 与 [0,3,4,5,6] 合并：先 0，再 1、2，再 3、4、5、6，最后 8。得到 [0,1,2,3,4,5,6,8]。长度为五的右段只参加必要的大合并，没有被拆成五个单元素问题。"
+      ],
+      "cost": "寻找段要检查邻居，合并要走过参与记录。携带已知前缀和后缀避免反复扫描，靠近中间的段边界控制合并层数。一个现成段最好 Θ(n)，典型无结构输入和最坏 O(n log n)。更细的界是 O(n(1+H))，n 为记录数，Lᵢ 为初始段长度，H=Σ(Lᵢ/n)log₂(n/Lᵢ)。一段时 H=0，r 段等长时 H=log₂r，H≤log₂r。相邻段合并成本接近最佳，允许额外 O(n)。普通数组合并缓冲区 O(n)，标准调度需 O(log n) 递归记录。稳定。",
+      "why": "它把切口移到已有顺序的边缘，避免先破坏长段再花钱恢复。已知边界还防止找段时一遍遍走过同一条长段。",
+      "use": "适合在普通自顶向下归并之后学习如何利用现成段。若还不熟悉递归，可先看自然归并的两两合并，再回到此条的切块规则。",
+      "details": "本条和例子固定只扫描最大不下降段。支持反转严格下降段的实现会将 [2,0] 识别为另一段，例子边界也随之变化，不能混用。中间位置用来找段，不一定成为实际切口。所有子区域必须比原区域小；完整段、空区域、单元素是停止条件。"
+    },
+    "en": {
+      "foundation": [
+        "Recursion asks the same procedure to solve a smaller region, then combines the answers. It needs stopping cases so it does not keep calling itself forever.",
+        "A known ordered prefix touches the region's left end; a known ordered suffix touches its right end. Remembering their boundaries avoids checking the same confirmed run again.",
+        "A stable merge compares the unused fronts of neighboring ordered regions, chooses the smaller, and chooses the left record on equality."
+      ],
+      "idea": "Ordinary top-down mergesort cuts at the middle even if that cut splits a long run that was already ordered. Peeksort first looks around the middle to discover the run containing it. It moves the cut to the nearer run boundary, preserves the run, sorts the remaining regions, and merges them. This is a way to plan from the whole problem downward. Powersort plans in the other direction, collecting runs from left to right.",
+      "steps": [
+        "Work on inclusive positions [l,r]. Return for an empty region, one item, or a known ordered run covering the whole region. Carry e, the end of a known left prefix, and s, the start of a known right suffix. Initially the outer single items can serve as these known runs.",
+        "Choose m=floor((l+r)/2). If m lies in the known prefix, keep [l,e] untouched, recursively sort [e+1,r], and merge. If m lies in the known suffix, sort [l,s−1] and merge it with [s,r]. Do not scan the already known run again.",
+        "Otherwise expand from m through nondecreasing neighbors. Going left is allowed while the left value is no greater than the right. On reaching the known prefix, compare only the joining pair: if the prefix's last value can precede the discovered run's first, extend the start directly to l without walking the prefix again. Do the symmetric join test at the known suffix and extend directly to r when it fits. Stop at a drop. This finds the complete midpoint run [i,j] while skipping confirmed interiors.",
+        "Compare m−i with j−m. If m−i<j−m, cut before i, giving [l,i−1] and [i,r]. Otherwise cut after j, giving [l,j] and [j+1,r]. If the run touches an outer end, use its internal boundary instead. A run covering the whole region is already a stopping case.",
+        "Recursively sort the two regions. Pass the discovered run to the region containing it: a cut before i makes it that region's known prefix; a cut after j makes it the other region's known suffix. Retain any other boundary information that belongs to each child region. This is how later calls avoid rescanning long runs.",
+        "Stably merge the two returned regions back into the original interval. A shared buffer is sufficient; recursive calls can change position boundaries rather than copy the entire input. The last outer merge completes the sort."
+      ],
+      "example": [
+        "For [1,8,2,0,3,4,5,6], the outer region is 0 through 7 and m=3, holding 0. To the left, 2>0 stops expansion. To the right, 0≤3≤4≤5≤6 continues to the end. The midpoint run is [0,3,4,5,6] at positions [3,7]. Only nondecreasing runs are recognized here.",
+        "The distances from m to the run ends are 0 and 4, so cut before position 3. The left problem is [1,8,2]. The right problem is a known complete run; passing its prefix end as 7 lets that call return immediately.",
+        "In the left region 0 through 2, midpoint 1 holds 8. Its run is [1,8] at positions [0,1]. Since it touches the left boundary, cut after position 1. Keep [1,8], return immediately on singleton [2], then merge by selecting 1,2,8.",
+        "The outer merge combines [1,2,8] with [0,3,4,5,6]. Select 0, then 1,2, then 3,4,5,6, then 8. Final output is [0,1,2,3,4,5,6,8]. The five-item right run was never broken into five singleton sorting tasks."
+      ],
+      "cost": "Run discovery checks neighboring records, and merging visits every participating record. Remembered prefix and suffix boundaries avoid repeated discovery scans. Cuts near the middle control the merge levels. Best time is Θ(n) for one run; unstructured typical and worst time are O(n log n). The finer bound is O(n(1+H)), where n is the record count, Lᵢ is run i's length, and H=Σ(Lᵢ/n)log₂(n/Lᵢ). H is zero for one run, log₂r for r equal-length runs, and at most log₂r. Merge cost is near the best adjacent-run plan, allowing additive O(n). Conventional buffer space is O(n), with O(log n) recursion information for standard scheduling. Stable.",
+      "why": "Moving the cut to a run's edge preserves useful order instead of breaking and rebuilding it. Remembering discovered boundaries prevents a long run from being walked repeatedly merely to confirm the same fact.",
+      "use": "An advanced step after top-down merging. If recursion is unfamiliar, learn natural mergesort's pairwise rounds first, then return to these region and boundary rules.",
+      "details": "This description and example recognize maximal nondecreasing runs only. A version that reverses strict descents could discover [2,0] as a run and would need different example boundaries. The midpoint starts the search; it need not be the cut. Every recursive child must be smaller, and complete runs, empty regions, and singletons stop recursion."
+    },
+    "sources": [
+      {
+        "title": "Munro and Wild: Nearly-optimal mergesorts, Peeksort algorithm",
+        "url": "https://drops.dagstuhl.de/opus/volltexte/2018/9526/pdf/LIPIcs-ESA-2018-63.pdf"
+      },
+      {
+        "title": "Authors' implementation repository",
+        "url": "https://github.com/sebawild/powersort"
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "zh_title": "耐心排序",
+    "en_title": "Patience sort",
+    "kind": "algorithm",
+    "zh_alias": "纸牌堆排序；与最长上升子序列算法有关",
+    "en_alias": "Patience sorting; card-pile sorting",
+    "zh": {
+      "foundation": [
+        "一摞牌只能从顶上取。我们会保证每摞从顶到底不下降，所以摞顶就是这摞尚未输出的最小值。",
+        "优先队列是一组候选记录，支持放入和取出最小项，不要求里面从左到右全部有序。二叉最小堆是一种实现：每个父位置的值不大于两个子位置，因而堆顶一定最小。",
+        "二分找摞不是在摞内找，而是在已经从左到右排好的摞顶列表里找第一个不小于新值的摞顶。"
+      ],
+      "idea": "像发牌一样把数放到几摞中。新数只要不大于某摞顶部，就能盖在上面；优先选最左边能放的摞，否则在右边开一摞。这样每摞自上而下有序，摞顶从左到右也有序。但这还没有排完：接下来必须在所有摞顶中不断选最小值，取走后露出同摞的下一张，直到所有牌都输出。",
+      "steps": [
+        "开始没有摞。读入 x，在摞顶列表中二分寻找第一个顶值≥x 的位置：看中间，若顶值≥x 就保留含它的左半边，否则只保留右半边，直到确定第一个位置。找到便把 x 压在该摞顶上；找不到就在最右边新建一摞。记录整摞的所有牌，不只留顶部。",
+        "为什么摞顶仍有序？被选摞左边的顶值都小于 x，否则会更早被选；被选摞右边的顶值不小于该摞原顶，更不小于 x。因此换上 x 后，左右关系仍正确。该摞原顶≥x，所以摞内从顶到底也仍不下降。",
+        "发完牌，将每摞顶部作为一个候选项放入最小优先队列，每项还记着属于哪一摞。下面可用二叉堆数组：第 i 格的父编号为 floor((i−1)/2)，两个孩子为 2i+1、2i+2，编号均从 0 开始。不存在的孩子不参与比较。",
+        "往堆里放候选项时，先加到末尾；若它小于父项，就交换并继续向上，直到父项更小或已到第 0 格。取最小时，拿走第 0 格，将最后一项搬到第 0 格；反复与较小孩子比较，若孩子更小就交换向下，直到关系恢复。这样无需每次重新排列整队候选。",
+        "每次从队列取出最小摞顶，把那张牌加入最终输出，并从它原来的摞取走。若该摞还有牌，将新露出的摞顶入队；否则不再给这摞放候选。队列为空时全部结束。"
+      ],
+      "example": [
+        "输入 [4,2,3,1]。4 建第一摞。2 找到摞顶 4，把自己盖在它上面，摞一从顶到底 [2,4]。3 比目前唯一摞顶 2 大，没有可放摞，于是在右边建摞二 [3]。1 找到最左的摞顶 2，盖上。最终摞一 [1,2,4]，摞二 [3]，顶值列表 [1,3]。",
+        "候选队列开始只有 (1,摞一)、(3,摞二)。取 1，输出 [1]；摞一露出 2，入队。现在候选为 2、3，取 2，输出 [1,2]；同摞露出 4，入队。",
+        "现在队列最小是 3，不是刚露出的 4。取 3，输出 [1,2,3]，摞二已空。最后取 4，输出 [1,2,3,4]，队列也空。若先整摞倒完摞一，再倒摞二，会得到错误的 [1,2,4,3]。",
+        "相等值若按基本 ≥ 规则盖在同一摞，会以新牌先出的顺序倒置。需要稳定时改用第一个顶值>x 的摞，并在队列相等时优先原来编号较小的记录。"
+      ],
+      "cost": "每个记录先做一次摞顶二分，之后一次出队，可能还引出下一项入队。最多 p 个摞顶时，二分和堆操作各需约 log(p+1) 层，总上界 O(n log(p+1))。n 为记录数，p 为摞数。严格反序只有一摞，最好 Θ(n)；随机互异值通常以及最坏为 Θ(n log n)。严格上升会形成 n 摞。所有摞、候选和输出通常需 Θ(n) 额外空间。基本 ≥ 版不稳定；上述严格大于加原编号的变体可稳定。",
+      "why": "每摞把一些记录藏在已经更小的顶牌下面，暂时不必参与全体比较。摞少，候选就少，每次选择更省。若几乎每条记录都自己成一摞，就没有这方面的省力。",
+      "use": "适合学习把多条有序序列合并、优先队列和输入顺序结构。摞的数量也与最长严格上升子序列有关，但求该长度和输出完整排序是两项不同任务。",
+      "details": "不能只保存摞顶，否则下面的记录会丢失。摞顶列表有序不等于全体数据已排。空输入直接输出空列；每项必须保留摞编号，才能知道取走它以后该露出哪张牌。"
+    },
+    "en": {
+      "foundation": [
+        "A pile lets you remove its top item first. Here each pile is nondecreasing from top to bottom, so its top is its smallest remaining item.",
+        "A priority queue holds candidates and can remove the smallest without keeping every candidate in a fully sorted row. A binary min-heap makes each parent no greater than its children, placing the minimum at the root.",
+        "Binary search is applied to the ordered list of pile tops, not to the records inside a pile."
+      ],
+      "idea": "Deal the values into piles. Put a new value on the leftmost pile whose top is at least as large; if none qualifies, start a new pile on the right. The piles each become ordered from top downward, and their top values stay ordered from left to right. This dealing stage is only preparation. To finish sorting, repeatedly take the smallest available pile top and reveal the next item below it.",
+      "steps": [
+        "Read x and binary-search the top-value list for its first value≥x. At a middle position, keep the left half including that position if its value qualifies; otherwise keep the right half. Put x on the selected pile, or create a new rightmost pile if the search finds none. Keep every item in the piles.",
+        "The top list stays ordered because every earlier top is smaller than x; otherwise that earlier pile would have been selected. Every later top was at least the selected old top and therefore at least x. Within the selected pile, x is no greater than the item it covers.",
+        "After dealing, place one candidate from each nonempty pile into a minimum priority queue. Store its pile identity too. A binary heap can use an array: zero-based position i has parent floor((i−1)/2) and children 2i+1,2i+2, if those positions exist.",
+        "To insert a candidate, append it and exchange it upward with a larger parent until the parent relation holds or it reaches the root. To remove the minimum, save the root, move the last entry to the root, then exchange it downward with the smaller child while that child is smaller. This repairs a path rather than sorting the whole queue.",
+        "Emit the removed candidate and take it off its pile. If that pile still has records, insert its newly exposed top into the queue. Otherwise it supplies no further candidate. An empty queue means every record has been emitted."
+      ],
+      "example": [
+        "Deal [4,2,3,1]. Four starts pile one. Two covers it, making top-to-bottom [2,4]. Three is greater than the only top 2, so it starts pile two [3]. One covers pile one's top. The piles are [1,2,4] and [3]; their top list is [1,3].",
+        "The queue begins with (1,pile one) and (3,pile two). Remove 1, output [1], and insert the newly exposed 2. Remove 2 next, output [1,2], and insert the exposed 4.",
+        "Candidates are now 3 and 4. Choose 3, output [1,2,3], and leave its empty pile out of the queue. Choose the final 4. Output is [1,2,3,4], and the queue is empty. Emptying the first pile completely before the second would incorrectly produce [1,2,4,3].",
+        "Under the basic ≥ rule, a new equal value covers an old equal value and comes out first. For stable sorting, use the first top>x instead, and resolve equal queue candidates by their original positions."
+      ],
+      "cost": "Each record is dealt using a binary search, then emitted with a queue removal; exposing it may also cause an insertion. With p piles, those searches and heap repairs travel about log(p+1) levels, giving O(n log(p+1)) total work. Here n is the record count. Strictly decreasing input gives one pile and best Θ(n). Random distinct input typically, and the worst case, give Θ(n log n). Strictly increasing input makes n piles. Full piles, candidates, and output need Θ(n) extra space. The basic ≥ version is unstable; the stated strict-greater and position-tie variant is stable.",
+      "why": "Records under a smaller pile top can wait without joining the current comparison. Fewer piles mean fewer candidates and shorter searches. If nearly every record starts its own pile, that advantage disappears.",
+      "use": "Good for learning multi-sequence merging, priority queues, and how input order affects work. Pile count is also connected to longest increasing subsequences, but computing a subsequence length is not the same as producing sorted output.",
+      "details": "Keeping only pile tops would discard records. Ordered tops do not mean the entire input is sorted. Each queue entry needs a pile identity so removal can expose the correct next item. Empty input immediately yields empty output."
+    },
+    "sources": [
+      {
+        "title": "Aldous and Diaconis: Longest increasing subsequences, from patience sorting",
+        "url": "https://escholarship.org/uc/item/09j2v8d0"
+      },
+      {
+        "title": "Aldous and Diaconis: Patience sorting paper",
+        "url": "https://www.stat.berkeley.edu/users/aldous/Research/OP/patience.pdf"
+      },
+      {
+        "title": "Stanford Aldous and Diaconis research report",
+        "url": "https://statistics.stanford.edu/technical-reports/longest-increasing-subsequences-patience-sorting-baik-deift-johansson-theorem"
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "zh_title": "平滑排序",
+    "en_title": "Smoothsort",
+    "kind": "variant",
+    "zh_alias": "Dijkstra 的自适应原地堆排序",
+    "en_alias": "Dijkstra's adaptive in-place heapsort",
+    "zh": {
+      "foundation": [
+        "树可以想成有上下级的记录：一个父节点连向孩子。最大堆只要求父值不小于孩子；因此根最大，但同层或整排还未完全排好。",
+        "森林表示并排放着几棵树。这里每棵树实际上占数组里的一个连续块，根放在块的最后一格，不另造一套记录副本。",
+        "Leonardo 数定义这些块的大小：L(0)=L(1)=1，L(k)=L(k−1)+L(k−2)+1，依次为 1、1、3、5、9、15……。一个大块等于左子块、右子块，再加一格根，公式正是这样来的；两个大小为 1 的阶数仍分别记为 0 和 1。"
+      ],
+      "idea": "普通堆排序把当前最大值送到右端，逐个确定最后的位置。Smoothsort 也这样做，但它不用固定的一棵堆，而是把未完成的左边分成几棵特殊大小的堆。每棵堆根最大，再让这些根从左到右不下降，于是最右根就是整个未完成区域的最大值，可以直接留在右端。已接近这种关系的数据不需要许多交换，这就是它能利用已有顺序的关键。下面给出每一步都完整修复的清楚版本；标准优化版会省掉部分注定被后续合并替代的修复。",
+      "steps": [
+        "从左到右把记录加入未完成前缀，记每块的阶数。第一条是阶 1 的单格堆。若最后两堆的阶数为 k、k−1，就把它们与新记录合成阶 k+1 的堆，新记录在新块末尾当根。否则追加单格堆：前一末堆是阶 1 时，新单格记阶 0；其余情况记阶 1。这些规则能表示任意前缀长度，不需要大小为 2 的堆。",
+        "先学堆内修复 sift。阶 k≥2 的块，由左阶 k−1、右阶 k−2、末格根组成。根编号为 t 时，右子根是 t−1，左子根是 t−1−L(k−2)。比较两个孩子，选较大者；若它比根大，就交换，并在那个子堆重复。若根已经不小于孩子，或走到单格堆，就停。每次向下走到更小的块。",
+        "还要修复堆与堆之间的根顺序，这个动作叫 trinkle。当前根编号 t、当前堆阶数 k 时，前一堆根就在 t−L(k)，不必扫描森林寻找。仅当这个前根大于当前根，而且也大于当前根的两个孩子（若有）时，交换两个根，将当前位置转到前一堆，继续向左检查。大根被移到右堆时仍不小于那里的孩子，因此右堆保持堆关系。",
+        "若前根没有同时满足以上比较，就不再向左交换，在当前堆执行 sift；没有前堆时也执行 sift。这修好刚被换小的根所在的内部关系。每加入一个记录，对新出现的最右堆做完整 trinkle，便保住所有堆内关系和从左到右的根顺序。",
+        "建完前缀后，最右根即全体最大，留在原格并把这一格划入完成后缀。若末堆只有一格，删除它的形状记录。若阶数 k≥2，拿走根后，原块自然分成阶 k−1 的左堆和阶 k−2 的右堆；它们的内部关系已有，只是新露出的根可能与前堆顺序不对。先对左子堆做 trinkle，再对右子堆做 trinkle。",
+        "重复取出最右根、删除或拆堆、修复。每次未完成区域少一格，完成后缀多一格。交换和比较只能在未完成前缀中进行，不再动右边已确定的位置。空前缀时结束。"
+      ],
+      "example": [
+        "输入 [3,4,1,5,2]。先加 3、4，得到阶数 [1,0] 的两个单格堆，根 3≤4，无需交换。加入 1 时，末尾两阶可与它合成阶 2、大小 3 的堆 [3,4,1]。根 1 比孩子 4 小，交换，数组变成 [3,1,4,5,2]，前三格的根为 4。",
+        "加入 5 为单格堆，阶数 [2,1]，根 4≤5。加入 2 后合成阶 3、大小 5 的堆，孩子根是 4 和 5，根为 2。与更大的孩子 5 交换，得到 [3,1,4,2,5]。现在 5 在最右根，确认它最终排第五。",
+        "拿走根 5 的形状后，留下大小 3 的 [3,1,4] 和单格 [2]。左根 4 比右根 2 大，于是 trinkle 交换这两个根，先成为 [3,1,2,4,5]；被换小的左根 2 又小于自己的孩子 3，sift 把 3 提上来，得到 [2,1,3,4,5]。右端 4 现在也可以确定。",
+        "删除单格 4，再确定大小 3 堆的根 3。它拆成单格 2、1，两个根顺序相反，交换为 [1,2,3,4,5]。继续确认 2、1 即结束。过程中的 [3,1,4] 是堆，不是已排序段；不能直接把它作为最终输出。"
+      ],
+      "cost": "加入或拆堆时，修复沿树向下或沿森林根向左走，最长约 log n 层，因此无明显结构的典型及最坏总时间 O(n log n)。已上升的输入满足所需关系，很多修复立即停止，加上形状更新的摊销成本，最好 Θ(n)。n 为记录数。标准实现用能表示 n 的常数个机器字和位编码保存森林形状，额外空间 O(1)；本条若显式存阶数列表，则需 O(log n) 空间。通常不稳定：非相邻交换可改变相同值的先后。",
+      "why": "它保留已经符合堆内和根间关系的部分，不必每次无条件重新找最大值。但数据杂乱时仍要上下、左右修复，回到对数层级的成本。这里的适应性不是声称所有接近有序的衡量方式都带来线性时间。",
+      "use": "适合进阶理解利用已有顺序的原地堆排序。需要先掌握父子关系、普通堆内下沉，再看森林根之间的 trinkle；第一次学排序可暂时跳过这一条。",
+      "details": "完整修复版用于讲清不变关系，优化实现可能推迟一些建堆交换。Leonardo 的两个单格阶必须区分，不能随意合成大小 2。不要每次扫描所有堆根找最大，否则会失去线性最好情形。子根位置由连续布局计算，不能套普通二叉堆数组的 2i+1 公式。"
+    },
+    "en": {
+      "foundation": [
+        "A tree connects a parent record to children. In a max-heap, every parent is at least its children, so the root is largest. This does not put every record in sorted order.",
+        "A forest is several trees side by side. Here each tree occupies a consecutive array block, with its root in that block's last slot.",
+        "Leonardo sizes are L(0)=L(1)=1 and L(k)=L(k−1)+L(k−2)+1: 1,1,3,5,9,15,… . A larger block consists of a left child block, a right child block, and one root. Orders 0 and 1 remain distinct despite both having size one."
+      ],
+      "idea": "Like heapsort, Smoothsort settles the largest remaining record at the right end. Instead of one fixed-shape heap, it organizes the unfinished prefix into a forest of special-sized heaps. Each heap root is largest within its block, and the roots are kept nondecreasing from left to right. The rightmost root is therefore the largest record in the whole unfinished prefix. If the data already fits these relations, little repair is needed. The following clear version fully repairs every step; optimized implementations can postpone repairs that later joins make unnecessary.",
+      "steps": [
+        "Build the prefix left to right and track each block's order. The first singleton has order 1. If the last two heap orders are k,k−1, combine them and the new record into order k+1, putting the new record at the block's end as root. Otherwise append a singleton: use order 0 when the previous last order is 1, and order 1 otherwise. No size-two Leonardo heap is required.",
+        "First learn the internal repair, sift. An order-k block for k≥2 contains an order-(k−1) left block, an order-(k−2) right block, then the root. If the root is at t, the right child root is t−1 and the left is t−1−L(k−2). Choose the larger child. If it exceeds the root, exchange them and continue inside that child heap. Stop when the root dominates its children or the block is a singleton.",
+        "The forest also needs root-order repair, called trinkle. For current root position t and heap order k, the preceding heap's root is at t−L(k); do not scan to find it. Exchange the roots only if that preceding root exceeds the current root and both current children, when children exist. Then move the repair position to the preceding heap and continue leftward. The large root moved right still dominates that right heap's children.",
+        "If the preceding root does not pass all those tests, stop moving left and sift inside the current heap. If there is no preceding heap, sift there as well. This repairs the internal heap whose root was reduced. After every addition, fully trinkle the newly formed rightmost heap to restore both heap relations and ordered roots.",
+        "Once construction finishes, leave the rightmost root in place as the final maximum and shorten the unfinished prefix by one. Delete a singleton heap description. For order k≥2, removing the root exposes its order-(k−1) left heap and order-(k−2) right heap. Their internal heaps remain valid, but the exposed roots may violate forest order. Trinkle the left exposed heap first, then the right.",
+        "Repeat maximum removal, deletion or splitting, and root repair. The final suffix grows by one slot per removal. Never exchange a record in that settled suffix. An empty unfinished prefix ends the algorithm."
+      ],
+      "example": [
+        "Build [3,4,1,5,2]. Values 3 and 4 form singleton orders [1,0], with roots already ordered. Adding 1 joins them into an order-2 heap of size three, [3,4,1]. Root 1 is smaller than child 4, so exchange them: [3,1,4,5,2]. The first heap's root is now 4.",
+        "Add singleton 5, making orders [2,1] and roots 4≤5. Adding 2 joins them into an order-3 heap of size five. Its child roots are 4 and 5. Exchange root 2 with larger child 5: [3,1,4,2,5]. The final 5 is now settled.",
+        "Removing 5's root description exposes [3,1,4] and singleton [2]. Root 4 exceeds the following root 2. Trinkle exchanges them, giving [3,1,2,4,5]. The decreased left root 2 is below its child 3, so sift yields [2,1,3,4,5]. The next rightmost maximum 4 is settled.",
+        "Delete singleton 4 and settle root 3. Its heap splits into singletons 2 and 1. Repair their reversed root order to obtain [1,2,3,4,5], then settle 2 and 1. A block such as [3,1,4] is a heap, not an already sorted run."
+      ],
+      "cost": "Repair can walk downward through heap levels or leftward through forest roots, with O(log n) work for a difficult operation. Unstructured typical and worst total time are O(n log n). On increasing input, the required relations already hold, so repairs usually stop immediately; amortized shape updates give best Θ(n). Here n is the record count. Standard implementations encode the shape in a constant number of machine words large enough to represent n, using O(1) extra space. An explicit educational list of heap orders uses O(log n) instead. Normally unstable: distant exchanges can reorder equal records.",
+      "why": "Already suitable heap and root relationships are retained rather than rebuilt blindly. Disordered data still requires movement through logarithmic levels. This adaptation does not mean every possible measure of near-sortedness guarantees linear time.",
+      "use": "An advanced study of adaptive in-place heap sorting. Learn ordinary parent-child sifting before forest-root trinkling. This entry can wait until simpler sorting methods are familiar.",
+      "details": "The fully repaired version exposes the required relations; optimized code may perform fewer construction exchanges. Distinguish the two singleton orders and never invent a size-two Leonardo heap. Scanning every root for every maximum loses the linear best case. These child positions come from consecutive Leonardo blocks, not the ordinary binary-heap formula 2i+1."
+    },
+    "sources": [
+      {
+        "title": "Dijkstra: Smoothsort, an alternative for sorting in situ, EWD796a",
+        "url": "https://www.cs.utexas.edu/~EWD/transcriptions/EWD07xx/EWD796a.html"
+      },
+      {
+        "title": "musl libc qsort: Smoothsort implementation",
+        "url": "https://git.musl-libc.org/cgit/musl/tree/src/stdlib/qsort.c"
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "zh_title": "笛卡尔树排序",
+    "en_title": "Cartesian tree sort",
+    "kind": "algorithm",
+    "zh_alias": "基于笛卡尔树的自适应堆排序；Levcopoulos–Petersson 方法",
+    "en_alias": "Cartesian-tree priority-queue sort; Levcopoulos–Petersson adaptive heapsort",
+    "zh": {
+      "foundation": [
+        "节点是装一条记录的小盒子，另有左、右连接指向其他盒子；没有孩子时连接为空。整棵树最上面的节点叫根。",
+        "中序访问依次走左边所有节点、当前节点、右边所有节点。这里它要保留输入顺序，不是排序输出。另一个要求是每个父值≤孩子，称为最小堆关系。",
+        "栈从最后放入的项开始取出。优先队列则每次取最小值。建树使用栈，输出使用优先队列，两个结构用途不同。"
+      ],
+      "idea": "能否先把输入搭成一棵树，让某个子树里最小的值总在顶部？笛卡尔树同时保持两件事：按左、自己、右访问仍能读出原输入；父节点不大于孩子，所以每棵子树的根都是那一块的最小值。树搭好后还不能按左右顺序输出，因为那样只是得到原输入。真正排序时，先输出根，再把它的孩子当作下一批候选，始终从候选中选最小。",
+      "steps": [
+        "为每条输入记录建立独立节点，左右连接先为空。维护一个值从栈底到顶不下降的栈，它记录当前树最右边的路径。处理新节点 x 时，先把 last 设为空；只要栈顶值比 x 大，弹出栈顶，并用 last 记住这次弹出的节点。最后一次弹出的节点会成为被移走整块的根。",
+        "将 x 的左孩子设为 last。若栈还有顶节点，就把顶节点的右孩子改为 x；若栈已空，x 就是新的整树根。再把 x 压入栈。注意被替换的右边整块并未丢失：它已经接到 x 的左边。新记录在输入末尾，左边放那些原来已经出现的记录，仍可保持中序访问等于原输入。",
+        "为何不必逐个重建旧子树？弹出的节点之间本来就有连接，保留它们，最后弹出的节点带着其整个子树接到 x 下方即可。每节点只压栈一次、最多弹一次。读完输入后，保存的根就是笛卡尔树的根，左右连接给出了完整树。",
+        "开始排序输出，优先队列只放根。队列中的候选是父节点已输出而自己未输出的节点；每个候选都代表一个尚未输出的子树，其中没有记录比它更小。候选之外的记录都被某个这样的根挡在下面，因此全体剩余最小值一定在候选中。",
+        "从队列取最小候选，将其记录写入结果；再把它存在的左、右孩子加入队列。队列可以用另一个二叉最小堆数组：新项加在末尾，比父项小就交换向上；取根时以末项补根，再与较小孩子交换向下直到父值不大于孩子。此堆用于候选，并不是刚搭好的笛卡尔树。",
+        "重复取最小、加入孩子，直到队列为空。每节点只输出一次。为了相同值按原顺序输出，从建树到队列都比较 (数值,原始编号)：值相等时编号小的更小，不只在某一步临时加规则。"
+      ],
+      "example": [
+        "输入 [3,1,4,2]。读 3：没有旧节点，3 成为根，栈 [3]。读 1：弹出 3，last=3；设 1 的左孩子为 3。栈空，根改为 1，栈 [1]。",
+        "读 4：栈顶 1 不大于它，不弹；将 1 的右孩子设为 4，栈 [1,4]。读 2：弹出 4，last=4；接为 2 的左孩子。留下的栈顶是 1，将 1 的右孩子改为 2，栈 [1,2]。4 没消失，它现在在 2 下方。",
+        "最终根 1，左孩子 3，右孩子 2，2 的左孩子 4。按中序访问，左边先读 3，读根 1，再在右边读 4、2，得到原输入 [3,1,4,2]；这说明中序不是排序步骤。",
+        "候选开始 [1]。取 1，输出 [1]，加入 3、2。取候选中较小的 2，输出 [1,2]，加入孩子 4，候选现在 3、4。再取 3、4，最终 [1,2,3,4]。左右孩子必须一起进入候选，不能未经比较就先遍历整棵左子树。"
+      ],
+      "cost": "建树时每节点压栈和弹栈至多一次，合计 Θ(n)。输出时每节点进、出候选队列各一次，每次最多走 log(q+1) 层，总上界 O(n log(qmax+1))，qmax 是同时出现的最多候选数，n 为记录数。单链树的候选始终只有一个，最好 Θ(n)；一般典型和最坏 O(n log n)，不能把线性建树误写成线性排序。节点、栈、队列和输出总额外空间 Θ(n)。全程以数值和原编号比较可稳定；任意处理相等值则不保证稳定。",
+      "why": "它一次建立了每个连续输入区域谁先有资格输出的关系，之后只比较已经露面的候选。若树是单链，几乎没有选择成本；若很多分支同时露面，队列仍要进行对数层比较。",
+      "use": "适合学习输入顺序与堆关系可以同时存在，以及用树中已知的局部最小值组织排序。它也是区间最小值结构的相关基础；初学者先懂节点、栈和优先队列再读此条。",
+      "details": "它不是二叉搜索树：左孩子不要求值更小。每个重复记录都要有独立节点。反复扫描区间找最小值再递归建树，最坏会 Θ(n²)，本条使用栈避免此问题。树可能很不平衡，但候选二叉堆是另一种结构，不依赖这棵树的高度。"
+    },
+    "en": {
+      "foundation": [
+        "A node is a record with left and right links to other nodes. A missing child has an empty link. The top node is the root.",
+        "Inorder visits the left subtree, the node, then the right subtree. Here it preserves the original input order. Separately, min-heap order requires a parent value to be no greater than its children.",
+        "A stack removes the most recently added entry. A priority queue removes the smallest entry. Tree construction uses the former; sorted extraction uses the latter."
+      ],
+      "idea": "Could we build a tree that puts the smallest record of every subtree at that subtree's top? A Cartesian tree does this while also preserving the input: walking left, node, right reproduces the original sequence. These two rules coexist, but neither means that the tree can simply be traversed to obtain sorted output. For sorting, output the root, expose its children as candidates, and repeatedly choose the smallest exposed candidate.",
+      "steps": [
+        "Create a separate node for each input record, initially with empty child links. Keep a stack whose values are nondecreasing from bottom to top; it represents the current tree's rightmost path. For a new node x, start last as empty. While the top value exceeds x, pop it and assign that popped node to last. The final popped node is the root of the whole portion moved aside.",
+        "Set x's left child to last. If a stack top remains, replace its right link with x. If the stack is empty, make x the overall root. Push x. The previous right portion has not been lost: it now hangs from x's left link. Since x is the new final input record, that placement preserves inorder input order.",
+        "Keep the old links within popped nodes. They already connect the moved subtree, so attaching its root is enough; do not rebuild every node individually. Each node is pushed once and popped at most once. After the input ends, the saved root and child links describe the entire Cartesian tree.",
+        "For sorted extraction, initialize a minimum priority queue with the root only. Candidates are unprinted nodes whose parents have been printed. Each is the minimum of its still-unprinted subtree. All hidden records lie under such a candidate, so the smallest remaining record must be among the candidates.",
+        "Remove the smallest candidate, append its record to output, and insert its existing children. A separate binary min-heap can implement the queue: append a new entry and exchange upward past larger parents; on removal, replace the root with the last entry and exchange downward with the smaller child until heap order returns. This candidate heap is not the Cartesian tree.",
+        "Continue until the queue is empty. Every node is emitted once. For stable duplicates, consistently compare (key,original position) during both construction and extraction. A smaller original position wins when keys tie."
+      ],
+      "example": [
+        "Build [3,1,4,2]. Reading 3 makes it the root and gives stack [3]. Reading 1 pops 3, sets 1.left=3, and makes 1 the new root because the stack is empty. Stack: [1].",
+        "Reading 4 pops nothing because 1≤4. Set 1.right=4 and push 4, giving [1,4]. Reading 2 pops 4. Set 2.left=4, then replace the remaining top node's right link: 1.right=2. Stack: [1,2]. The old node 4 survives beneath 2.",
+        "The final tree has root 1, left child 3, right child 2, and 2's left child 4. Inorder visits 3, then 1, then 4, then 2: [3,1,4,2]. It reconstructs the input, demonstrating why inorder is not the sorting step.",
+        "Start candidates [1]. Emit 1 and expose 3 and 2. Choose 2, output [1,2], and expose 4. Candidates are now 3 and 4. Emit 3, then 4, to finish [1,2,3,4]. Both children join the candidate queue; traversing the entire left subtree first would be unjustified."
+      ],
+      "cost": "Construction pushes and pops each node at most once, taking Θ(n). Extraction inserts and removes each candidate once, with a heap path of about log(q+1) levels. Its upper bound is O(n log(qmax+1)), where qmax is the largest candidate count and n is the record count. A chain keeps one candidate and gives best Θ(n). General typical and worst sorting time are O(n log n); linear tree construction does not imply linear sorting. Nodes, stack, queue, and output use Θ(n) extra space. Consistent key-plus-original-position comparisons make it stable; arbitrary equal-key handling does not.",
+      "why": "The tree establishes which local minima may become eligible first. Only exposed candidates need comparison. A chain leaves almost no choice; many exposed branches still require logarithmic queue work.",
+      "use": "An advanced example of preserving input order while organizing local minima. It is related to range-minimum structures as well. Learn nodes, stacks, and priority queues before using this entry as an implementation guide.",
+      "details": "This is not a binary search tree: a left child need not have a smaller value. Keep a separate node for each duplicate. Repeatedly scanning intervals for their minimum can make construction Θ(n²); the stack avoids that. The Cartesian tree may be very unbalanced, but the candidate binary heap is a different structure and does not inherit that height."
+    },
+    "sources": [
+      {
+        "title": "Levcopoulos and Petersson: Adaptive heapsort",
+        "url": "https://www.sciencedirect.com/science/article/abs/pii/S0196677483710217"
+      },
+      {
+        "title": "Goodrich: Cartesian-tree priority-queue sort lecture",
+        "url": "https://ics.uci.edu/~goodrich/teach/cs263/notes/09-Maxima.pdf"
+      }
+    ]
+  }
+]

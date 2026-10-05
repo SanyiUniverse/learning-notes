@@ -1,0 +1,41 @@
+<div id="sorting-first-steps-20261005">
+  <div class="viz-row"><span class="text-small">冒泡：先让最大的一根走到右边</span></div>
+  <div class="sort-scene" role="img" aria-label="四根长条按数字大小逐步排序">
+    <div class="sort-bar" data-id="0"><span class="tabular-nums">4</span><span class="text-small sort-tag"></span></div>
+    <div class="sort-bar" data-id="1"><span class="tabular-nums">1</span><span class="text-small sort-tag"></span></div>
+    <div class="sort-bar" data-id="2"><span class="tabular-nums">3</span><span class="text-small sort-tag"></span></div>
+    <div class="sort-bar" data-id="3"><span class="tabular-nums">2</span><span class="text-small sort-tag"></span></div>
+  </div>
+  <div class="sort-current" aria-live="polite"></div>
+  <div class="viz-controls">
+    <button type="button" class="btn sort-back">上一动作</button>
+    <button type="button" class="btn btn-primary sort-next">下一步</button>
+    <button type="button" class="btn sort-play">自动慢播放</button>
+  </div>
+</div>
+<style>
+#sorting-first-steps-20261005 .sort-scene{position:relative;height:190px;margin:20px 0 14px}
+#sorting-first-steps-20261005 .sort-bar{position:absolute;bottom:0;left:0;width:17%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;background:var(--viz-series-1);transition:transform .65s ease,background .25s ease}
+#sorting-first-steps-20261005 .sort-bar>span{color:var(--foreground);background:var(--background);padding:0 3px}
+#sorting-first-steps-20261005 .sort-tag{position:absolute;top:-22px;white-space:nowrap}
+#sorting-first-steps-20261005 .sort-bar.is-comparing{background:var(--viz-series-2)}
+#sorting-first-steps-20261005 .sort-bar.is-moving{background:var(--viz-series-3)}
+#sorting-first-steps-20261005 .sort-bar.is-done{background:var(--viz-series-4)}
+#sorting-first-steps-20261005 .sort-current{min-height:48px;margin-bottom:12px}
+@media(prefers-reduced-motion:reduce){#sorting-first-steps-20261005 .sort-bar{transition:none}}
+</style>
+<script>
+(()=>{
+const root=document.getElementById('sorting-first-steps-20261005'),values=[4,1,3,2];
+const bars=[...root.querySelectorAll('.sort-bar')],back=root.querySelector('.sort-back'),next=root.querySelector('.sort-next'),play=root.querySelector('.sort-play'),caption=root.querySelector('.sort-current');
+const frames=[],a=[0,1,2,3],done=[];
+function frame(text,active=[],moved=[]){frames.push({ids:a.slice(),text,active:active.slice(),moved:moved.slice(),done:done.slice()});}
+frame('先看这四根：高度表示数值，左右表示当前位置。');
+for(let end=3;end>0;end--){let swaps=0;for(let j=0;j<end;j++){const left=a[j],right=a[j+1];frame(`比较 ${values[left]} 和 ${values[right]}，现在还没有移动。`,[left,right]);if(values[left]>values[right]){[a[j],a[j+1]]=[a[j+1],a[j]];swaps++;frame(`${values[left]} 较大，交换这两根。`,[],[left,right]);}else frame(`${values[left]} 不大于 ${values[right]}，这一对不用换。`);}done.push(a[end]);frame(`${values[a[end]]} 已在正确位置，这轮后不再碰它。`);if(!swaps)break;}
+done.splice(0,done.length,...a);frame('完成：从左到右是 1、2、3、4，原来四根一根不少。');
+let index=0,timer=null;
+function stop(){if(timer!==null){clearInterval(timer);timer=null;}play.textContent='自动慢播放';}
+function draw(){const f=frames[index];bars.forEach((b,id)=>{b.style.height=(30+values[id]*32)+'px';b.style.transform=`translateX(${f.ids.indexOf(id)*147}%)`;b.classList.toggle('is-comparing',f.active.includes(id));b.classList.toggle('is-moving',f.moved.includes(id));b.classList.toggle('is-done',f.done.includes(id));b.querySelector('.sort-tag').textContent=f.active.includes(id)?'比较':f.moved.includes(id)?'移动':f.done.includes(id)?'已固定':'';});caption.textContent=f.text;root.querySelector('.sort-scene').setAttribute('aria-label',f.ids.map(i=>values[i]).join('、')+'。'+f.text);back.disabled=index===0;next.disabled=index===frames.length-1;if(index===frames.length-1)stop();}
+back.onclick=()=>{stop();index=Math.max(0,index-1);draw();};next.onclick=()=>{stop();index=Math.min(frames.length-1,index+1);draw();};play.onclick=()=>{if(timer!==null){stop();return;}if(index===frames.length-1)index=0;play.textContent='暂停';timer=setInterval(()=>{index=Math.min(frames.length-1,index+1);draw();},1500);draw();};draw();
+})();
+</script>

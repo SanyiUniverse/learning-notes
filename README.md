@@ -33,6 +33,15 @@ The manual starts with simple comparisons and movements. It includes 37 guided s
 
 Lessons, diagrams, and animations work offline without installation or an account. External reference links need internet access.
 
+## 制作文件与旧稿备份
+
+除了上面的完整学习包，仓库还保存了本次整理的原始制作文件和一个旧稿：
+
+- [制作源文件](排序算法/制作源文件/)：双语内容、网页模板、PDF 构建器和原先在聊天中展示的动画片段。聊天动画片段依赖聊天界面的样式；日常观看请使用完整学习包里的独立动画网页。
+- [旧版中文稿：90 条目、135 页](排序算法/历史版本/中文版_90条目_135页.pdf)：原文件备份，与当前 80 条目的学习包分开保存。
+
+重新生成当前版本的 PDF 需要 Python、ReportLab，以及原制作环境中的 Arial Unicode、Artifakt Element Regular/Bold 和系统 Arial 字体；系统字体没有上传。源文件完整保存了当前学习包的内容和制作逻辑，但在其他电脑上可能需要调整字体配置。旧版中文稿的原始制作文件不在这组源文件中。
+
 ## 以后怎样添加资料
 
 新主题新建一个文件夹，例如“英语学习”或“数学笔记”；同一主题的资料继续放在对应文件夹中。需要多个文件的主题，优先提供一个“从这里开始”的总入口，让读者知道先看什么、需要时再打开什么。

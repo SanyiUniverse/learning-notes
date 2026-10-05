@@ -1,0 +1,478 @@
+{
+  "zh": {
+    "title": "排序算法学习手册",
+    "subtitle": "像有人坐在旁边 从最小的动作开始讲",
+    "cover": [
+      "中文版 独立学习版",
+      "80 个学习条目 含算法家族 重要变体与辅助技术",
+      "2026 年 10 月 5 日"
+    ],
+    "opening": "桌上有四张纸，分别写着 4、1、3、2。我们想把它们摆成 1、2、3、4。一张纸也不能少，重复的数字也要保留。这个目标很容易说清楚，难点是：下一步应该看哪张纸，什么时候换位置，怎样知道已经完成？排序算法就是把这些决定写成一套能反复照着做的步骤。这本书会先讲每个小动作，再把动作接成完整方法。",
+    "scope_title": "覆盖范围与计数方法",
+    "scope": [
+      "完整目录先于算法正文。目录共有 80 个编号学习条目；编号代表讲解单元，不等于 80 种互不相关的新算法。同名别称归到同一条目。具有不同操作步骤的重要变体单列，并标明“变体”；多个相关实现标明“家族”。",
+      "范围包括常见比较排序，整数与字符串的分布排序，自适应与缓存方法，少见的堆和树方法，外存调度，并行与网络排序，限制操作及趣味方法。置换选择明确是段生成阶段；间接排序和固定小网络明确是辅助技术。Grailsort 与 WikiSort 是同一类块归并的不同实现，并非彼此别名。",
+      "这个范围足够广，但不能穷尽所有已发表或新命名的方法。未展开的范围包括 AKS 等复杂网络构造、Columnsort、Cubosort、LearnedSort 的众多模型版本、特殊整数排序理论、全部缓存优化及磁带调度变体，也不逐一计数每一种枢轴、增量或阈值组合。它们需要额外的数学或机器模型，不应随意补一个通用复杂度。",
+      "Stalin sort 会删去不合次序的值，不能保持全部输入记录；miracle sort 没有保证发生的有效步骤。两者不计为本手册中的完整排序算法。拓扑排序排列依赖关系、Quickselect 只找某个名次，任务不同，亦不混入全量数值排序的速度排名。",
+      "本文固定从小到大排序。步骤图和例子为自制，数值小是为了看清动作，不作为实测性能证据。高级家族会给出可理解的具体操作与必要前提；平台级实现还需按文末作者资料补齐边界和工程细节。"
+    ],
+    "primer_title": "从四张纸和最小的动作开始",
+    "primer": [
+      [
+        "1 我们到底要得到什么",
+        [
+          "先把 1+1 想成把一张纸和另一张纸放在一起：现在共有两张纸。这里最重要的是分清“有多少张”和“纸上写着几”。纸上写着 7，也仍然只是一张纸。输入 [4,1,3,2] 有四张纸，不是十张。",
+          "从小到大表示：沿着一排纸往右看，右边的数不能比左边小。[1,2,3,4] 满足这个条件，[1,3,2,4] 不满足，因为 3 后面紧跟着 2。相等可以挨在一起，所以 [1,2,2,4] 也是排好的。"
+        ]
+      ],
+      [
+        "2 为什么不能把不顺眼的数拿掉",
+        [
+          "如果 [4,1,3,2] 最后只剩 [1,2,3]，它看起来从小到大，却不是正确排序：4 被丢了。正确排序要同时做到两件事：顺序正确，每张原来的纸也都还在。",
+          "纸不只有数字。它也可能写着一个人的名字和分数。按分数排序时，名字要跟着分数一起走。整张纸叫“记录”，决定位置的分数叫“键”。这两个词后面还会出现，含义就是这样。"
+        ]
+      ],
+      [
+        "3 看一眼和动一下是两件事",
+        [
+          "看到 4 和 1，我们可以问：4 比 1 大吗？答案是大。这叫比较。比较只得到一个判断，两张纸现在还在原位置。",
+          "如果规定左边不能比右边大，我们接着把它们对调：[4,1,3,2] 变成 [1,4,3,2]。这叫交换。一次比较可以不交换，例如 1 和 4 已经方向正确。算法必须告诉我们该比较谁，不能只说“比较到排好为止”。"
+        ]
+      ],
+      [
+        "4 为什么只换一次还没有完成",
+        [
+          "[1,4,3,2] 的头两张已经从小到大，但 4 后面仍有较小的 3 和 2。所以“这一对排好”和“整排排好”不是一回事。",
+          "很多算法每一步只保证一小件事。例如让最小数到最左边，或者让开头三张彼此有序。下一步靠这件已完成的小事继续推进。书中的绿色有时表示一个局部排好的小区间，文字会说明它是否已在最终位置。"
+        ]
+      ],
+      [
+        "5 怎样插入一个数 又不丢掉别的数",
+        [
+          "假设开头两张是 [1,4]，现在要加入 3。3 应放在 1 与 4 之间。先把 3 拿在手里，再把 4 向右挪一个位置，最后把 3 放进空位，得到 [1,3,4]。",
+          "电脑里的“挪动”也要按这个顺序。直接把 3 写到 4 的格子里，会覆盖 4；如果没有先保存或挪走它，就把记录丢掉了。文中的临时保存、空位和右移，都在解决这个问题。"
+        ]
+      ],
+      [
+        "6 位置编号只是用来指路",
+        [
+          "一排格子让我们能说“拿第几个”。为了避免每次都写长句，电脑通常从 0 编号。对于 [4,1,3,2]，位置 0 放 4，位置 1 放 1，位置 2 放 3，位置 3 放 2。",
+          "数字的大小与位置编号没有关系。位置 0 可以放最大的数。本文一般用“第 1 个”说话；出现下标公式时会说明从 0 数。连续几个位置叫区间，开头的一段叫前缀，末尾的一段叫后缀。"
+        ]
+      ],
+      [
+        "7 重复数为什么还可能有先后",
+        [
+          "两张纸都写 2，但一张属于甲，一张属于乙。我们用 2a、2b 记住纸的身份，字母不参与数字大小比较。输入 [2a,1,2b]，从小到大可以是 [1,2a,2b]，也可以是 [1,2b,2a]。",
+          "如果我们要求相等时仍按原先先后，第一种结果才符合要求，这叫稳定。稳定与数值是否排对是两个问题。每个条目会讲所述做法能否保留这种先后。"
+        ]
+      ],
+      [
+        "8 两排已经有序的纸 怎样合成一排",
+        [
+          "拿 [1,4] 和 [2,3]。每排最左边都是自己那排剩余纸里最小的，所以只比较两排的头就够了。1 比 2 小，先拿 1；现在比较 4 和 2，拿 2；再比较 4 和 3，拿 3；另一排空了，把剩下的 4 接上。结果 [1,2,3,4]。",
+          "这个动作叫归并。拿走一张后，只更新它所属那排的头，不重新扫描所有纸。它成立的前提是两排各自已排好；把两排无序数这样合起来，不保证正确。"
+        ]
+      ],
+      [
+        "9 大任务拆成小任务 为什么有用",
+        [
+          "要排四张纸，可以先分别排好前两张和后两张，再用刚才的归并合起来。排两张时，又可以把它们看作两组各一张。一张纸本来就有序，不再拆。",
+          "让同一个做法处理更小的一组，叫递归。它像一个人暂停手上大任务，先解决里面的小任务，再回到原来的地方。必须规定什么时候不再继续，通常是只剩零张或一张；否则会不停重复。"
+        ]
+      ],
+      [
+        "10 栈与队列 只是两种取东西的顺序",
+        [
+          "把小盘子一层层叠起来，最后放的盘子最先取，这种规则叫栈。递归要记住“做完小任务后回哪儿”，可以把待回去的任务叠在这样的栈里。",
+          "排队买东西时，先来的人先走，这种规则叫队列。算法的队列也是先放先取。它们不是自动排序工具，而是安排下一步取谁的规则。"
+        ]
+      ],
+      [
+        "11 什么是树 它为什么能组织数字",
+        [
+          "画一个圆圈放 4，下面画两个圆圈放 1 和 6，用线相连。上面的圆圈叫父节点，下面的叫孩子。再在 1 下连 2 和 3，就有了树形关系。最上面的节点叫根；顺着线下去经过的所有节点是后代。",
+          "树不一定代表大小顺序。算法还必须规定关系。例如搜索树要求左边都较小、右边都较大；最小堆要求每个父节点不大于自己的孩子。两种规则不同，不能看到树就当作已排序。"
+        ]
+      ],
+      [
+        "12 堆怎样帮我们总是先拿到最小数",
+        [
+          "若每个父节点都不大于孩子，从根沿任意路径往下走，数都不会变小。所以根是全树最小的。这样的树叫最小堆。拿走根以后，把末尾的数补到根，再与较小的孩子比较，必要时向下交换，直到关系恢复。",
+          "加进一个新数时，先放树的末尾，与父节点比较；若新数更小，向上交换，反复做到根或不再需要交换。堆只保证根最小，兄弟之间不必有序。具体堆算法会继续讲怎样放到数组里、怎样找孩子。"
+        ]
+      ],
+      [
+        "13 什么是桶 与数位",
+        [
+          "桶就是分组。按“0 到 9、10 到 19、20 到 29”分组时，整个第一组一定在整个第二组前面，但第一组内部还可能乱。所以分组以后，常常仍需排每一组。",
+          "十进制的 21 表示两个十加一个一。个位是 1，十位是 2。按个位分组与按整个数分组不同：21 和 11 个位相同，却不代表它们相等。基数排序会解释为什么要把几轮分组按特定顺序接起来。"
+        ]
+      ],
+      [
+        "14 一排已经有序 怎样省力找位置",
+        [
+          "要把 5 插进 [1,3,6,8,10]。先看中间的 6，知道 5 在它左边，就不用再查 8 和 10；只看 [1,3]，最后找到 3 与 6 之间。这样每次排除约一半候选，叫二分查找。",
+          "它省的是找位置时的比较。真把 5 放进紧密排列的格子里，6、8、10 仍得往右挪。所以“很快找到了位置”不等于“整次插入也只做很少的动作”。"
+        ]
+      ],
+      [
+        "15 我们用什么办法说快或慢",
+        [
+          "先问具体在做什么：看多少张纸、比较多少次、交换多少次、挪多少张、读写多少块文件。有时比较很贵，有时搬整张大记录很贵，两者不能总混成同一个数字。",
+          "再问数据有多少。后面用 n 表示记录数。n=4 就是四张；n=1000 就是一千张。走一遍每张看一次，大约做 n 件事。输入翻倍，这一类工作通常也约翻倍。"
+        ]
+      ],
+      [
+        "16 为什么会出现 n² 和 log n",
+        [
+          "若每张纸都与所有其他纸打交道，总次数接近 n 乘 n，写成 n²。十张大约一百份这种工作，一千张大约一百万份。这是解释增长趋势，实际算法常只比较一半的成对组合。",
+          "若每次把候选减少一半，一千个候选约十次就缩到一个：1000、500、250、125，继续往下减。所需的减半次数写作 log₂n，读作“以 2 为底的对数”。每层看完整批，约十层，就有 n log n 的工作。先理解动作，符号只是给这种增长起个短名字。"
+        ]
+      ],
+      [
+        "17 最好 最坏 平均 不是同一件事",
+        [
+          "一排本来就有序，是某些方法的最好情况；完全倒着放，可能是最坏情况。但“最坏”不一定都是倒序，取决于方法会在哪种输入上反复做最多的事。",
+          "说平均要先讲怎样抽取输入。把所有排列等可能抽一个，与“每天来的日志通常接近有序”，不是同一分布。随机算法还可能因为自己的随机选择，时快时慢。没有这些前提，就不能把一个平均数字当成保证。"
+        ]
+      ],
+      [
+        "18 空间 正确结束 与下一步怎样读",
+        [
+          "除了原来的纸，我们可能还要另一排空格、一张计数表、几张用来记任务的小纸条。这些是额外空间。原地排序通常表示不再准备另一份同样大的记录数组，但递归栈仍可能占地方。",
+          "每个方法都要能说清什么时候结束。正确结果必须有序、所有记录都保留，而且按所述条件能完成。接下来看算法时，沿着数字例子问三个问题：这一步改了哪里？为什么不会丢纸？完成了哪一件小事？复杂度部分可以在你能手动复现过程之后再读。"
+        ]
+      ]
+    ],
+    "cost_title": "如何公平比较效率",
+    "cost_intro": "我们已经把 n、减半和 n² 讲过了。现在才用一张表把这些工作量放在一起。表中比较的是增长趋势，不是秒数。默认只有一个工作者，数字已放在内存里，每次比较或搬动一个小记录的成本差不多。文件读写、多核和特殊数字条件要分开看。",
+    "growth": [
+      [
+        "增长量",
+        "朴素含义",
+        "n 为 1000 时的量级"
+      ],
+      [
+        "n",
+        "像完整扫描一次；输入翻倍，工作约翻倍",
+        "1000"
+      ],
+      [
+        "n log2 n",
+        "每层扫描，每次把任务约减半",
+        "约 10000"
+      ],
+      [
+        "n log2² n",
+        "有约平方对数层的固定网络等",
+        "约 100000"
+      ],
+      [
+        "n²",
+        "每项可能与几乎所有项打交道",
+        "1000000"
+      ],
+      [
+        "n!",
+        "尝试输入的全部排列，增加一项就再乘一次",
+        "大到不适合穷举"
+      ]
+    ],
+    "cost_notes": [
+      "O 表示增长上界，Θ 表示同一增长量级，Ω 表示下界。它们通常忽略常数，不是秒数。n 是记录数，k 可能是键域大小或位移上限，r 是基数，d 或 w 是位数；每个条目会给局部定义，不能跨条目把 k 当同一个量。log 默认以 2 为底，其他固定底数只差常数。",
+      "最好指最有利输入，最坏指最不利输入，平均需要说明输入分布；期望也可能来自算法自己的随机选择。“以高概率”表示失败概率随规模变小，不等于任何随机结果都保证。无法可靠给出统一平均界时，正文明确保留条件或不给数值。",
+      "假设所有键都不同。两项比较只有“前者小”或“后者小”两个结果。问一次，最多分出 2 条结果路径；问两次，最多 4 条；问 t 次，最多 2^t 条。n 条不同记录的可能次序有 n! 种，其中 n! 表示 1×2×…×n。要把这些次序分清，最坏路径必须足够长，使 2^t≥n!，因此最坏至少要 log₂(n!) 次比较，即 Ω(n log n)。这不是说每一次比较都恰好把可能性减半。计数和基数排序还利用键的结构，所以不受纯比较的这个限制。",
+      "现实中比较字符串要检查多个字符，大记录移动很贵，缓存命中、分支、分配和磁盘读写也有成本。两种同为 O(n log n) 的算法仍可相差很多。小例能说明原理，不能证明常数性能。",
+      "外存按 B 条记录一块读取、M 条记录内存来计算传输；并行同时报告总工作量 W 和跨度 S。p 个工作者的时间至少是 max(W/p,S)，还会有同步与传输成本。物理装置和计时器方法则不能套用普通 RAM 排名。"
+    ],
+    "rank": [
+      [
+        "固定条件",
+        "优先层级 从较少工作到较多工作",
+        "限制"
+      ],
+      [
+        "整数键域 k=O(n)，位数 d 固定",
+        "计数或基数的近线性层 → 通用 n log n 比较层 → 平方层",
+        "键域巨大、键很长会改顺序；桶类另需分布假设"
+      ],
+      [
+        "已有很少逆序或很少长有序段",
+        "插入的 O(n+I) 或自适应归并的近线性层 → 常规 n log n 层",
+        "I 为逆序对数；不同“近有序”含义不可混用"
+      ],
+      [
+        "任意大数组，只准键比较",
+        "有保护的 n log n 层 → 无保护可能 n² 的方法 → 固定平方层 → 超多项式层",
+        "普通快排平均很快，但最坏保障弱；同层靠实测比较"
+      ],
+      [
+        "写入昂贵或记录巨大",
+        "间接排序、Cycle 的少写策略需单独评估",
+        "比较更多仍可能总用时更短"
+      ],
+      [
+        "文件超过内存",
+        "少轮的大路数归并或均衡分布 → 更多整文件读写轮次",
+        "固定内存、磁盘、桶均衡和可用流数量"
+      ],
+      [
+        "多核 GPU 或排序电路",
+        "固定 W、S、线程数与带宽后评估",
+        "不能把并行层数当串行工作量；不作跨硬件名次"
+      ],
+      [
+        "物理与随机趣味模型",
+        "条件成立的特殊模型另列；阶乘穷举和随机重试靠后",
+        "Sleep 不保证正确；随机方法没有有限最坏步数"
+      ]
+    ],
+    "navigation": "阅读顺序按效率条件分组：先看可能近线性的专用方法和自适应方法，再看通用 n log n 方法；特殊机器条件单列；通常较慢的方法及趣味方法靠后。同组内先介绍有保障或较少工作的一层，再介绍附带条件、退化可能或研究型方法。同一效率层中的先后是学习依赖，不宣称前一个必定比后一个快。完整目录和 PDF 书签均可直接跳转。",
+    "diagram": "步骤图图例：橙色边框与 C 表示正在比较或分类；蓝色填充与 M 表示刚交换或移动；绿色填充与 S 表示文字明确指出的已排好区间或最终位置。S 若只是局部有序，并不宣称全局最终。白色是当前未标记项。图中有省略的内部比较时，正文会逐步解释；每一行都对应正文的一个状态。",
+    "reading_title": "如何使用每个条目",
+    "reading": [
+      "每个条目先把要用的小动作讲清楚，再接成完整方法。拿纸片照着例子做一遍：每次换、挪、分组或输出，都确认没有丢掉任何一张纸。复杂方法允许多读一遍；关键是每一步都有理由，而不是记住一个名字。",
+      "效率部分解释成本和成立条件；用途部分说明什么数据值得考虑。学习时先能复现例子，再替换为重复数、负数、逆序数和空数组。正文给出的稳定性仅针对所述版本，不能未经检查套到所有同名实现。",
+      "算法正文包含完整数字例、具体执行规则和必要工程注意；参考资料提供作者原论文、大学教材、NIST 定义和原实现。引用编号在两个语言版本中分别独立可用。"
+    ]
+  },
+  "en": {
+    "title": "Sorting Algorithms Learning Manual",
+    "subtitle": "A patient explanation, starting with the smallest actions",
+    "cover": [
+      "English edition for independent study",
+      "80 learning entries including families variants and supporting techniques",
+      "5 October 2026"
+    ],
+    "opening": "Imagine four cards on a table: 4, 1, 3, and 2. We want them to read 1, 2, 3, 4. Every card must survive, including cards with equal numbers. The goal is easy to say. The questions are what to look at next, when to change positions, and how to know we are done. A sorting algorithm is a set of steps that answers those questions. We will learn the small actions first, then see how each method combines them.",
+    "scope_title": "Scope and counting rules",
+    "scope": [
+      "The complete catalog appears before the algorithm lessons. Its 80 numbered entries are teaching units, not 80 unrelated inventions. Alternate names share one entry. An important variant receives its own lesson only when its operations differ, and is labeled as a variant. Related implementations may be taught as a family.",
+      "Coverage includes common comparison sorts, integer and string distribution methods, adaptive and cache-oriented methods, less familiar tree and heap sorts, external schedules, parallel sorts and networks, restricted-operation sorts, and playful methods. Replacement selection is labeled as a run-generation phase. Indirect sorting and small-network design are supporting techniques. Grailsort and WikiSort are different implementations in one family, not synonyms.",
+      "The catalog is broad rather than exhaustive. It does not develop AKS network construction, Columnsort, Cubosort, the many model-specific LearnedSort variants, all theoretical integer-sorting results, every cache optimization, or every tape schedule. It also does not count each choice of pivot, gap sequence, or threshold as a new algorithm. Those topics need additional mathematical or machine assumptions.",
+      "Stalin sort discards out-of-order items and therefore fails the requirement to keep every input record. Miracle sort lacks an effective step that guarantees progress. Neither is counted as a full sorter here. Topological sorting orders dependencies, and Quickselect finds a rank rather than fully sorting; they solve different tasks and are excluded from the numeric-sorting ranking.",
+      "Examples use ascending order and are newly constructed for this manual. Small numbers expose operations; they are not performance measurements. Advanced families receive concrete mechanisms and prerequisites, while a production implementation still needs the boundary and engineering details in the cited original materials."
+    ],
+    "primer_title": "Start with four cards and the smallest actions",
+    "primer": [
+      [
+        "1 What result are we trying to get?",
+        [
+          "Think of 1+1 as putting one card beside one more card: there are now two cards. Separate the number of cards from the number written on a card. A card marked 7 is still one card. Input [4,1,3,2] contains four records.",
+          "Ascending order means that, as you move right, the next number never gets smaller. [1,2,3,4] passes that test. [1,3,2,4] fails because 2 follows 3. Equal numbers may stand together, so [1,2,2,4] is ordered too."
+        ]
+      ],
+      [
+        "2 Why every original card must stay",
+        [
+          "Output [1,2,3] looks increasing, but it does not correctly sort [4,1,3,2]: the card marked 4 has disappeared. We need both correct order and every original card, exactly once.",
+          "A card may hold a name and a score. When sorting by score, the name must move with it. The whole card is a record. The score used to decide order is its key. Those words will mean exactly this in later lessons."
+        ]
+      ],
+      [
+        "3 Looking and moving are different actions",
+        [
+          "Ask whether 4 is larger than 1. The answer is yes. That action is a comparison; the cards have not moved.",
+          "If the rule requires the smaller card on the left, exchange their positions: [4,1,3,2] becomes [1,4,3,2]. That action is a swap. A comparison need not cause a swap: 1 followed by 4 is already in the right direction. A complete algorithm must tell us which cards to compare next."
+        ]
+      ],
+      [
+        "4 Why one successful swap is not enough",
+        [
+          "The first pair in [1,4,3,2] is ordered, but 4 still has smaller numbers to its right. Ordering one pair and ordering the whole row are different achievements.",
+          "Many methods make one small promise at a time: the smallest item is now first, or the first three items are ordered among themselves. The next action builds on that promise. Green in a diagram may mark a locally ordered part; the caption says whether those items also occupy final positions."
+        ]
+      ],
+      [
+        "5 Insert a card without losing another one",
+        [
+          "Suppose [1,4] is already ordered and we want to add 3. It belongs between them. Hold 3 aside, move 4 one place right, then put 3 into the empty place. The result is [1,3,4].",
+          "Computer positions follow the same logic. Writing 3 straight over 4 destroys the old value unless we first save or move it. Temporary storage and shifting are ways of keeping every record safe. A held card is still part of the input."
+        ]
+      ],
+      [
+        "6 Position numbers are addresses",
+        [
+          "We need a short way to say which place to use. Computer arrays usually count from zero. In [4,1,3,2], position 0 holds 4, position 1 holds 1, position 2 holds 3, and position 3 holds 2.",
+          "A position number says nothing about key size: position 0 may hold the largest key. Prose uses first, second, and so on; index formulas state the zero-based convention. A range is a consecutive group of positions. A prefix starts at the beginning, and a suffix reaches the end."
+        ]
+      ],
+      [
+        "7 Equal numbers can still be different records",
+        [
+          "Two cards may both show 2 while belonging to different people. Write 2a and 2b to remember their identities; the letters do not change the numeric keys. Input [2a,1,2b] can become [1,2a,2b] or [1,2b,2a] while ordering its keys.",
+          "Keeping the original order of equal-key cards is called stability. The first result is stable for this input. Key order and equal-record order are separate requirements; each lesson says what its version preserves."
+        ]
+      ],
+      [
+        "8 Combine two ordered rows",
+        [
+          "Take [1,4] and [2,3]. Each front card is the smallest one remaining in its own row, so compare the two fronts. Take 1 before 2. Then compare 4 with 2 and take 2. Compare 4 with 3 and take 3. One row is empty, so append the remaining 4. Output: [1,2,3,4].",
+          "This action is called merging. After taking a card, update only that row’s front. We do not search the whole input again. Both input rows must already be ordered; merging two unordered rows this way is not a sorting guarantee."
+        ]
+      ],
+      [
+        "9 Why solve smaller tasks first?",
+        [
+          "To sort four cards, sort the first pair and the second pair, then merge the ordered pairs. To sort a pair, we may treat it as two single-card groups. A single card is already ordered, so splitting stops there.",
+          "Running the same method on a smaller group is recursion. Imagine pausing a large job, finishing its smaller jobs, then returning to where you paused. A stopping rule is essential; empty or single-item groups usually stop immediately."
+        ]
+      ],
+      [
+        "10 A stack and a queue are rules for taking things",
+        [
+          "In a pile of plates, the last plate added is the first removed. That rule is a stack. Paused recursive jobs can be remembered this way, so the program knows where to return.",
+          "In a waiting line, the first person to arrive is served first. That rule is a queue. Neither structure sorts values by itself. It determines which stored item is taken next."
+        ]
+      ],
+      [
+        "11 A tree organizes relationships",
+        [
+          "Draw a circle containing 4, with circles 1 and 6 below it and lines joining them. The upper circle is a parent and the lower circles are children. Add circles 2 and 3 beneath 1. The linked shape is a tree. Its top node is the root. Nodes reached farther down a path are descendants.",
+          "The picture alone makes no promise about number order. A search tree requires smaller values on the left and larger ones on the right. A min-heap requires each parent to be no larger than its children. These are different rules, and neither picture is automatically a fully sorted row."
+        ]
+      ],
+      [
+        "12 How a heap keeps the smallest item available",
+        [
+          "If every parent is no larger than its children, a path downward can never decrease. The root must be a smallest item. This structure is a min-heap. After removing the root, put the last item there, compare it with the smaller child, and exchange downward when needed until the rule holds again.",
+          "To add an item, place it at the end and compare it with its parent. Move it upward while it is smaller, stopping at the root or a valid parent relation. Siblings need not be ordered. Heap lessons explain how array positions represent the tree and how to find the children."
+        ]
+      ],
+      [
+        "13 Buckets and digits",
+        [
+          "A bucket is a group. Groups for 0–9, 10–19, and 20–29 have a useful order: every first-group key precedes every second-group key. Yet a single bucket may still be unordered, so its contents may need sorting.",
+          "In decimal notation, 21 means two tens and one unit. Its units digit is 1 and its tens digit is 2. Grouping by one digit differs from grouping by the complete number. Radix methods explain how several digit passes combine into correct full-key order."
+        ]
+      ],
+      [
+        "14 Find a place by repeatedly halving",
+        [
+          "To insert 5 into [1,3,6,8,10], first inspect the middle item, 6. Since 5 is smaller, ignore 8 and 10 and inspect the left part. The final gap is between 3 and 6. Removing roughly half the remaining candidates at each step is binary search.",
+          "This saves comparisons during the search. To put 5 into a tightly packed array, 6, 8, and 10 still have to move right. Finding a place quickly does not make those moves disappear."
+        ]
+      ],
+      [
+        "15 What do we count when we say fast?",
+        [
+          "Count actual actions: cards inspected, key comparisons, swaps, records moved, or file blocks read and written. Some tasks have expensive comparisons; others have very large records that cost more to move. One count does not always capture both.",
+          "We use n for the number of records. n=4 means four cards; n=1000 means a thousand. A pass that touches each item once performs roughly n actions. Doubling the input usually doubles this kind of work."
+        ]
+      ],
+      [
+        "16 Why n squared and log n appear",
+        [
+          "If almost every item interacts with almost every other item, work grows like n times n, written n². Ten items give a scale near a hundred such actions; a thousand give a scale near a million. Actual pairwise methods may use roughly half that many comparisons.",
+          "If candidates repeatedly halve, a thousand shrink to one in about ten steps: 1000, 500, 250, 125, and so on. That halving count is log₂n, the base-two logarithm. Touching the whole input at each of about ten levels gives work near n log n. The symbols name patterns of actions we can already understand."
+        ]
+      ],
+      [
+        "17 Best, worst, and average need different questions",
+        [
+          "An already ordered row is favorable for some methods. A reversed row may be unfavorable, but not every algorithm has its worst case on reversed data. The worst input is whichever makes that particular method do the most work.",
+          "An average needs a rule for choosing inputs. Choosing every permutation with equal probability differs from using daily logs that are usually nearly ordered. A randomized method may also vary because of its own choices. Without those conditions, an average number is not a guarantee."
+        ]
+      ],
+      [
+        "18 Room, termination, and how to read a lesson",
+        [
+          "An extra row, a count table, or notes about unfinished jobs all use extra space. In-place usually means no second full record array; it does not automatically remove a recursive stack.",
+          "A method must say when it finishes. Correct sorting orders the keys, preserves every record, and completes under its stated conditions. While following an example, ask what changed, why no card was lost, and what small promise now holds. Read the cost formulas after you can carry out the actions yourself."
+        ]
+      ]
+    ],
+    "cost_title": "Compare efficiency under the same conditions",
+    "cost_intro": "We have already met n, repeated halving, and n² through concrete actions. The table now puts those growth patterns together. It gives scales of work, not seconds. Unless stated otherwise, one worker handles data already in memory and each comparison or small-record move has similar cost. Files, many workers, and special key types need separate conditions.",
+    "growth": [
+      [
+        "Growth",
+        "Plain meaning",
+        "Scale at n equal to 1000"
+      ],
+      [
+        "n",
+        "A full scan; doubling the input roughly doubles work",
+        "1000"
+      ],
+      [
+        "n log2 n",
+        "Scan per level while tasks repeatedly halve",
+        "about 10000"
+      ],
+      [
+        "n log2² n",
+        "For example a network with squared-logarithmic depth",
+        "about 100000"
+      ],
+      [
+        "n²",
+        "Most items may interact with most other items",
+        "1000000"
+      ],
+      [
+        "n!",
+        "Try all permutations; each added item multiplies the count",
+        "far beyond useful enumeration"
+      ]
+    ],
+    "cost_notes": [
+      "O gives an asymptotic upper bound, Θ a matching growth scale, and Ω a lower bound. These symbols usually hide constants and do not give seconds. n counts records; k can mean a key-range size or a displacement bound; r is a radix; d or w counts digits or bits. Each lesson defines its local symbols. Unless stated otherwise, log means base two.",
+      "Best case means the most favorable input and worst case the least favorable. An average needs an input distribution; an expectation may instead be over the algorithm’s own random choices. With high probability is not a guarantee for every random outcome. A lesson avoids a single average bound when it cannot justify one.",
+      "Assume all keys are different. Comparing two items has two possible answers: the first is smaller or the second is smaller. One question can distinguish at most two answer paths; two questions at most four; t questions at most 2^t. There are n! possible orders, where n! means 1×2×…×n. To distinguish them all, the longest path must allow 2^t≥n!, requiring at least log₂(n!) comparisons in the worst case, or Ω(n log n). An individual comparison need not split possibilities evenly. Counting and radix sorts use key structure beyond these two-answer questions.",
+      "Real string comparisons may inspect many characters. Large records cost more to move, and caches, branches, allocation, and disk transfers matter. Two O(n log n) sorts can therefore have different elapsed times. A tiny trace explains correctness, not processor speed.",
+      "External-memory analysis counts blocks of B records transferred with memory capacity M. Parallel analysis reports total work W and span S, the longest chain of dependent actions. On p workers, time is at least max(W/p,S), before scheduling and communication costs. Physical devices and timer tricks need their own models."
+    ],
+    "rank": [
+      [
+        "Fixed conditions",
+        "Priority tiers from less work to more work",
+        "Limits"
+      ],
+      [
+        "Integer range k=O(n) and fixed digits",
+        "Near-linear counting or radix tier → general n log n comparison tier → quadratic tier",
+        "Huge ranges or long keys change this order; buckets need distribution assumptions"
+      ],
+      [
+        "Few inversions or few long ordered runs",
+        "O(n+I) insertion or near-linear adaptive merging → ordinary n log n tier",
+        "I counts inversions; different meanings of nearly sorted are not interchangeable"
+      ],
+      [
+        "Arbitrary large arrays using comparisons",
+        "Protected n log n tier → methods exposed to quadratic worst cases → fixed quadratic tier → superpolynomial tier",
+        "Plain quicksort can be fast on average; methods within a tier need actual measurement"
+      ],
+      [
+        "Expensive writes or large records",
+        "Evaluate indirect sorting and low-write cycle sorting separately",
+        "More comparisons can still mean less total time"
+      ],
+      [
+        "Data exceeds memory",
+        "Fewer wide merge or balanced distribution passes → more whole-file passes",
+        "Hold memory capacity disk system balance and stream limits fixed"
+      ],
+      [
+        "Multicore GPU or sorting circuits",
+        "Evaluate fixed work span workers and bandwidth",
+        "Parallel layers are not serial work; no ranking across different hardware"
+      ],
+      [
+        "Physical and playful random models",
+        "Model-dependent special methods stand apart; factorial trials appear later",
+        "Sleep sort has no general correctness guarantee; random retry has no finite worst-case bound"
+      ]
+    ],
+    "navigation": "The lessons begin with methods that can be near-linear under key or order assumptions, then develop general n log n methods. Separate machine models follow. Usually slower methods and playful algorithms come later. Within a group, guaranteed or low-work tiers precede conditional, degeneration-prone, or research-oriented methods. Order within one tier follows learning dependencies, not an assertion that one always runs faster. The catalog and PDF bookmarks link to every entry.",
+    "diagram": "Diagram key: orange outlines and C mark comparisons or classification; blue fills and M mark records just moved or swapped; green fills and S mark an ordered region or final positions explicitly described in the text. A locally ordered S region need not be globally final. White cells are unmarked. Each row matches a state in the written example; the text explains any intermediate comparisons omitted from the drawing.",
+    "reading_title": "How to study an entry",
+    "reading": [
+      "Each lesson first explains any small actions it needs, then connects them into a complete procedure. Move paper cards while following the example. After every swap, shift, group, or output, check that every card still exists. A complex method may take a second reading; the aim is to understand each action rather than memorize a name.",
+      "The cost section states the assumptions behind efficiency. Try duplicates, negative values, reverse order, and an empty input after reproducing the supplied trace. A stability claim applies to the described version, not automatically to every implementation with the same name.",
+      "Each lesson provides concrete operations, a complete small example, and necessary implementation cautions. References point to original papers, author implementations, university material, and NIST definitions. Each language edition has its own usable reference numbering."
+    ]
+  }
+}

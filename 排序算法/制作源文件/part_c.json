@@ -1,0 +1,1864 @@
+[
+  {
+    "id": 41,
+    "group": "D",
+    "zh_title": "选择排序",
+    "en_title": "Selection sort",
+    "kind": "algorithm",
+    "zh_alias": "直接选择排序",
+    "en_alias": "Straight selection sort",
+    "zh": {
+      "foundation": [
+        "把数写成一排，位置从左到右数。比较就是判断两个数谁小，比较本身不改变这排数。",
+        "交换两格时，先把第一格的数暂存，第二格的数填入第一格，再把暂存数填入第二格。这样两个数都不会丢。"
+      ],
+      "idea": "先把最小的数找出来，放在第一格；再从剩下的数里找最小的，放在第二格。一直这样做。每次只确定一格，但那格一旦确定，以后就不用再碰了。关键在于：必须看完所有候选，才能知道手里记着的最小值确实是最小。",
+      "steps": [
+        "先看第一格，记下它的值和位置，把它暂时当作最小值。这只是当前最好的候选，还不是结论。",
+        "从第二格开始往右看。每看见一个更小的数，就改记这个新数的位置；比较到最后一格才结束寻找。寻找期间不移动任何数。",
+        "把最后记住的最小值与第一格交换。如果它原来就在第一格，什么也不搬。现在第一格比所有剩下的数都小，因此已经是最终位置。",
+        "第二轮把第二格当作目标，只在第二格及其右边寻找。第三轮从第三格开始，依次继续。左边已经放好的数不再参与。只剩最后一格时，其他格都正确，它也自然正确。"
+      ],
+      "example": [
+        "从 [4,2,5,1,3] 开始。暂记 4；看到 2 改记 2；看到 5 不改；看到 1 改记 1；看到 3 不改。现在才确定 1 是全列最小值。",
+        "交换第一格的 4 与第四格的 1，得到 [1,2,5,4,3]。左边的 1 永久放好，4 仍留在待处理区里。",
+        "第二轮看 [2,5,4,3]：没有比 2 更小的，保留原样 [1,2,5,4,3]。前两格已经确定。",
+        "第三轮从 5 开始，看见 4 改记 4，看见 3 再改记 3。交换第三格的 5 和第五格的 3，成为 [1,2,3,4,5]。",
+        "第四轮还要比较 4 和 5；没有交换。最后一格留下 5。基本方法不知道自己提前排好了，所以仍完成这些规定的查找。"
+      ],
+      "cost": "它花时间的地方主要是找数：第一轮比较 n−1 次，下一轮 n−2 次，直到 1 次。这里 n 是元素个数，总比较为 n(n−1)/2，所以最好、通常、最坏都随 n² 增长，写作 Θ(n²)。至多交换 n−1 次，只要一个暂存格和几个位置，额外空间 O(1)。通常不稳定：相等记录可能被远距离交换改变先后。",
+      "why": "交换少，但查找重复很多。数组已经有序，也仍要逐轮看完剩余部分。如果写入很昂贵、比较很便宜，少交换可能有价值；它并不会因此成为一般数据上的快速算法。",
+      "use": "适合很小的数组、学习如何确定最终位置，或专门重视少写入的简单场景。大数组通常用比较总量更少的排序。",
+      "details": "例如 [2a,2b,1]，a、b 是两个同值记录的名字。把 1 与 2a 交换会得到 [1,2b,2a]，先后改变。要稳定，可以拿出第一个最小值，把它前面的那些记录逐格右移，再插入；但移动次数可能达到二次规模。"
+    },
+    "en": {
+      "foundation": [
+        "Number slots from left to right. Comparing values tells you which is smaller; it does not move either value.",
+        "To swap two slots safely, save the first value, copy the second into the first slot, then put the saved value in the second slot."
+      ],
+      "idea": "Find the smallest value and put it in slot one. Then find the smallest of the remaining values and put it in slot two. Keep going. Each search finishes one position permanently. The important point is that a remembered minimum becomes trustworthy only after every remaining candidate has been examined.",
+      "steps": [
+        "Treat the first unfinished slot as the destination. Remember its value and position as your current smallest candidate. This is a temporary choice, not yet a final answer.",
+        "Visit each later slot. Whenever its value is smaller, remember this new position instead. Keep looking to the end; do not move values during the search.",
+        "Swap the final remembered minimum into the destination. If it is already there, leave it alone. It cannot be greater than any remaining value, so this slot is finished.",
+        "Move the destination one slot right. Search only that slot and the values after it. Leave the finished prefix alone. When only one unfinished slot remains, every other value is already placed, so the last one is correct too."
+      ],
+      "example": [
+        "Begin with [4,2,5,1,3]. Remember 4, replace it with 2, ignore 5, replace 2 with 1, then ignore 3. Only now is 1 confirmed as the minimum.",
+        "Swap 4 and 1: [1,2,5,4,3]. The 1 stays there permanently; the displaced 4 remains available in the unfinished region.",
+        "Search [2,5,4,3]. Nothing is smaller than its first 2, so leave the array as [1,2,5,4,3]. Two slots are finished.",
+        "Search [5,4,3]. The remembered candidate changes from 5 to 4 to 3. Swap the 5 and 3: [1,2,3,4,5].",
+        "Still compare the remaining 4 and 5. This basic method completes its prescribed searches even when the array happens to become ordered early."
+      ],
+      "cost": "The repeated searches dominate the cost. With n items, they require n−1, then n−2, down to one comparison: n(n−1)/2 altogether. Best, typical and worst time therefore grow quadratically, written Θ(n²). There are at most n−1 swaps. O(1) extra space means only a fixed amount of temporary storage is needed.",
+      "why": "It saves movement but repeats many comparisons. Even ordered input must be searched. This tradeoff can help when writing a value costs far more than comparing it.",
+      "use": "Use it for tiny arrays, learning permanent placement, or a simple situation that especially rewards few writes. Large general inputs usually benefit from other methods.",
+      "details": "The swapping version is unstable. For [2a,2b,1], moving 1 to the front gives [1,2b,2a], reversing equal records. A stable variant removes the first minimum and shifts intervening records right before inserting it, but may perform quadratic movement."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: selection sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/selectionSort.html"
+      },
+      {
+        "title": "Princeton Algorithms: Elementary Sorts",
+        "url": "https://algs4.cs.princeton.edu/21elementary/"
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "group": "D",
+    "zh_title": "双向选择排序",
+    "en_title": "Double selection sort",
+    "kind": "variant",
+    "zh_alias": "双选择排序；最小最大选择排序",
+    "en_alias": "Min-max selection sort; bidirectional selection sort",
+    "zh": {
+      "foundation": [
+        "左右边界是两个位置标记，夹在它们中间的数还没放好。边界外的数已经最终确定。",
+        "记住最小、最大的位置，就是记住两格的地址；交换后值可能换地址，所以地址也要更新。"
+      ],
+      "idea": "一轮找两个目标：最小值放左端，最大值放右端。然后把两端留在原地，只处理更小的中间区域。它就是选择排序的双端版本。少了一些轮次，但每轮还是必须把中间区域看一遍，才能知道两个极值是谁。",
+      "steps": [
+        "先把最左和最右格标出来。扫描这整个区域，分别记住目前最小值和最大值的位置。每个新数都可能更新这两个记录。",
+        "扫描结束后，先把最小值与左端交换。左端现在放的是该区域最小值，可以固定。",
+        "再把最大值与右端交换。特别检查：如果最大值原先在左端，第一场交换已经把它搬到了原最小值的位置，必须使用这个新位置。",
+        "左右边界各往中间移一格，再找新的最小和最大。只剩一格时，它夹在已放好的两边之间，不需要移动。"
+      ],
+      "example": [
+        "输入 [5,2,3,1,4]。完整扫描发现最小是第四格的 1，最大是第一格的 5。",
+        "把 1 与左端 5 交换，成为 [1,2,3,5,4]。此刻最大值 5 在第四格；继续用“第一格”去找它，会错误地拿到 1。",
+        "把现在第四格的 5 与右端 4 交换，得到 [1,2,3,4,5]。两端 1、5 都可以固定。",
+        "下一轮只看 [2,3,4]。最小 2 和最大 4 已在这段的两端，所以不交换。把两边缩进去，只剩中间的 3，完成。"
+      ],
+      "cost": "每轮扫待排区域的全部数，虽然区域每次缩短两个，总扫描量仍随 n² 增长；n 是元素个数。普通版本最好、通常、最坏 Θ(n²)。每轮最多两次交换，总交换 O(n)，额外只记几处位置，空间 O(1)。通常不稳定。成对寻找极值可以少做一些比较，但增长级别不变。",
+      "why": "它减少轮数，不会消除反复搜索。不能只看轮数减半，就断言它快两倍。实际差异还取决于比较和交换分别有多贵。",
+      "use": "适合学习一遍扫描同时得到两个结果，或处理很小的数组。它不是沿相邻格来回交换的鸡尾酒排序。",
+      "details": "全相等时不必做交换，但基本版仍要扫描。相等记录若要保留原先顺序，需要额外稳定规则；普通远距离交换没有这个保证。最大值位置被第一次交换改变，是这类实现最容易漏掉的情况。"
+    },
+    "en": {
+      "foundation": [
+        "A left and a right boundary mark the still-unfinished region. Values outside it have reached their final positions.",
+        "Remembering a minimum or maximum position means remembering where its value lives. A swap can change that address."
+      ],
+      "idea": "Double selection sort chooses two values per round: the minimum for the left end and the maximum for the right end. It then works inside those finished ends. This is selection sort with two destinations. A round still needs a complete search, because an unseen value might change either extreme.",
+      "steps": [
+        "Mark the ends of the unfinished region. Scan every value between them, remembering the smallest and largest values and their current positions. Update either remembered position when appropriate.",
+        "Swap the minimum into the left boundary. This slot can now be finished because all other remaining values are at least as large.",
+        "Swap the maximum into the right boundary. First check whether it used to occupy the left boundary: the first swap then moved it to the minimum’s old position. Use that new address.",
+        "Move both boundaries inward and repeat. When only one middle value remains, all values around it have been placed, so no further movement is needed."
+      ],
+      "example": [
+        "Start with [5,2,3,1,4]. A full search finds minimum 1 in slot four and maximum 5 in slot one.",
+        "Swap 1 with the leftmost 5: [1,2,3,5,4]. The maximum now lives in slot four. Using its old slot-one address would accidentally select 1.",
+        "Swap the current 5 with the rightmost 4: [1,2,3,4,5]. The outer values 1 and 5 are finished.",
+        "Search only [2,3,4]. Its minimum and maximum already occupy its ends, so make no swaps. Move inward again and leave the final middle 3 in place."
+      ],
+      "cost": "Each round scans the whole remaining region. Shrinking by two instead of one still gives quadratic total search work. With n items, best, typical and worst time are Θ(n²). At most two swaps per round gives O(n) swaps altogether. O(1) extra space means a fixed number of remembered positions and temporary values.",
+      "why": "Fewer rounds do not eliminate repeated searching. Halving the round count does not guarantee twice the speed. Comparison and movement costs also matter.",
+      "use": "Use it to learn how one scan can find two answers, or for very small arrays. Cocktail shaker sort is different: it moves values through neighboring comparisons.",
+      "details": "The ordinary version is unstable because distant swaps can reverse equal records. Equal values need consistent handling, although an all-equal region needs no movement. Pairwise min-max searching can reduce comparison constants. The critical implementation detail remains updating a maximum moved by the first swap."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: selection sort and its variants",
+        "url": "https://xlinux.nist.gov/dads/HTML/selectionSort.html"
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "group": "D",
+    "zh_title": "冒泡排序",
+    "en_title": "Bubble sort",
+    "kind": "algorithm",
+    "zh_alias": "下沉排序；exchange sort 在部分资料中也指冒泡",
+    "en_alias": "Sinking sort; exchange sort is an ambiguous name",
+    "zh": {
+      "foundation": [
+        "相邻就是两格紧挨着，没有别的格夹在中间。一遍扫描指从左走到右，把这段内每一对相邻格都检查一次。",
+        "交换只会让两个数各走一格。相等数保留原先先后；这样可以让同值记录保持稳定。"
+      ],
+      "idea": "从左向右比较邻居，左边更大就互换。一个很大的数换到右边后，下一步又与新的右邻居比较，可以一路走到最右。完整走一遍后，当前最大的数必然停在右端。把它留下，再对前面重复。",
+      "steps": [
+        "从待排区最左的一对开始。左数大于右数就交换；否则原样保留。比较的目的是让这一对较小的在左、较大的在右。",
+        "向右前进一步，比较下一对。注意上一对的右格也是下一对的左格，所以刚被推右的大数会继续参加。",
+        "一直走到本轮右边界。一路携带到这里的值是区域最大值，因而最后一格已经最终放好。下一轮不再碰它。",
+        "记录这一整遍有没有交换。若完全没有，所有相邻关系已经正确，可以停止。若有，回到左端处理缩短后的区域；只有一格时自然结束。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]。先比较 4、1，4 更大，交换成 [1,4,3,2]。",
+        "下一对是现在的 4、3，交换：[1,3,4,2]。再比较 4、2，交换：[1,3,2,4]。这轮的 4 走了三格，已经定位。",
+        "第二轮只看前三格。1≤3，不动；3>2，交换：[1,2,3,4]。这轮结束，3 也位于剩余区域的末端。",
+        "第三轮看剩下的 1、2，不交换。整遍无交换，停止。某一对不交换只证明那一对正确，不能代替完整一遍。"
+      ],
+      "cost": "已经有序时，一遍约 n 次比较就结束，因此最好 Θ(n)，n 是元素个数。普通杂乱输入和最坏情况可能需要约 n 遍，每遍又看约 n 格，总时间 Θ(n²)。额外空间 O(1)。严格大于才交换的相邻版本稳定。若旧版强制做完所有遍，最好也为二次时间。",
+      "why": "大数向右很快，小数从最右向左却慢：在左到右的一遍中，它通常只能左移一格。[2,3,…,n,1] 因此仍需许多遍，不能只说“看起来快有序了”。",
+      "use": "适合学习扫描、相邻交换和停止判断。对于实际小数组，插入排序往往更省操作。",
+      "details": "可以记住最后一次发生交换的位置，下次不用越过它，因为更右侧已没有需要纠正的相邻关系。部分文献把它叫 exchange sort，但这个名字也用于别的过程；本书的直接交换排序另有明确步骤。"
+    },
+    "en": {
+      "foundation": [
+        "Neighbors occupy consecutive slots. A pass walks across a region and checks every neighboring pair in it.",
+        "One neighboring swap moves each involved value only one slot. Leave equal records alone if their original order matters."
+      ],
+      "idea": "Walk from left to right, swapping a pair whenever its left value is larger. A large value moved right becomes part of the next comparison, so it can keep traveling. By the end of a complete pass, the region’s maximum has reached the right boundary. Leave it there and repeat on the shorter region.",
+      "steps": [
+        "Begin with the leftmost neighboring pair. Swap if the left value is greater; otherwise keep both values where they are. This puts the pair’s smaller value on the left.",
+        "Move the comparison one slot right. The previous right slot is now the new left slot, so a large value just moved right is examined again.",
+        "Continue to the current right boundary. The value carried along by these comparisons is the largest encountered, so it finishes at the end. Exclude that slot from the next pass.",
+        "Remember whether any swap occurred during the whole pass. No swaps means every neighboring relationship was checked and is correct. Otherwise return to the left and scan the shorter unfinished region. A one-item region needs nothing further."
+      ],
+      "example": [
+        "Start with [4,1,3,2]. Compare 4 and 1. Swap them: [1,4,3,2].",
+        "The next pair is the current 4 and 3. Swap: [1,3,4,2]. Then swap 4 and 2: [1,3,2,4]. The 4 traveled three slots and is now final.",
+        "Scan only the first three slots. Keep 1 and 3, then swap 3 and 2: [1,2,3,4]. The 3 finishes the shorter region.",
+        "Check the remaining pair 1,2. This complete pass makes no swaps, so stop. A single quiet comparison would prove only that one pair is ordered."
+      ],
+      "cost": "On ordered input, one pass takes roughly n comparisons, giving best time Θ(n). Here n is the item count. Typical and worst inputs can need roughly n passes of roughly n operations, giving Θ(n²). Extra space is O(1). Strict neighboring swaps preserve equal-record order, so the method is stable. A fixed-pass old version has quadratic best time too.",
+      "why": "Large values can travel far right in one pass, but a tiny value at the far right generally moves left only one slot per pass. The pattern [2,3,…,n,1] is therefore still expensive.",
+      "use": "Use it to understand scanning, swaps and a correct stopping condition. Insertion sort is generally a better practical small-array choice.",
+      "details": "A last-swap-position variant shortens later passes further. Some sources call bubble sort exchange sort, but that name is ambiguous. The separate direct exchange entry in this book gives a different, explicit process."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: bubble sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/bubblesort.html"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "比较 4 与 1",
+          "en": "Compare 4 and 1",
+          "values": [
+            4,
+            1,
+            3,
+            2
+          ],
+          "active": [
+            0,
+            1
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "4 向右一格",
+          "en": "4 moves one slot right",
+          "values": [
+            1,
+            4,
+            3,
+            2
+          ],
+          "active": [
+            1,
+            2
+          ],
+          "fixed": [],
+          "moved": [
+            0,
+            1
+          ]
+        },
+        {
+          "zh": "继续把 4 推右",
+          "en": "Keep moving 4 right",
+          "values": [
+            1,
+            3,
+            4,
+            2
+          ],
+          "active": [
+            2,
+            3
+          ],
+          "fixed": [],
+          "moved": [
+            1,
+            2
+          ]
+        },
+        {
+          "zh": "第一遍：4 定位",
+          "en": "End of pass: 4 is final",
+          "values": [
+            1,
+            3,
+            2,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            3
+          ],
+          "moved": [
+            2,
+            3
+          ]
+        },
+        {
+          "zh": "第二遍交换 3、2",
+          "en": "Next pass swaps 3 and 2",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            2,
+            3
+          ],
+          "moved": [
+            1,
+            2
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": 44,
+    "group": "D",
+    "zh_title": "鸡尾酒排序",
+    "en_title": "Cocktail shaker sort",
+    "kind": "variant",
+    "zh_alias": "双向冒泡排序；摇摆排序；shaker sort",
+    "en_alias": "Bidirectional bubble sort; shaker sort; double-direction bubble sort",
+    "zh": {
+      "foundation": [
+        "一次从左到右，一次从右到左，这叫两个方向的扫描。无论走哪个方向，比较后总是把较小值放左、较大值放右。",
+        "两端边界之间是待排区；边界缩短只是以后少检查一些格，不会删除任何元素。"
+      ],
+      "idea": "鸡尾酒排序让冒泡往返走。向右的一趟把最大值带到右端，向左的一趟把最小值带到左端。这样右边的小数也有机会在一趟中连走几格，避免一直等下一轮才能再往左走。",
+      "steps": [
+        "从待排区左端向右比较所有相邻对，左数大于右数才交换。结束后区域最大值已到右端，把右边界缩短一格。",
+        "现在反向走。从缩短区域的右边开始，比较一对后向左挪一个位置。仍然是左数较大才交换；被换到左边的小数会立即进入下一对。",
+        "反向走到左端时，区域最小值已经被带回来。把左边界右移一格。然后在更小的中间区域继续往返。",
+        "任何一个完整方向都没有交换，就说明该区域全部相邻关系已正确，可以结束。若边界之间只剩一格，也结束。"
+      ],
+      "example": [
+        "输入 [2,3,4,1]。向右先检查 2、3，再检查 3、4，都不换；最后 4>1，交换为 [2,3,1,4]。4 固定在右端。",
+        "向左只处理前三格。从 3、1 开始，交换为 [2,1,3,4]。1 被带到左边，下一对立即会再次看到它。",
+        "比较 2、1，交换为 [1,2,3,4]。1 在同一趟里左移两格，现在左端固定。",
+        "中间只剩 [2,3]。下一次向右比较没有交换，确认结束。反向扫描不是要求降序，它改变的是检查方向。"
+      ],
+      "cost": "已排序时一趟就能确认，最好 Θ(n)，n 为个数。通常和最坏仍可能反复做许多相邻交换，总时间 Θ(n²)。额外只需几个位置和交换暂存值，空间 O(1)。相等邻居不交换，所以稳定。",
+      "why": "往返能改善某些位置模式，但一个数穿过很多其他数仍要做许多单格交换。它解决了单向冒泡的一些拖延，并没有消除二次工作量。",
+      "use": "适合观察方向如何影响移动，或处理极小数组。一般软件排序仍优先考虑插入或更高效的方法。",
+      "details": "鸡尾酒、shaker、双向冒泡是同一方法的别名。可以分别记录两个方向最后一次交换的位置，进一步缩小区域；必须在每次改变方向时正确更新边界。"
+    },
+    "en": {
+      "foundation": [
+        "A forward pass checks neighboring pairs left to right; a backward pass checks them right to left. Both put the smaller value on the left.",
+        "Moving a boundary inward means leaving a finished end slot alone. No item is removed from the array."
+      ],
+      "idea": "Cocktail shaker sort makes bubble sort walk both ways. A forward pass carries the maximum to the right end. A backward pass carries the minimum to the left end. A tiny value stuck on the right can therefore travel several slots left during one backward trip.",
+      "steps": [
+        "Scan every neighboring pair in the unfinished region from left to right. Swap only when the left value is larger. The region maximum finishes at the right end; move that boundary left one slot.",
+        "Scan the shortened region backward. Start with its rightmost pair and move the pair left one slot at a time. Still swap only an inverted pair. A small value moved left participates in the next comparison.",
+        "At the left end, the region minimum is now final. Move the left boundary right one slot. Continue these trips through the shrinking middle region.",
+        "A complete directional pass with no swaps checks every neighboring relationship in that region and allows termination. Also stop when the boundaries leave at most one unfinished slot."
+      ],
+      "example": [
+        "Start with [2,3,4,1]. Going forward, keep 2,3 and then 3,4. Swap the final 4,1: [2,3,1,4]. The 4 is final.",
+        "Going backward through the first three slots, swap 3,1: [2,1,3,4]. The 1 just moved left and will be examined again immediately.",
+        "Swap 2,1: [1,2,3,4]. In this one backward trip, the 1 traveled two slots. The left end is now final.",
+        "The middle is [2,3]. Its next forward scan makes no swaps, so stop. Scanning backward changes the inspection direction; it still builds ascending order."
+      ],
+      "cost": "Ordered input is confirmed in one pass, giving best time Θ(n), where n is the item count. Typical and worst cases can still require quadratically many neighboring operations, giving Θ(n²). O(1) extra space means only fixed-size position markers and swap storage. Equal neighbors are not swapped, so this version is stable.",
+      "why": "Two directions help certain movement patterns, but moving an item across many other items still requires many one-slot exchanges. The improvement does not remove quadratic growth.",
+      "use": "Use it to study how traversal direction changes movement, or for very small arrays. Insertion sort and efficient general methods usually serve software sorting better.",
+      "details": "Cocktail, shaker and bidirectional bubble are aliases of this method. A variant remembers the last swap in each direction and tightens its boundaries. Boundary updates must remain correct when direction changes."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: bidirectional bubble sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/bidirectionalBubbleSort.html"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "向右：比较 4、1",
+          "en": "Forward: compare 4 and 1",
+          "values": [
+            2,
+            3,
+            4,
+            1
+          ],
+          "active": [
+            2,
+            3
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "4 在右端定位",
+          "en": "4 is final at the right",
+          "values": [
+            2,
+            3,
+            1,
+            4
+          ],
+          "active": [
+            1,
+            2
+          ],
+          "fixed": [
+            3
+          ],
+          "moved": [
+            2,
+            3
+          ]
+        },
+        {
+          "zh": "向左：1 越过 3",
+          "en": "Backward: 1 passes 3",
+          "values": [
+            2,
+            1,
+            3,
+            4
+          ],
+          "active": [
+            0,
+            1
+          ],
+          "fixed": [
+            3
+          ],
+          "moved": [
+            1,
+            2
+          ]
+        },
+        {
+          "zh": "1 在左端定位",
+          "en": "1 is final at the left",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            3
+          ],
+          "moved": [
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": 45,
+    "group": "D",
+    "zh_title": "奇偶换位排序",
+    "en_title": "Odd-even transposition sort",
+    "kind": "algorithm",
+    "zh_alias": "砖排序；奇偶排序（区别于奇偶归并）",
+    "en_alias": "Brick sort; odd-even sort (not odd-even mergesort)",
+    "zh": {
+      "foundation": [
+        "同时比较的两对不能共用一格，否则同一个数可能被两次操作争用。这里把邻居分成不重叠的配对。",
+        "位置从 1 开始数：“第一类”比较 1–2、3–4；“第二类”比较 2–3、4–5。奇偶名称指位置，不指数值奇偶。"
+      ],
+      "idea": "先让第一格和第二格排好、第三格和第四格排好；然后换一组邻居，第二格和第三格排好、第四格和第五格排好。交替检查两组邻接关系，较小的数逐步走左，较大的逐步走右。同一组内的各对互不干扰，所以可以并行执行。",
+      "steps": [
+        "执行第一类配对，从第一格起每两格一组。每组左数较大就交换，否则保留。末端若落单，本阶段不动它。",
+        "执行第二类配对，从第二格起每两格一组。它补上刚才没有检查的相邻边界。",
+        "把这两个阶段作为一整轮。记住其中有没有任何交换；有交换就再执行一整轮。",
+        "整轮都没有交换时，两类配对合起来已检查全部相邻关系，因此可以停止。只做一个阶段没有交换，还不足以确定有序。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]。第一阶段检查 4、1 和 3、2，分别交换，成为 [1,4,2,3]。",
+        "第二阶段只检查中间 4、2，交换为 [1,2,4,3]。4 被向右再推一步。",
+        "下一轮第一阶段检查 1、2（不换）和 4、3（交换），得到 [1,2,3,4]；第二阶段检查 2、3，不换。",
+        "这轮仍发生过交换，所以再做一整轮：1、2 不换，3、4 不换，随后 2、3 也不换，才停止。对照 [2,1,4,3]：中间 1、4 已正确，但两侧仍错，说明一个安静阶段不能证明完成。"
+      ],
+      "cost": "在单处理器上逐对做，有提前停止的最好 Θ(n)，通常、最坏 Θ(n²)，n 是个数；空间 O(1)，相等不交换时稳定。固定执行 n 个交替阶段的网络，总比较工作 Θ(n²)。若每阶段所有配对同时做，阶段数即深度为 Θ(n)；这是并行时间，不是顺序总工作。",
+      "why": "它容易并行，因为一阶段的配对互不重叠。代价是每次一个数最多走一格，需要许多阶段穿过长距离。",
+      "use": "适合并行处理器链、简单比较网络和教学。顺序运行通常有更省比较的方法。",
+      "details": "brick sort 是别名。Odd-even transposition 与 Batcher odd-even mergesort 不同：前者只轮换邻居，后者按另一套归并网络连接比较器，不能因为名字相近就合并。"
+    },
+    "en": {
+      "foundation": [
+        "Pairs processed at the same time must not share a slot. Otherwise two operations could compete for the same value.",
+        "Number positions from one. One phase checks 1–2, 3–4; the other checks 2–3, 4–5. Odd and even describe positions, not whether the values are odd or even."
+      ],
+      "idea": "Order one set of neighboring pairs, then shift the pairing by one slot and order the other set. Alternating these phases lets small values travel left and large values right. The pairs within a phase do not overlap, which makes simultaneous comparisons possible.",
+      "steps": [
+        "Run the first phase, pairing slots from slot one. For each pair, swap if its left value is larger. An unmatched last slot waits.",
+        "Run the second phase, pairing from slot two. This checks neighboring boundaries omitted by the first phase.",
+        "Treat both phases as one round. Remember whether either phase exchanged anything. If so, run another complete round.",
+        "Stop only when a whole round makes no swaps. Together its phases covered every neighboring boundary. One quiet phase alone cannot certify the array."
+      ],
+      "example": [
+        "For [4,1,3,2], the first phase swaps 4,1 and 3,2: [1,4,2,3].",
+        "The second phase checks only the middle 4,2 and swaps: [1,2,4,3]. The 4 travels one more slot right.",
+        "In the next first phase, keep 1,2 but swap 4,3: [1,2,3,4]. The following second phase keeps 2,3.",
+        "That round contained a swap, so run another complete round. Its pairs 1,2; 3,4; and then 2,3 all remain unchanged. Now stop. In [2,1,4,3], the middle 1,4 is already ordered although the outer pairs are wrong, illustrating why one phase is insufficient."
+      ],
+      "cost": "On one processor, the early-stop version has best time Θ(n) and typical/worst time Θ(n²), where n counts items. Extra space is O(1). Strict inverted-pair swaps make it stable. A fixed n-phase network performs Θ(n²) total comparison work. Enough simultaneous comparators reduce elapsed depth to Θ(n) phases; depth is different from total work.",
+      "why": "Independent pairs are convenient for parallel hardware. Values still travel only one slot per phase, so long journeys require many phases.",
+      "use": "Use it for linear processor chains, simple sorting networks and parallel-algorithm teaching. Sequential software usually has more efficient options.",
+      "details": "Brick sort is an alias. Odd-even transposition is not Batcher odd-even mergesort. The latter connects comparisons through a different merging network; a similar name does not imply identical steps or costs."
+    },
+    "sources": [
+      {
+        "title": "ETH Zürich: Principles of Distributed Computing, Odd/Even Sort",
+        "url": "https://disco.ethz.ch/courses/fs12/podc/lecture/podc_2on1.pdf"
+      },
+      {
+        "title": "Colorado State University: Sorting lecture",
+        "url": "https://www.cs.colostate.edu/~cs475/f17/Lectures/Lec10Sorting.pdf"
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "group": "D",
+    "zh_title": "梳排序",
+    "en_title": "Comb sort",
+    "kind": "algorithm",
+    "zh_alias": "梳子排序；CombSort11 是间隔规则变体",
+    "en_alias": "Comb sort; CombSort11 is a gap-rule variant",
+    "zh": {
+      "foundation": [
+        "间隔是两个位置之间的距离。间隔 3 表示比较第一格和第四格，再比较第二格和第五格。",
+        "向下取整就是丢掉小数部分，例如 4÷1.3≈3.08 变成 3。间隔不能缩成 0，否则两格就没有区别。"
+      ],
+      "idea": "先比较远处的数，让放错很远的数一次跨好几格；再把比较距离慢慢缩短。最后距离变成 1，用相邻交换清理小范围错误。它像先做粗调整，再做细调整，但每个大间隔只扫一遍，并不保证当时已经排好。",
+      "steps": [
+        "先记间隔为数组长度。每遍开始除以约 1.3，向下取整；算出 0 时改为 1。本条固定用这一常见规则。",
+        "从第一格起，比较它与右边相距该间隔的那一格，左数大就交换。向右挪一格，继续；右侧配对超出数组时结束本遍。",
+        "下一遍再缩小间隔。大间隔没有交换也继续，因为靠得更近的错误还没检查。",
+        "间隔达到 1 后不再缩小，反复完整检查邻居。一整遍没有交换才停止；这时全部相邻关系都正确。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]。长度 4 除以 1.3 后取整，间隔为 3。只能比较第一、第四格的 4、2，交换为 [2,1,3,4]。2 一次跨了三格。",
+        "3÷1.3 取整为 2。比较第一、第三格的 2、3，再比较第二、第四格的 1、4，两对都不交换。数列仍是 [2,1,3,4]，显然尚未有序。",
+        "2÷1.3 取整为 1。先交换 2、1，成为 [1,2,3,4]；再检查 2、3 和 3、4，不动。",
+        "间隔继续保持 1。再检查一整遍没有交换，结束。这里大间隔的安静一遍没有误导停止判断。"
+      ],
+      "cost": "即使输入有序，这个固定缩距规则也要做许多间隔遍；n 为个数，约 log n 遍、每遍约 n 次检查，最好 Θ(n log n)。log 表示规模反复按固定比例缩小所需的层数。最坏仍可能由相邻收尾花 O(n²) 时间。额外空间 O(1)，通常不稳定；没有一个适用于所有间隔规则的精确平均公式。",
+      "why": "长距离交换省去了一部分逐格移动，末尾却仍可能像冒泡那样反复扫描。它与希尔不同：希尔在每个间隔把相应数列充分整理，这里通常只扫一遍。",
+      "use": "适合学习长距离比较与缩距，也可做简单实验。需要严格运行时间保证时，应选择保证更明确的算法。",
+      "details": "例如 [2a,2b,1]，远距离交换可把 2a 放到 2b 后面，所以相等记录不一定稳定。CombSort11 常把间隔 9 或 10 改成 11，仍属于同一方法。其他初始间隔或缩距规则要另注条件。"
+    },
+    "en": {
+      "foundation": [
+        "A gap is the distance between compared positions. Gap three pairs slot one with slot four, then slot two with slot five.",
+        "Round down by dropping a division’s fractional part: 4/1.3 becomes three. The gap must stay at least one."
+      ],
+      "idea": "Comb sort begins with distant comparisons, letting misplaced values travel several slots in one swap. It gradually shortens the distance and finishes by checking neighbors. These are coarse adjustments followed by fine cleanup. One large-gap pass does not claim that the whole array is already ordered.",
+      "steps": [
+        "Begin with the array length as the gap. Before each pass, divide by about 1.3 and round down. Replace zero with one. This entry uses that particular common rule.",
+        "Starting at the first slot, compare it with the slot one gap to its right. Swap if the left value is larger. Move the pair one slot right; stop when its right member would be outside the array.",
+        "Shrink the gap for the next pass. Continue even after a quiet large-gap pass, since closer relationships have not yet been examined.",
+        "At gap one, keep that gap and repeat complete neighboring passes. Stop after an entire pass makes no swaps, proving every neighboring relationship is correct."
+      ],
+      "example": [
+        "For [4,1,3,2], dividing length four by 1.3 gives gap three. The only pair is 4 and 2. Swap: [2,1,3,4]. The 2 crosses three slots at once.",
+        "Dividing three by 1.3 gives gap two. Compare 2,3 and then 1,4. Neither changes. The array is still [2,1,3,4], so a quiet large-gap pass clearly does not prove order.",
+        "The next gap is one. Swap 2,1: [1,2,3,4]. Keep the remaining pairs 2,3 and 3,4.",
+        "Keep gap one and scan again. No exchanges occur anywhere, so stop."
+      ],
+      "cost": "Even ordered input must pass through all prescribed gaps. With n items, roughly log n shrinking-gap passes each examine roughly n values, giving best time Θ(n log n). The logarithm counts repeated proportional shrinkage. Neighboring cleanup can still make worst time O(n²). Extra space is O(1). No single exact average formula applies to every gap policy.",
+      "why": "Long swaps can save many one-slot moves, but cleanup can still repeat. Shellsort is different: it thoroughly insertion-sorts each gap-separated sequence rather than making just one pass.",
+      "use": "Use it to study distant comparisons or as a simple experiment. Prefer stronger guarantees when predictable running time matters.",
+      "details": "It is normally unstable: [2a,2b,1] can reverse the equal twos through a distant swap. CombSort11 changes gaps nine or ten to eleven. This remains a variant, and other starting gaps or shrink rules need their own stated conditions."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: comb sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/combSort.html"
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "group": "D",
+    "zh_title": "侏儒排序",
+    "en_title": "Gnome sort",
+    "kind": "algorithm",
+    "zh_alias": "花园侏儒排序；最初也称 stupid sort，名称有歧义",
+    "en_alias": "Garden gnome sort; originally also stupid sort, an ambiguous name",
+    "zh": {
+      "foundation": [
+        "用一个位置标记指着当前格。标记向左或向右走不会移动数，只改变下一次检查的位置。",
+        "当前数往左移动，可能撞上另一个更大数，所以交换后还要向左退一步继续检查。"
+      ],
+      "idea": "看当前数和它的前一个邻居。两个数已经按序，就往右走；左边更大，就交换并退一步。这样一个较小数会连续穿过前面较大的数，直到它找到正确位置，然后再往右继续。这是用相邻交换来完成插入。",
+      "steps": [
+        "开始指向第二格。第一格暂时只是一段长度 1 的有序部分，不需要内部比较。",
+        "若前一格小于等于当前格，两格关系正确，标记向右走一格。越过最后一格，就说明处理结束。",
+        "若前一格大于当前格，交换它们，然后标记向左退一格。刚被放到左边的较小数现在要与更前面的数比较。",
+        "如果退到第一格，没有左邻居，就往右走一格。不断重复上述规则；相等时只前进、不交换。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]，标记在第二格 1。4>1，交换：[1,4,3,2]；退到第一格后再向右。1≤4，标记走到第三格。",
+        "4>3，交换：[1,3,4,2]，退到第二格。检查 1≤3，通过；再检查 3≤4，通过，标记到第四格。",
+        "4>2，交换：[1,3,2,4]，退到第三格。3>2，再交换：[1,2,3,4]，退到第二格。",
+        "检查 1≤2，通过。接着 2≤3、3≤4 都通过，标记依次右移，最终越过末端。2 沿两次交换插入正确位置，其他数仍全部保留。"
+      ],
+      "cost": "有序时标记只向右走一遍，最好 Θ(n)，n 为个数。杂乱时很多数需要反复向左穿过邻居，通常、最坏 Θ(n²)。额外只存一个位置和交换临时值，空间 O(1)。只交换严格逆序邻居，所以稳定。",
+      "why": "比固定重复全遍扫描更局部：哪里出错就往哪里退。但每走过一个较大邻居仍要一次交换，远距离错误仍昂贵。",
+      "use": "适合极小或很有序的数组，也适合学习“出错就退一步”的过程。数组插入排序可把一串值直接移位，常有更低操作开销。",
+      "details": "优化版记住此前最远处理到的位置。较小数插入完，可以直接回到那里，不再逐格穿过已经知道有序的部分。基本版和优化版都叫 gnome sort；stupid sort 有时也指 Bogosort，不能仅凭这个别名判断过程。"
+    },
+    "en": {
+      "foundation": [
+        "A position marker tells you which slot to examine. Moving the marker does not move a value.",
+        "After moving a small value left, check it against its new left neighbor. That neighbor might still be larger."
+      ],
+      "idea": "Gnome sort checks the current value and its predecessor. If they are ordered, walk right. If the left value is larger, exchange them and step left. A small item can therefore keep passing larger neighbors until it fits. Then the walk proceeds right again. This is insertion by neighboring swaps.",
+      "steps": [
+        "Begin at slot two. A single first item needs no internal comparison, so it is the initial one-item ordered region.",
+        "If the predecessor is no greater than the current value, move the marker one slot right. Passing the array’s end means completion.",
+        "If the predecessor is greater, swap the two values and move the marker one slot left. The smaller value just moved left now needs checking against an earlier neighbor.",
+        "At slot one there is no predecessor, so move right again. Continue applying these local rules. Equality permits forward movement without a swap."
+      ],
+      "example": [
+        "For [4,1,3,2], the marker starts at the second-slot 1. Swap 4,1: [1,4,3,2]. Step left to slot one, then right. The pair 1≤4 allows movement to slot three.",
+        "Swap 4,3: [1,3,4,2]. Step back to slot two. Check 1≤3, then 3≤4; both allow progress to slot four.",
+        "Swap 4,2: [1,3,2,4]. Step back to slot three, where 3>2. Swap again: [1,2,3,4], then step back to slot two.",
+        "The pairs 1≤2, 2≤3 and 3≤4 now permit successive rightward steps. The marker passes the end. The 2 found its place through two exchanges, with every original value preserved."
+      ],
+      "cost": "Ordered input needs only a rightward walk, so best time is Θ(n), where n counts items. Disordered input can require many leftward crossings, giving typical and worst time Θ(n²). Extra space is O(1): a position marker and swap storage. Strictly inverted neighboring swaps preserve equal-record order, so it is stable.",
+      "why": "It repairs local mistakes rather than blindly repeating whole passes. However, crossing every larger neighbor still costs a swap, so long misplaced journeys remain expensive.",
+      "use": "Use it for teaching, tiny inputs or highly ordered data. Array insertion sort can shift a sequence with less overhead.",
+      "details": "An optimized version remembers the furthest processed frontier. After inserting a value it returns directly there instead of walking across known order again. Both versions are gnome sort. The old name stupid sort is also used for Bogosort, so the name alone is not enough to identify the procedure."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: gnome sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/gnomeSort.html"
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "group": "D",
+    "zh_title": "循环排序",
+    "en_title": "Cycle sort",
+    "kind": "algorithm",
+    "zh_alias": "最少写入的比较式循环排序；另有已知目标位置的线性变体",
+    "en_alias": "Write-minimizing comparison cycle sort; known-destination variants differ",
+    "zh": {
+      "foundation": [
+        "“写入”是改变某一格存的值。交换通常写两格；把手里暂存的值放进一格，只写那一格。",
+        "“目标位置”就是这个值在有序结果中的位置。例如三个值比它小，它就应在第四格。",
+        "图中的 □ 是逻辑空位：我们已经拿起这格的数，稍后要填回。实际内存可以保留旧副本，不必真的写一个空符号。"
+      ],
+      "idea": "循环排序想少写格子。先把一个数拿到手里，数清有多少数应在它前面，直接送到目标格。目标格原来的数不能丢，把它接到手里，再送往它的目标。这样一串交接最终回到起点，填上最初留下的空位，像沿一圈位置传东西，所以叫循环。",
+      "steps": [
+        "选一个起点，暂存其中的值。先检查起点后面的所有数，计数其中严格比手里值小的数。已处理的左侧不需要再看；目标就是从起点往右数这么多格。",
+        "第一次算出目标就是起点，说明没有后面的数比它小，当前值已经应在这里，不启动交接，换下一个起点。",
+        "若目标格已经是同值，不能把同值挤出来，否则没有实际推进，可能反复拿到一样的数。继续向右找，跳过所有同值格，找到需要改变的格。",
+        "写入前先保存目标格原值，然后把手里值写进去，再让保存的原值成为手里新值。每次只写目标格一处，起点的逻辑空位一直保留。",
+        "对新值重新数起点后缀里的较小值，确定新目标；仍跳过同值，然后放入、接出。已经放好的目标格保留正确值。目标回到起点时填回，这一圈结束。再从下一个起点重复，直到所有格都处理过。"
+      ],
+      "example": [
+        "输入 [3,1,4,2]。拿起第一格的 3。后面 1、2 两个值比它小，所以目标是第三格。放入 3、接出 4，画成 [□,1,3,2]，手里是 4。",
+        "后缀里的 1、3、2 都比 4 小，目标第四格。放 4、接 2：[□,1,3,4]，手里是 2。",
+        "后面只有 1 比 2 小，目标第二格。放 2、接 1：[□,2,3,4]，手里是 1。没有后面值比 1 小，目标回到第一格；填入后 [1,2,3,4]。这四格各写一次。",
+        "再检查第二格的 2：后面 3、4 没有更小值，所以不启动新一圈。第三格也一样；最后一格无需再处理。",
+        "重复值例 [2,1,2,1]：拿起第一格 2，有两个 1 比它小，算出的第三格已是 2。跳过第三格，送到第四格，接出 1，成为 [□,1,2,2]。手里 1 的目标是第一格，填回得 [1,1,2,2]。这样只写原本错误的第一、第四格。"
+      ],
+      "cost": "少写入需要付出反复数位置的代价。n 是元素个数，基本比较版即使已经有序也要逐个数后缀，最好、通常、最坏 Θ(n²)，即二次规模比较。每个要改变的值位置尽量只写一次，写入总量 O(n)；手里只暂存一个值和少量位置，额外空间 O(1)。通常不稳定。若某种特殊键本身直接给出目标，不必反复比较，特定循环方法可以线性；那需要额外条件。",
+      "why": "它优化的是写入，不是所有操作。数目标时会重复读、比较许多元素，但直接送到目标避免了往返交换和长串移位。读写成本差别很大时才可能合算。",
+      "use": "适合学习排列交接，或评估写入昂贵的存储。先分别估计读、比较、写的成本，再决定是否使用。",
+      "details": "相等值跳过规则保证值排序能推进，却不保护同值记录的身份先后，因此不自动稳定。Haddon 的线性版本利用特定键范围或已知目标；不要因为看到“循环排序”这个名字，就把它的线性时间套到此处的一般比较版。"
+    },
+    "en": {
+      "foundation": [
+        "A write changes the value stored in one slot. A swap normally writes two slots; placing a held value writes just its destination.",
+        "A destination is a value’s position in the ordered result. If three values must precede it, its destination is slot four.",
+        "A square □ marks a logical vacancy after its value has been picked up. Real memory can keep an old copy there; no blank marker needs to be written."
+      ],
+      "idea": "Cycle sort tries to write as few slots as possible. Pick up one value, work out where it belongs, and put it directly there. Save the value displaced from that destination, work out its destination, and continue. Eventually a held value belongs in the starting slot. Filling that vacancy closes the chain into a cycle.",
+      "steps": [
+        "Choose a starting slot and hold its value temporarily. Count strictly smaller values in the suffix after that start. Positions before the start have already been dealt with. The destination is that many slots to the right of the start.",
+        "If this first destination is the starting slot itself, no later value is smaller. Leave the value there and try the next starting slot.",
+        "Otherwise examine the destination. If it already contains an equal value, skip it and move right past equal occupants. Replacing an equal value would achieve nothing and could keep returning the same held value.",
+        "Save the destination’s old value before writing. Put the held value there, then hold the saved old value. Only this destination is written; the logical starting vacancy remains.",
+        "Recount the destination for the newly held value in the same suffix. Skip equal occupants, place the value, and save its replacement again. When the destination returns to the start, fill it and end this cycle. Advance to later starts to handle any other cycles."
+      ],
+      "example": [
+        "Begin with [3,1,4,2]. Hold the first 3. Later values 1 and 2 are smaller, so its destination is slot three. Place 3 and hold the displaced 4: [□,1,3,2].",
+        "The later 1,3,2 are all smaller than 4. Place 4 in slot four and hold 2: [□,1,3,4].",
+        "Only 1 is smaller than the held 2. Place 2 in slot two and hold 1: [□,2,3,4]. No later value is smaller than 1, so fill the original vacancy: [1,2,3,4]. Four incorrect slots each received one write.",
+        "Now start at slot two. Its 2 has no smaller value after it, so no new cycle begins. The same is true of slot three; the last slot needs no separate work.",
+        "For duplicates, start with [2,1,2,1]. Holding the first 2 gives destination slot three because two ones are smaller. That slot already holds 2, so skip it. Write 2 in slot four and hold 1: [□,1,2,2]. Put 1 in the starting slot: [1,1,2,2]. Only the originally wrong first and fourth slots were written."
+      ],
+      "cost": "The cost of saving writes is repeated destination counting. With n items, this comparison-based version has Θ(n²) best, typical and worst time: even ordered input scans many suffixes. Array writes total O(n), aiming to write each incorrect value position once. O(1) extra space means one held value and fixed-size control information. It is normally unstable. Special keys with directly computable destinations can support linear cycle methods, under different assumptions.",
+      "why": "It optimizes writes, not every operation. Finding destinations repeats reads and comparisons, but direct placement avoids repeated two-slot swaps and long shifts. This tradeoff matters when writes are much more expensive.",
+      "use": "Use it to understand permutation cycles or evaluate storage with costly writes. Estimate reading, comparison and writing separately.",
+      "details": "Skipping equal occupants makes value sorting progress but does not preserve equal records’ identities or order. Haddon’s linear methods rely on restricted keys or known destinations. Their linear bound does not transfer merely because both approaches use the name cycle sort."
+    },
+    "sources": [
+      {
+        "title": "Haddon: Cycle-Sort: A Linear Sorting Method (author-uploaded paper)",
+        "url": "https://www.researchgate.net/publication/220459798_Cycle-Sort_A_Linear_Sorting_Method"
+      },
+      {
+        "title": "Manipal: Parallelization of Cycle Sort Algorithm",
+        "url": "https://researcher.manipal.edu/en/publications/parallelization-of-cycle-sort-algorithm/"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "拿起 3，数出目标",
+          "en": "Hold 3; count its destination",
+          "values": [
+            3,
+            1,
+            4,
+            2
+          ],
+          "active": [
+            0
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "写 3，手中是 4",
+          "en": "Write 3; hold 4",
+          "values": [
+            "□",
+            1,
+            3,
+            2
+          ],
+          "active": [],
+          "fixed": [
+            2
+          ],
+          "moved": [
+            2
+          ]
+        },
+        {
+          "zh": "写 4，手中是 2",
+          "en": "Write 4; hold 2",
+          "values": [
+            "□",
+            1,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            2,
+            3
+          ],
+          "moved": [
+            3
+          ]
+        },
+        {
+          "zh": "写 2，手中是 1",
+          "en": "Write 2; hold 1",
+          "values": [
+            "□",
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            1,
+            2,
+            3
+          ],
+          "moved": [
+            1
+          ]
+        },
+        {
+          "zh": "填回 1，循环闭合",
+          "en": "Write 1; close the cycle",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "moved": [
+            0
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": 49,
+    "group": "D",
+    "zh_title": "秩排序（枚举排名）",
+    "en_title": "Rank / enumeration sort",
+    "kind": "algorithm",
+    "zh_alias": "排名排序；枚举排序（不要与枚举全排列混淆）",
+    "en_alias": "Ranking sort; enumeration sort (not exhaustive permutation sort)",
+    "zh": {
+      "foundation": [
+        "一条记录可以有数值和身份，例如 3a、3b 的数值都为 3，字母只用来追踪它们。",
+        "秩从 0 数，表示该记录前面应有几条记录。秩 0 放第一格，秩 1 放第二格，不是把第 0 格放进结果。"
+      ],
+      "idea": "让每条记录自己计算应排第几：数一数其他记录中有多少条应放在它前面。这个数量就是它的秩。全部秩算出来后，把记录直接写到对应的结果格。两个相等值也必须有不同位置，所以相等时按原先的位置决定谁在前。",
+      "steps": [
+        "保留输入，不立即覆盖它；另外准备与输入同长度的结果数组。需要重复比较原记录，提前覆盖会丢掉还没使用的信息。",
+        "取一条记录，计数先设为 0。与输入的每条其他记录比较；对方值更小，计数加 1。",
+        "遇到相等值，检查原来谁更靠左。对方原来更靠左，也加 1；对方在后面则不加。同一条记录不算在自己前面。",
+        "计数完毕，把该记录写到从第一格往后走“计数”格的位置。对所有记录重复。由于每条记录拥有不同秩，结果不会抢占同一格；填完再读取或复制回原数组。"
+      ],
+      "example": [
+        "输入 [3a,1,3b,2]，3a 原来在第一格，3b 在第三格。",
+        "计算 3a：1 比它小，计数变 1；3b 同值但在后，不加；2 比它小，计数变 2。所以 3a 写入结果第三格，结果暂为 [□,□,3a,□]。",
+        "计算 1：其他值都更大，计数 0，填第一格：[1,□,3a,□]。",
+        "计算 3b：同值 3a 原来在前，计一次；1 更小，再计一次；2 更小，再计一次，总计 3，填第四格：[1,□,3a,3b]。",
+        "计算 2：只有 1 应在前，计数 1，填第二格：[1,2,3a,3b]。如果相等值不按原位置分先后，两个 3 都会算出秩 2，写同一格并覆盖一条记录。"
+      ],
+      "cost": "每条记录都要看全部其他记录，n 条就形成约 n² 次比较；最好、通常、最坏 Θ(n²)。结果数组需要随 n 增长的空间 Θ(n)，这里 n 是记录数。每条只向结果写一次，总写入 O(n)。原位置破同值平局让排序稳定。并行可以同时算不同记录的秩，但比较总工作仍是二次，还要计求和和通信。",
+      "why": "目标独立计算，容易分给多个处理器。代价是同一批记录被一遍又一遍比较，没有像归并那样重复利用整段已有顺序。",
+      "use": "适合同时需要排名的任务、硬件比较和并行教学；普通单处理器排序通常有更省比较的方法。",
+      "details": "enumeration 在这里指逐个列举比较对象，不是枚举所有排列。它也不是计数排序：计数排序按有限键值范围统计次数，这里逐条比较记录。稳定性的依据是原位置规则，不是“都写进另一个数组”。"
+    },
+    "en": {
+      "foundation": [
+        "A record can have a value and an identity. Records 3a and 3b both have value three; their letters only help track them.",
+        "A rank starts at zero and counts records that should precede this record. Rank zero means the first output slot; rank one means the second."
+      ],
+      "idea": "Rank sort lets each record calculate its own destination. Count all records that should come before it, then write it into the output position given by that count. Equal values must still receive different slots. Original input position provides a clear rule: the earlier equal record belongs first.",
+      "steps": [
+        "Keep the input available and prepare a separate result array of the same length. Other records still need to examine this input, so writing over it too early could destroy needed information.",
+        "Choose one record and start its count at zero. Compare it with every other input record. Add one whenever the other value is smaller.",
+        "For equal values, compare original positions. Add one if the other record originally appeared earlier. Do not count the record itself as preceding itself.",
+        "After all comparisons, write the record that many slots after the first result slot. Repeat for every input record. The tie rule gives distinct ranks, so output slots do not collide. Read the filled result or copy it back."
+      ],
+      "example": [
+        "Use [3a,1,3b,2]. The equal record 3a originally appears before 3b.",
+        "For 3a, count the smaller 1 and 2, but not the later equal 3b. Rank two places it in slot three: [□,□,3a,□].",
+        "For 1, no record should precede it. Rank zero gives [1,□,3a,□].",
+        "For 3b, count the earlier equal 3a as well as smaller 1 and 2. Rank three gives [1,□,3a,3b].",
+        "For 2, only 1 comes before it. Rank one fills the remaining slot: [1,2,3a,3b]. Ignoring the tie rule would give both threes rank two and overwrite one record."
+      ],
+      "cost": "Every record compares with all other records. With n records, best, typical and worst time are Θ(n²), or quadratic comparison work. A separate n-slot result needs Θ(n) extra space. Each record is written once to the result, so output writes are O(n). Original-position tie breaking makes it stable. Parallel rank calculations can shorten elapsed time, but total comparisons remain quadratic.",
+      "why": "Independent destinations make the work easy to distribute. The disadvantage is examining the same collection repeatedly instead of reusing sorted-region information.",
+      "use": "Use it when ranks are useful results themselves, for hardware ranking, or for parallel-algorithm study. Sequential sorting usually has less costly choices.",
+      "details": "Parallel costs also include summing counts and communication. Enumeration here means enumerating comparison partners, not all permutations. Counting sort counts a key range instead. Stability comes from the tie rule, not simply from having a separate output array."
+    },
+    "sources": [
+      {
+        "title": "Colorado State University: Enumeration Sort with duplicate tie breaking",
+        "url": "https://www.cs.colostate.edu/~cs475/f17/Lectures/Lec10Sorting.pdf"
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "group": "D",
+    "zh_title": "直接交换排序",
+    "en_title": "Direct exchange / interchange sort",
+    "kind": "algorithm",
+    "zh_alias": "两两交换排序；exchange/interchange 名称在文献中有歧义",
+    "en_alias": "All-pairs exchange sort; terminology varies across sources",
+    "zh": {
+      "foundation": [
+        "固定一格表示暂时一直使用这个位置作左侧比较对象；它的值在交换后会变化。",
+        "两两比较不要求相邻。例如第一格可以直接与第五格比较和交换，中间的格子不移动。"
+      ],
+      "idea": "固定当前左侧格，遇到一个更小的值就立即换进来，再拿这个新的当前值继续往右比较。扫到最后时，当前格留下的是整个区域最小值。下一轮固定下一格。与选择排序相比，它不等查找结束才交换，而是每遇到更小候选都先搬一次。",
+      "steps": [
+        "从第一格开始，把它定为当前目标。第二格作为第一个比较对象。",
+        "若目标值大于后面的值，立即交换这两格。交换后目标里的新值更小，继续用这个新值比较；否则不搬。",
+        "比较对象每次右移一格，直到与全部后续格比较过。此时每个后续值都不小于当前目标值，所以目标已经最终确定。",
+        "把目标右移一格，从它下一格开始扫描。已经确定的左边各格不再动，处理完倒数第二格后结束。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]。固定第一格，比较 4、1，交换成 [1,4,3,2]。现在目标值是 1，再与 3、2 比，都不换。第一格确定。",
+        "固定第二格，值为 4。与第三格 3 比较，交换为 [1,3,4,2]。第二格暂存 3，但还有第四格没检查，所以还不能固定。",
+        "拿现在的 3 与第四格 2 比较，再交换为 [1,2,4,3]。第二轮结束，第二格才确定为 2。",
+        "固定第三格，比较 4、3，交换得 [1,2,3,4]。第二轮做了两次交换；普通选择排序先找出 2，再只交换一次，这就是过程上的差别。"
+      ],
+      "cost": "每个目标都与后续所有格比较，总比较 n(n−1)/2；n 是个数，所以最好、通常、最坏 Θ(n²)。最好输入不需交换，最坏交换也可能达到二次数量。暂存一个值和两个位置足够，额外空间 O(1)。远距离交换通常不稳定。",
+      "why": "寻找最小值仍要完整看后缀，并且一格可能被反复写入更小候选。已排序输入能省交换，省不了这些固定比较。",
+      "use": "适合学习“立即搬候选”与“先记位置再搬”的差别，也可帮助读懂旧程序中的短区间排序。",
+      "details": "例如 [2a,2b,1]，第一格与第三格交换后 [1,2b,2a]，同值顺序被改变。exchange 和 interchange 在不同来源里也可能指冒泡或整个交换类。本书只把此处明确的非相邻双循环过程称为直接交换排序。"
+    },
+    "en": {
+      "foundation": [
+        "Keeping a slot fixed means using the same position as your comparison target. A swap may change the value inside it.",
+        "Pairs need not be neighbors. Slot one can exchange with slot five while the intervening slots stay put."
+      ],
+      "idea": "Fix the leftmost unfinished slot. Whenever a later value is smaller, swap it into that slot immediately. Continue comparing with the newly received value. After all later slots have been examined, the target contains the region minimum. Unlike selection sort, this method moves every improving candidate instead of waiting until the search ends.",
+      "steps": [
+        "Choose the first slot as the target. Begin comparisons at the following slot.",
+        "If the target value is larger than the later value, exchange them immediately. Use the new, smaller target value for the next comparison. Otherwise leave both values alone.",
+        "Move the comparison partner one slot right until every later slot has been visited. They now all contain values no smaller than the target, so the target is finished.",
+        "Move the target right and begin at its next slot. Leave the finished prefix unchanged. Processing the second-last target finishes the array."
+      ],
+      "example": [
+        "For [4,1,3,2], fix slot one and compare 4,1. Swap: [1,4,3,2]. The target now holds 1; its comparisons with 3 and 2 need no changes. Slot one is finished.",
+        "Fix slot two, holding 4. Compare with the later 3 and swap: [1,3,4,2]. The new 3 is temporary because slot four has not been examined.",
+        "Compare that current 3 with the later 2 and swap again: [1,2,4,3]. Only now does slot two finish.",
+        "Fix slot three and swap 4,3: [1,2,3,4]. The second round made two swaps. Ordinary selection sort would first locate its minimum 2 and then make only one."
+      ],
+      "cost": "Each target compares with every later slot, giving n(n−1)/2 comparisons for n items. Best, typical and worst time are therefore Θ(n²). Best-case swaps can be zero, but worst-case swaps can also be quadratic. A saved value and two position markers give O(1) extra space. Distant exchanges make the ordinary method unstable.",
+      "why": "It still searches full suffixes, and one destination can repeatedly receive smaller candidates. Ordered input saves movement but not the prescribed comparisons.",
+      "use": "Use it to understand immediate candidate movement versus remembering a position, or to read older short-region sorting routines.",
+      "details": "For [2a,2b,1], exchanging the first and third slots gives [1,2b,2a], changing equal-record order. Sources use exchange and interchange inconsistently: sometimes they mean bubble sort or an entire family. Here they refer specifically to the nonadjacent nested-search procedure described above."
+    },
+    "sources": [
+      {
+        "title": "UCAR CESM official source: interchange_sort",
+        "url": "https://docs.cesm.ucar.edu/models/cesm2/config/old/cesmBbrowser/html_code/cam/quicksort.F90.html"
+      }
+    ]
+  },
+  {
+    "id": 51,
+    "group": "D",
+    "zh_title": "煎饼排序",
+    "en_title": "Pancake sort",
+    "kind": "algorithm",
+    "zh_alias": "前缀翻转排序",
+    "en_alias": "Sorting by prefix reversal",
+    "zh": {
+      "foundation": [
+        "前缀是从第一格开始的一整段，例如 [3,1,4,2] 的前三格前缀是 [3,1,4]。",
+        "翻转一段就是把整个顺序反过来。实现时先交换两端，再交换向内一格的一对，直到中间；不是仅交换最外一对。"
+      ],
+      "idea": "只允许翻转从最左开始的一段，像从上面翻一叠煎饼。要把当前最大值放到待排区末端，先翻到它为止，把它带到最前；再翻整个待排前缀，让它到末端。这样每轮固定一个大值，然后只处理更短的左侧前缀。",
+      "steps": [
+        "在当前前缀里逐格找最大值：先记第一格，遇到更大值就更新位置，看完才确定。若最大值已经在前缀末端，这轮不用翻。",
+        "否则，翻转第一格到最大值所在格的整段。最大值原来在这段末端，翻后就在第一格。如果它本来就在第一格，这一步省略。",
+        "翻转整个待排前缀。第一格的最大值会跑到这一段末端，因此到达最终位置。",
+        "把前缀长度减一。右边已固定的大值不再参与翻转。只剩第一格时，其他位置都正确，结束。"
+      ],
+      "example": [
+        "输入 [3,1,4,2]。找出最大 4 在第三格。翻前三格 [3,1,4]：交换两端 3、4，中间 1 不动，整列成为 [4,1,3,2]。",
+        "翻四格：先交换外侧 4、2，暂为 [2,1,3,4]；再交换内侧 1、3，得到 [2,3,1,4]。4 最终固定。",
+        "在前三格找最大 3，它在第二格。翻前两格，得到 [3,2,1,4]；再翻前三格，把 3、1 交换，得到 [1,2,3,4]。3 固定。",
+        "剩余前两格最大值 2 已在第二格，不用翻。只剩 1，完成。每一场翻转都局限在当前前缀，没有碰已经固定的 4。"
+      ],
+      "cost": "基本版本每轮都重新找最大，扫描长度 n、n−1、…，因此最好、通常、最坏 Θ(n²)，n 是个数。每轮最多两次翻转，总次数 O(n)；但长度 m 的翻转约需 m/2 次交换，不能把一次长翻当成实际电脑上的一步。反转可原地交换，额外空间 O(1)，通常不稳定。",
+      "why": "一次操作能改变很大范围，却也必须真的搬动这个范围的值。它研究的是操作受到“只能翻前缀”限制时如何完成排序。",
+      "use": "适合煎饼问题、前缀翻转的排列问题和教学。普通数组没有这个限制时，更高效方法通常更合适。",
+      "details": "本方法保证排好，不保证翻转次数最少。相等记录在段内反转时可能倒序，所以不稳定。烧焦煎饼还给每个元素加上朝向，翻转时必须同时变号，下一条变体再解释。"
+    },
+    "en": {
+      "foundation": [
+        "A prefix starts at slot one. In [3,1,4,2], the first-three prefix is [3,1,4].",
+        "Reversing a segment reverses its entire order. Swap its endpoints, then the next inward pair, and continue to the middle."
+      ],
+      "idea": "Pancake sort allows only prefix reversals, as though flipping the top of a pancake stack. To finish the current maximum, first reverse through its position to bring it to the front. Then reverse the whole unfinished prefix to carry it to the end. Each round finishes one large value and leaves a shorter prefix.",
+      "steps": [
+        "Search the current prefix for its maximum. Remember the first value, update the remembered position when a larger value appears, and examine the whole prefix. If the maximum already occupies its end, skip this round’s flips.",
+        "Otherwise reverse the prefix ending at the maximum. A value at that segment’s end becomes its first value. Skip this flip if the maximum is already first.",
+        "Reverse the whole unfinished prefix. The maximum at the front becomes its final rightmost value.",
+        "Reduce the prefix length by one. Exclude the finished suffix from future flips. A final single-item prefix needs no movement."
+      ],
+      "example": [
+        "For [3,1,4,2], maximum 4 is in slot three. Reverse [3,1,4]: swap its endpoints 3 and 4, leaving middle 1 unchanged. The array becomes [4,1,3,2].",
+        "Reverse all four. Swap outer 4,2 to get the intermediate [2,1,3,4], then inner 1,3 to complete [2,3,1,4]. The 4 is final.",
+        "In the first three slots, maximum 3 is second. Reverse the first two: [3,2,1,4]. Reverse the first three by swapping 3,1: [1,2,3,4]. The 3 is final.",
+        "The remaining prefix [1,2] already ends in its maximum 2, so skip flips. Only 1 remains. Every reversal stayed within the unfinished prefix and protected the final 4."
+      ],
+      "cost": "Each round searches a prefix of length n, n−1, and so on. For n items, this basic version therefore has Θ(n²) best, typical and worst time. There are O(n) flips, at most two per placement, but reversing length m takes about m/2 swaps. A long flip is not one computer operation. In-place reversal gives O(1) extra space.",
+      "why": "A flip changes many positions, but those values must actually move. The method is interesting because its allowed movement is restricted to prefixes.",
+      "use": "Use it for the pancake problem, prefix-reversal constraints and teaching. General arrays without this restriction usually have faster choices.",
+      "details": "This greedy procedure guarantees order, not the minimum number of flips. It is normally unstable because reversals can reverse equal records. Burnt pancakes additionally have orientations, requiring each included sign to change during a flip; that variation needs an extra placement rule."
+    },
+    "sources": [
+      {
+        "title": "Anupam Gupta: Sorting Pancakes lecture notes",
+        "url": "https://cs.nyu.edu/~anupamg/251-notes/pancakes.pdf"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "最大值 4 在第三格",
+          "en": "Maximum 4 is in slot three",
+          "values": [
+            3,
+            1,
+            4,
+            2
+          ],
+          "active": [
+            2
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "翻前三格：4 到前端",
+          "en": "Flip first three: 4 reaches front",
+          "values": [
+            4,
+            1,
+            3,
+            2
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "zh": "翻四格：4 定位",
+          "en": "Flip four: 4 is final",
+          "values": [
+            2,
+            3,
+            1,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            3
+          ],
+          "moved": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "zh": "翻前两格：3 到前端",
+          "en": "Flip first two: 3 reaches front",
+          "values": [
+            3,
+            2,
+            1,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            3
+          ],
+          "moved": [
+            0,
+            1
+          ]
+        },
+        {
+          "zh": "翻前三格：3 定位",
+          "en": "Flip first three: 3 is final",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            2,
+            3
+          ],
+          "moved": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": 52,
+    "group": "D",
+    "zh_title": "Stooge 排序",
+    "en_title": "Stooge sort",
+    "kind": "joke",
+    "zh_alias": "三段重叠递归排序（描述性译名）",
+    "en_alias": "Overlapping two-thirds recursive sort (descriptive name)",
+    "zh": {
+      "foundation": [
+        "这里的递归不是新操作：把同一套指令用于一小段，等它做完再回到原来暂停的位置。必须记住正在处理哪段、接下来轮到哪一步。",
+        "长度 1 已有序；长度 2 只需比较并必要时交换。这是缩小任务后真正执行到底的小动作。",
+        "两个区间重叠，表示一些格会参加两个任务。第二个任务的交换可能影响第一个任务刚排好的位置。"
+      ],
+      "idea": "先比较这一段的两端，把较小的放左。随后做三件事：排前面的三分之二、排后面的三分之二、再排前面的三分之二。每个“排”又使用相同规则，把任务继续缩小，最终变成两格比较。它靠重叠任务把值逐步搬到正确两侧，但重复次数非常多。",
+      "steps": [
+        "接到一段任务时，先检查长度。空段或单格返回，不移动。长度至少 2 就比较首尾，前者大才交换。若只有 2 格，现在已经完成。",
+        "长度超过 2 时，把长度除以 3 向下取整得到 t。例如 6 得 2，4 得 1。前任务包含除末尾 t 格外的全部格；后任务包含除开头 t 格外的全部格。",
+        "先完成前任务。它里面若仍超过 2 格，也先比较两端，再做自己的前、后、前三个更小任务。等所有这些任务做完，才回到外层进行下一步。",
+        "再完成后任务，同样继续缩小到两格比较。它会把较大的数推向整体右侧，但也可能让一个较小值落回中间重叠区。",
+        "最后再完成前任务，把重叠区的小值向左整理。三个任务都返回后，这一整段才完成。输入一开始有序也照样走这些任务。"
+      ],
+      "example": [
+        "先看三格 [2,3,1]。比较两端 2、1，交换为 [1,3,2]。t=1，前任务是前两格，后任务是后两格。",
+        "前两格 1、3 比较不换；后两格 3、2 比较交换，成为 [1,2,3]；再比较前两格 1、2 不换。三个小任务做完，大任务结束。",
+        "为了看到第三次为什么需要，取 [1,5,6,7,3,2]。首尾 1≤2 不换，t=2。先排前四格 [1,5,6,7]；它已按序，但仍按上述小任务比较，数列不变。",
+        "再排后四格 [6,7,3,2]。首尾 6、2 交换，局部变 [2,7,3,6]；前三级任务排成 [2,3,7,6]；后三级任务变 [2,3,6,7]；再次前三级不变。整列此时是 [1,5,2,3,6,7]。",
+        "此时右边已经整理好，前面却有 5、2 逆序。最后前四格任务把 [1,5,2,3] 整理成 [1,2,3,5]，最终 [1,2,3,5,6,7]。若省掉第三个任务，这个例子就不有序。"
+      ],
+      "cost": "每个长任务制造三个仍约有原长度三分之二的任务，里面又各制造三个，数量迅速增多。n 为个数，最好、通常、最坏均为 Θ(n^log₍₃⁄₂₎3)，约 Θ(n^2.71)：比二次增长还快。这个指数来自“长度缩到 2/3、任务数乘 3”的反复关系。每次只交换两格，但需记录约 log n 层暂停任务，额外空间 O(log n)。通常不稳定。",
+      "why": "问题不在两格比较难，而在重叠区域被反复处理。普通高效分治把工作拆得更小、重复更少；这里三个任务每个都还很大，产生大量相同检查。",
+      "use": "适合学习递归的真实执行顺序、重叠任务和增长速度。作为反面教材即可，不用拿大输入等待它运行。",
+      "details": "有些来源采用对称的后—前—后顺序，本条统一采用前—后—前。远距离首尾交换可能让相等记录换序，所以不稳定。它确实能把数排好；效率差与正确性差是两件分别检查的事。"
+    },
+    "en": {
+      "foundation": [
+        "Recursion means using the same instructions on a shorter segment, then returning to the larger task where you paused. Remember the segment and the next instruction.",
+        "One item needs no sorting. Two items need one comparison and possibly a swap. These small cases are where the process reaches concrete actions.",
+        "Overlapping segments share slots. Changes made by a later task can disturb positions handled by an earlier one."
+      ],
+      "idea": "Stooge sort compares a segment’s endpoints, then sorts its first two thirds, its last two thirds, and its first two thirds again. Each smaller sorting task follows exactly the same instructions until it reaches one or two items. The overlap helps carry values toward the correct ends, but it also creates enormous repetition.",
+      "steps": [
+        "On receiving a segment, check its length. An empty or one-item segment returns unchanged. Otherwise compare the first and last values and swap if the first is larger. For two items, that completes the task.",
+        "For a longer segment, divide its length by three and round down to obtain t. The front task excludes the final t slots; the back task excludes the first t slots. Length six gives t=2; length four gives t=1.",
+        "Finish the front task first. If it has more than two items, it too compares endpoints and launches its own three shorter tasks. Complete those before returning to the paused outer task.",
+        "Next finish the back task in the same way. It pushes larger values right, but can bring a small value into the shared middle region.",
+        "Finally finish the front task again to move such values left. Only after all three tasks return is this segment complete. Initially ordered segments still execute this schedule."
+      ],
+      "example": [
+        "For [2,3,1], compare and swap endpoints 2,1: [1,3,2]. Since t=1, the smaller tasks are the first pair and the last pair.",
+        "The first pair 1,3 stays unchanged. Swap the last pair 3,2: [1,2,3]. Check the first pair 1,2 again, without changing it. The three small tasks have now completed the larger one.",
+        "To see why the third task matters, use [1,5,6,7,3,2]. Endpoints 1≤2 stay put. Here t=2. The front-four task handles [1,5,6,7]; it is ordered but still completes its prescribed comparisons.",
+        "The back-four task handles [6,7,3,2]. Swapping its endpoints gives [2,7,3,6]. Its front-three task produces [2,3,7,6]; its back-three task produces [2,3,6,7]; its repeated front-three task leaves that order unchanged. The whole array is now [1,5,2,3,6,7].",
+        "The back is ordered, but 5 still precedes smaller 2. The final front-four task turns [1,5,2,3] into [1,2,3,5], giving [1,2,3,5,6,7]. Omitting that third task would leave this input unordered."
+      ],
+      "cost": "Every large task produces three tasks still about two thirds as long. Those tasks each produce three more. With n items, best, typical and worst time are Θ(n^log₍₃⁄₂₎3), approximately Θ(n^2.71). The exponent describes length shrinking by 2/3 while task count triples. It grows faster than quadratic work. About log n levels of paused tasks need O(log n) extra stack space. Distant endpoint swaps mean stability is not guaranteed.",
+      "why": "The individual comparison is simple. The expensive part is sorting large overlapping regions again and again. Efficient divide-and-conquer methods split work into smaller pieces with less repetition; these three pieces remain relatively large.",
+      "use": "Use it to study the actual order of recursive execution, overlap and growth. Small teaching inputs are enough; there is no practical reason to wait for a large run.",
+      "details": "Some descriptions use the symmetric back-front-back schedule. This entry consistently uses front-back-front. The method does sort correctly. Correctness and efficiency are separate properties: an enormous amount of repeated work can still eventually produce the right answer."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: stooge sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/stoogesort.html"
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "group": "D",
+    "zh_title": "慢排序",
+    "en_title": "Slowsort",
+    "kind": "joke",
+    "zh_alias": "Slowsort；勿与 Bogosort 的模糊别名混用",
+    "en_alias": "Slowsort; not a synonym for Bogosort in this text",
+    "zh": {
+      "foundation": [
+        "左右两半排好后，每半最后一格是这一半最大值。全段最大值一定是这两个之一，因为其他数都不超过它们。",
+        "递归调用表示暂停当前任务，完整执行同一方法处理更短区间，再返回继续。只有空段或单格任务可以直接结束。",
+        "“去掉最后一格”只是把它划出后续任务，不是删除它；这个数仍在数组里，已经最终定位。"
+      ],
+      "idea": "慢排序先花力气排好两半，用两个末端值找到全段最大值，再把最大值留在最右。接着，它对其余几乎整段重新使用慢排序。这个最后动作浪费了刚才排好两半的大量成果，却确实会继续固定下一个最大值，直到全部完成。",
+      "steps": [
+        "任务只有一格或没有元素时，直接返回。否则从中间分成左半和右半；奇数长度时左半多一格。",
+        "先完整执行左半任务，再完整执行右半任务。每个较短任务仍用本方法；最终两格任务变成分别看单格，再比较它们并必要时交换。",
+        "两半都完成后，比较左半最后一格与右半最后一格。如果左半更大，交换两者；否则保留。右半最后一格也是全段最后一格，此时一定持有全段最大值。",
+        "把全段最后一格留在原地，给前面剩下的整个区间安排新任务。它跨越原来的两半，不是只看一小块；其内部还可能有逆序。",
+        "这个新任务也先处理自己的两半、固定自己的最大值、再处理去掉末端的区间。所有较短任务返回后，外层任务才完成。即使某段碰巧有序，也仍按这套调用顺序执行。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]，分成 [4,1] 与 [3,2]。先处理左半：两个单格直接返回，比较 4、1，交换，整列成为 [1,4,3,2]；再处理它的第一格 1，返回。",
+        "处理右半：单格 3、2 各返回，比较并交换，成为 [1,4,2,3]；它的首格 2 返回。两半现在分别是 [1,4]、[2,3]。",
+        "两个半段最大值是 4、3。交换它们，成为 [1,3,2,4]。4 最终定位，但前面的 3、2 仍逆序，所以排好两半并不等于整列有序。",
+        "处理前三格 [1,3,2]：先处理左半 [1,3]，比较 1≤3 不换，按规则再处理单格 1；右半单格 2 直接返回。",
+        "再比较左半末值 3 与段末值 2，交换成 [1,2,3,4]。前三格的 3 已定位，但仍按规则处理前两格 [1,2]：两个单格返回，比较不换，再处理单格 1。",
+        "所有暂停的任务都已结束，回到最外层，得到 [1,2,3,4]。这些“返回”不改变数；它们表示小任务完成，执行次序回到原来暂停的位置。"
+      ],
+      "cost": "基本过程不因为数据已经有序而少调用任务，所以最好、通常、最坏调用数量同类。n 是长度，T(n) 表示处理长度 n 的工作：T(n)=T(⌊n/2⌋)+T(⌈n/2⌉)+T(n−1)+Θ(1)。前两项是排两半，第三项是重排几乎整段，最后是一次比较等固定工作。总增长 n^{Θ(log n)}，比任何固定幂 n²、n³ 等最终都快增长，但比通常 c^n 慢。普通实现最多留住约 n 层暂停任务，空间 O(n)，通常不稳定。",
+      "why": "只为了固定一个最大值，它先排两半，然后又处理长度仅少一格的区域。这种反复付费正是它故意慢的原因，不能把“分成两半”就自动当成高效。",
+      "use": "适合把递归执行展开、比较不同递推结构的成本，作为效率反例；不用于真实排序。它没有随机猜测，步骤确定。",
+      "details": "log n 可以理解为反复将长度减半所需的次数；n^{Θ(log n)} 的指数本身随规模增长，不是一个固定次数。本条给增长类别与递推式，不伪造一个精确常数指数。普通调用栈含 n−1 的长链；若实现专门消除尾调用，空间行为可变化。Slowsort 不应与随机洗牌的 Bogosort 混称。"
+    },
+    "en": {
+      "foundation": [
+        "When a half is ordered, its last value is that half’s maximum. The whole segment’s maximum must be one of the two half-maxima.",
+        "A recursive call pauses the current task, completes the same procedure on a shorter segment, then returns to the paused instruction.",
+        "Excluding the last slot means protecting a finished value from later work. It does not delete that value."
+      ],
+      "idea": "Slowsort spends work ordering both halves, compares their maxima, and leaves the whole segment’s maximum at the right end. Then it applies Slowsort again to almost the entire remaining region. This repeats much of the work just completed, but it eventually fixes the next maximum and continues until every value is placed.",
+      "steps": [
+        "Return for an empty or single-item segment. Otherwise split near the middle, giving the left half the extra item for an odd length.",
+        "Complete the left-half task, then the right-half task. Each uses these same instructions. At length two, the halves are singletons: they return, their two maxima are compared and possibly exchanged, and the remaining singleton returns.",
+        "After both halves finish, compare their last values. If the left maximum is larger, swap those two slots. The right half’s last slot is also the whole segment’s last slot, and now contains the overall maximum.",
+        "Protect that final slot and launch a new Slowsort task on the complete prefix before it. This region crosses the old half boundary and can still contain inversions.",
+        "That new task again sorts its halves, fixes its maximum, and sorts its shortened prefix. The outer task finishes only after these smaller tasks return. Ordered input follows the same calling schedule."
+      ],
+      "example": [
+        "Begin with [4,1,3,2], split into [4,1] and [3,2]. In the left task, singletons 4 and 1 return; comparing their maxima swaps them: [1,4,3,2]. Its remaining singleton 1 then returns.",
+        "In the right task, singletons 3 and 2 return. Swap them: [1,4,2,3], then finish its remaining singleton 2. The ordered halves are [1,4] and [2,3].",
+        "Their maxima are 4 and 3. Swap them: [1,3,2,4]. The final 4 is protected, but the earlier 3,2 remain inverted. Ordering both halves did not finish the whole array.",
+        "Launch the prefix-three task on [1,3,2]. Its left task [1,3] completes without a swap and still visits its remaining singleton 1. The right singleton 2 returns.",
+        "Compare this task’s half-maxima 3 and 2, then swap: [1,2,3,4]. Its final 3 is finished, but the prescribed prefix-two task still runs: singletons 1 and 2 return, their comparison needs no change, then singleton 1 returns.",
+        "All paused tasks now complete. The outer task returns [1,2,3,4]. Returning does not move a value; it resumes the larger instruction after a smaller task finishes."
+      ],
+      "cost": "Input order does not remove these calls, so best, typical and worst cases have the same kind of work growth. Let n be the length and T(n) its work. The recurrence is T(n)=T(⌊n/2⌋)+T(⌈n/2⌉)+T(n−1)+Θ(1). The first two terms order halves, the third reorders almost everything, and the last is fixed comparison work. The resulting class n^{Θ(log n)} grows faster than any fixed polynomial power, but slower than ordinary c^n growth. Basic retained call frames require O(n) extra space. It is normally unstable.",
+      "why": "It pays to sort two halves just to finish one value, then pays again for nearly the same region. Splitting a task in half does not by itself make an algorithm efficient.",
+      "use": "Use it to unfold recursive execution and compare work recurrences. It is a deterministic counterexample to efficient design, not a practical sorting choice.",
+      "details": "Here log n describes repeated halving, and the exponent itself grows with input size rather than staying at two or three. The recurrence and growth class avoid claiming an unsupported exact exponent. Ordinary calls retain a long n−1 chain; deliberate tail-call elimination can change space usage. Slowsort is distinct from random-shuffling Bogosort."
+    },
+    "sources": [
+      {
+        "title": "Broder and Stolfi: Pessimal Algorithms and Simplexity Analysis",
+        "url": "https://ic.unicamp.br/~stolfi/EXPORT/papers/by-tag/papers/math/pessimal-algorithms/download.pdf"
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "group": "F",
+    "zh_title": "珠排序（重力排序）",
+    "en_title": "Bead / gravity sort",
+    "kind": "physical",
+    "zh_alias": "算盘排序；Bead sort",
+    "en_alias": "Abacus sort; gravity sort",
+    "zh": {
+      "foundation": [
+        "这里一个数表示珠子的数量，3 就放三颗珠子。只能直接处理零或正整数。",
+        "一行横着摆，一列竖着摆。珠子只能在自己的竖列内下落，不能跑到隔壁列。空格没有珠子，计数为零。"
+      ],
+      "idea": "把每个数画成一排从左边开始摆的珠子。随后让各列的珠子沉到底部。上面的行得到较少珠子，下面的行得到较多珠子。最后逐行数珠子，就读出了从小到大的数。这里并没有让某个完整的原始记录一路移动：珠子重新组成了数。",
+      "steps": [
+        "找出最大的数，记为 M，准备 M 列；有几个输入数就准备几行。数值 x 对应的那一行，从第一格开始放 x 颗珠子。",
+        "处理第一列：数这列共有几颗珠子。清空这一列，再从最底格往上放同样数量的珠子。这样模拟了下落，珠子总数没有变。",
+        "第二列、第三列也这样处理，直到所有列都处理完。每列都独立下落。",
+        "从顶行开始数：这一行有几颗珠子，就写下几。依次读到底行，得到升序结果。"
+      ],
+      "example": [
+        "输入 [3,1,4,2]。最大值是 4，所以每行四格。用 1 表示珠子、0 表示空格，初始四行依次是 1110、1000、1111、1100。",
+        "第一列有四颗，四行全填；第二列有三颗，最上格空着，下面三格填珠子。此时前两列从上到下是 10、11、11、11。",
+        "第三列有两颗，只填最下面两格；第四列有一颗，只填最底格。最终四行是 1000、1100、1110、1111。",
+        "逐行数得 [1,2,3,4]。为什么不会出现上行比下行珠子多？每列的珠子都挤在底部：上行某格有珠子，同列更低的格就一定也有。",
+        "输入若含 0，就有一整行空格。它下落后仍对应一个空行，读为 0。"
+      ],
+      "cost": "计算机若真的准备整个格子表，每格都检查或填一次，工作量同时取决于数的个数和最大数值。n 表示输入个数，M 表示最大值：时间 Θ(nM+n)，格子空间 Θ(nM)，另有 O(n) 结果空间。Θ 表示增长量同一数量级，O 表示上界。固定 n、M 后，这种实现的最好、通常、最坏情况没有数量级差别。若逐颗操作，还要计入所有数之和所代表的珠子总量。",
+      "why": "让很多珠子一起落，可以在物理上同时做许多动作。但很大的数需要很宽的架子、很多珠子，或很多模拟格子。把这些资源藏起来，才会显得时间与数字大小无关。",
+      "use": "适合很小的非负整数和理解物理计算。普通程序处理整数，计数排序或基数排序通常更合适。",
+      "details": "负数、小数要另外编码。相同数值的原始记录身份没有自然保留下来，所以不能直接说这种方法稳定。原论文讨论不同的物理和数字实现，不能把其中某个模型的时间结论套到全部版本。图中 1110 是一整行四格，不是数字一千一百一十。"
+    },
+    "en": {
+      "foundation": [
+        "A value is a number of beads: 3 means three beads. This representation directly supports nonnegative whole numbers.",
+        "Rows go across; columns go down. A bead can fall down its own column, but cannot move into another column. An empty cell contributes zero."
+      ],
+      "idea": "Write each value as a left-aligned row of beads. Let the beads in every column settle at the bottom. Upper rows now have fewer beads and lower rows have more. Counting each row from top to bottom gives ascending values. The beads rebuild the values; a complete original record does not travel intact through the process.",
+      "steps": [
+        "Find the largest value, called M. Make M columns and one row per input value. In the row for x, fill its first x cells with beads.",
+        "For the first column, count its beads. Clear that column, then fill that many cells upward from the bottom. This simulates falling without changing the column total.",
+        "Do the same for every remaining column. Each column settles independently.",
+        "Count the beads in the top row and write that count. Continue down to the bottom row. An empty row gives zero."
+      ],
+      "example": [
+        "Start with [3,1,4,2]. Four is largest, so each row has four cells. Write 1 for a bead and 0 for an empty cell: the rows are 1110, 1000, 1111, 1100.",
+        "Column one has four beads, so all four cells stay filled. Column two has three, so its top cell becomes empty and its bottom three cells are filled. The first two columns now read 10, 11, 11, 11 down the rows.",
+        "Column three has two beads and fills only its bottom two cells. Column four has one and fills only its bottom cell. The complete rows are now 1000, 1100, 1110, 1111.",
+        "Their counts give [1,2,3,4]. If an upper row has a bead in a column, every cell below it in that column also has a bead. Therefore the row counts cannot decrease as we move downward."
+      ],
+      "cost": "A full-grid simulation visits or fills the cells, so large values increase work even when there are few inputs. Let n be the item count and M the largest value. Time is Θ(nM+n), grid space Θ(nM), and output space O(n). Θ means the same growth order; O gives an upper bound. Best, usual, and worst inputs have the same order for fixed n and M. A bead-by-bead model must also count the total number of beads.",
+      "why": "Physical falling can happen in parallel because the apparatus supplies many working units. Large values still need more beads, width, or simulation work.",
+      "use": "Use tiny whole-number examples to study physical computation. Counting or radix methods are normally more useful in software.",
+      "details": "Negative and fractional values need extra encoding. Original record identities and stable equal-record order are not naturally preserved. The paper describes several models with different costs. A row such as 1110 is a picture of four cells, not the number eleven hundred and ten."
+    },
+    "sources": [
+      {
+        "title": "Arulanandham, Calude and Dinneen: Bead-Sort: A Natural Sorting Algorithm",
+        "url": "https://www.researchgate.net/publication/37987842_Bead--Sort_A_Natural_Sorting_Algorithm"
+      },
+      {
+        "title": "Calude: University of Auckland publication list",
+        "url": "https://www.cs.auckland.ac.nz/~cristian/papers.html"
+      }
+    ],
+    "visual": {
+      "rows": [
+        {
+          "zh": "输入：四个非负整数",
+          "en": "Input: four nonnegative integers",
+          "values": [
+            3,
+            1,
+            4,
+            2
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "每格是一行：1 珠、0 空",
+          "en": "Each cell is a row: 1 bead, 0 empty",
+          "values": [
+            "1110",
+            "1000",
+            "1111",
+            "1100"
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "按列数珠子",
+          "en": "Count beads by column",
+          "values": [
+            4,
+            3,
+            2,
+            1
+          ],
+          "active": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fixed": [],
+          "moved": []
+        },
+        {
+          "zh": "各列下落后的四行",
+          "en": "Four rows after each column settles",
+          "values": [
+            "1000",
+            "1100",
+            "1110",
+            "1111"
+          ],
+          "active": [],
+          "fixed": [],
+          "moved": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "zh": "数每行珠子：升序输出",
+          "en": "Count each row: ascending output",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "active": [],
+          "fixed": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "moved": []
+        }
+      ]
+    }
+  },
+  {
+    "id": 69,
+    "group": "F",
+    "zh_title": "意大利面排序",
+    "en_title": "Spaghetti sort",
+    "kind": "physical",
+    "zh_alias": "面条排序；SAG（Spaghetti Analog Gadget）",
+    "en_alias": "Spaghetti Analog Gadget (SAG)",
+    "zh": {
+      "foundation": [
+        "把长度当作数：三厘米的杆代表 3，一厘米的杆代表 1。这里先假设长度为正且能准确制作、区分。",
+        "要比较杆的长短，底端必须落在同一个平面。把短杆举高，会误以为它更长。"
+      ],
+      "idea": "把每个数做成一根对应长度的杆，像一把干意大利面。底端齐平时，最高的顶端属于最长的杆。拿走最长的，再拿剩下最长的，就会按从大到小取出。把这串结果倒过来，才是从小到大。",
+      "steps": [
+        "选定长度单位，准备每个数对应的杆。若需要知道原记录是谁，给杆加标签。",
+        "把所有杆竖起来，底端都放在同一个平面上。检查没有杆悬空，也没有歪斜导致高度失真。",
+        "从上方找到最高的顶端，取出对应杆，记下它的长度。现在这个数是剩余输入的最大值。",
+        "继续对剩余杆做同样的事，直到取完。得到的是降序：把结果整串反转，或每次从结果的最后一个空位置往前填，形成升序。"
+      ],
+      "example": [
+        "输入 [3,1,4,2]，做出长度为 3、1、4、2 单位的四根杆。原来谁排在前面不影响长度。",
+        "底端对齐后，4 的杆最高。取出它，暂记 [4]；剩余长度是 3、1、2。",
+        "接着 3 最高，取出后暂记 [4,3]。再取 2，得到 [4,3,2]。最后取 1，得到 [4,3,2,1]。",
+        "反转时交换最外面的 4 和 1，得到 [1,3,2,4]；再交换中间的 3 和 2，得到 [1,2,3,4]。",
+        "为什么每次取出的都可靠？因为剩余杆的底端仍然齐平，顶端最高就等于长度最长。若底端不齐，这个推理就不成立。"
+      ],
+      "cost": "理想模型若规定做杆、对齐、一次拿到最高杆都算一个动作，那么准备和读取各做约 n 次，工作量 Θ(n)，保存 n 根杆需要 Θ(n) 资源。n 是数的个数，Θ 是同一增长数量级。真实成本还取决于总长度、材料、精度和操作。计算机若没有一次拿到最大值的物理能力，而是每轮逐个比较寻找最大值，就会做 n+(n−1)+… 次检查，时间 Θ(n²)。",
+      "why": "快来自特殊器材把全部长度同时展示成高度。器材替我们做了大范围比较；准备器材和读出结果仍然需要工作。相近长度尤其难分辨。",
+      "use": "适合讲解模拟计算，以及为什么效率必须说明允许什么操作。不是普通程序里免费调用的线性排序。",
+      "details": "等长杆先取谁没有保证。若要求稳定，必须带原顺序标签并规定等高时的取出顺序。负数要加偏移，小数要求更高精度；这些都增加前提。不能把“对齐后高度已经有序”当作整项工作零成本完成。"
+    },
+    "en": {
+      "foundation": [
+        "Use length to represent a value: a three-unit rod represents 3. Assume positive lengths that can be made and distinguished accurately.",
+        "The bottom ends must share a flat surface. Raising a short rod would make its top falsely suggest a larger value."
+      ],
+      "idea": "Make one rod for each value, like a handful of uncooked spaghetti. With the bottoms aligned, the highest top belongs to the longest rod. Remove that rod, then the longest remaining rod. The readings arrive largest first. Reverse them to obtain ascending order.",
+      "steps": [
+        "Choose a length unit and prepare the rods. Add labels if the original records have identities that must survive.",
+        "Stand the rods upright with every bottom on the same flat surface. A lifted or tilted rod can give a misleading height.",
+        "Find the highest top, remove its rod, and record its length. That rod represents the largest remaining input.",
+        "Continue until no rods remain. Reverse the recorded sequence, or write each removal into the last available output slot and work backward."
+      ],
+      "example": [
+        "For [3,1,4,2], prepare rods of lengths three, one, four, and two units. Their original positions do not affect their lengths.",
+        "After aligning the bottoms, the four-unit rod is highest. Remove it: the partial reading is [4], and the remaining lengths are 3,1,2.",
+        "Three is highest next, giving [4,3]. Then remove two, giving [4,3,2], and finally one, giving [4,3,2,1].",
+        "To reverse the readings, exchange the outside values 4 and 1: [1,3,2,4]. Exchange the middle values 3 and 2: [1,2,3,4].",
+        "Each removal is justified because all remaining bottoms are still aligned. Highest top then means greatest length. Without that alignment, the argument fails."
+      ],
+      "cost": "Suppose an ideal model counts preparing a rod, aligning it, and selecting the highest top as unit-cost actions. Preparation and reading each take about n actions: Θ(n) work and Θ(n) rods, where n is the item count and Θ means the same growth order. Real work also depends on length, material, precision, and handling. A computer that scans every remaining value to find each maximum makes n+(n−1)+… checks and takes Θ(n²) time.",
+      "why": "The apparatus exposes many lengths at once and supplies a special selection operation. Making the apparatus and reading its answer still require work. Nearly equal lengths are especially difficult to measure.",
+      "use": "Use it to discuss analog computation and why speed claims need an operation model. It is not a free linear-time operation available to ordinary software.",
+      "details": "Equal rods have no automatic stable order. Labels and an original-order rule are needed for ties. Negative values need an offset, and fractions need enough measurement precision. An aligned physical state is not the same as a zero-cost completed sorting job."
+    },
+    "sources": [
+      {
+        "title": "A. K. Dewdney: Computer Recreations, June 1984",
+        "url": "https://www.scientificamerican.com/article/computer-recreations-1984-06/"
+      }
+    ]
+  },
+  {
+    "id": 70,
+    "group": "F",
+    "zh_title": "睡眠排序",
+    "en_title": "Sleep sort",
+    "kind": "joke",
+    "zh_alias": "延时输出排序（描述性名称）",
+    "en_alias": "Delay-based output (descriptive name)",
+    "zh": {
+      "foundation": [
+        "一个任务可以先等待一段时间，之后再执行。等待结束通常只表示它可以运行，不保证它立刻抢到处理器或输出设备。",
+        "多个任务同时存在叫并发。并发不等于所有任务真的同一时刻开始、同一时刻按计划写出结果。"
+      ],
+      "idea": "给每个数开一个等待任务：小数值等得短，大数值等得长。希望它们按醒来的先后写出数，就成为升序。这依赖现实中没有普遍保证的时间条件，所以它是一种演示技巧，不能保证一般输入都正确排序。",
+      "steps": [
+        "先限定非负数，选时间比例，例如每 1 个数值单位等 1 秒。若希望最小值先写出，所有等待必须以同一个起点计时。",
+        "为每个输入安排任务。数值 x 的计划输出时刻是共同起点加 x 倍时间比例。不要误把依次创建任务的各自起点当成共同起点。",
+        "收集实际写出的值，等所有任务完成。实际顺序取决于任务何时获得运行和输出机会。",
+        "若计划时间与实际写出时间的次序不同，就得到错误结果。普通等待调用本身不提供排序正确性；演示必须明确这些理想前提。"
+      ],
+      "example": [
+        "用 [3,1,2]，假设共同在零秒开始、每单位等一秒、没有任何延误。1 在一秒写出，2 在两秒写出，3 在三秒写出，结果 [1,2,3]。",
+        "这期间没有比较两个数，也没有交换数组位置。数值被改成了计划等待时间。",
+        "再看 [1,2]。任务 1 在一秒准备好，却因为处理器忙一直等到 2.5 秒才写出；任务 2 在两秒顺利写出。实际收集到 [2,1]，排序失败。",
+        "还有一种错误：先创建 3 的任务，过很久才创建 1 的任务。即使各自都精确等待，较小数也可能更晚写出。共同起点可以修复这一点，却不能修复后续调度延误。"
+      ],
+      "cost": "理想条件下，创建和收集各处理 n 个任务，工作量 Θ(n)；总等待约为时间比例乘最大值 M。n 是输入个数，M 是最大数值，Θ 表示同一增长数量级。通常要 O(n) 任务资源，O 表示上界。只有启动动作少不代表整项工作快：若最大值随数字位数 b 达到约 2^b，等待也可这么长。真实系统一般没有保证正确次序的调度上界，不能给它一个按 n 排列的可靠最好、通常、最坏排序时间。",
+      "why": "它把数字大小换成真实时间，没有消除这份成本。把等待比例缩短，虽然快一些，但更容易被时间分辨率和调度误差打乱。",
+      "use": "适合学习计时、并发和“准备运行”与“实际运行”的区别。需要结果一定正确时，不应选它。",
+      "details": "等值记录的先后也没保证，因此不稳定。负数加偏移、小数扩大比例都不能解决任务延误。若使用能可靠按时刻取出事件的队列，队列本身可能已经需要堆或别的排序结构，其成本也应计入。"
+    },
+    "en": {
+      "foundation": [
+        "A waiting task becomes ready after its delay. Ready does not mean it immediately receives processor time or access to output.",
+        "Several tasks can exist concurrently without starting or printing at exactly their planned times."
+      ],
+      "idea": "Create a waiting task for each value. Small values wait briefly; large values wait longer. The hope is that printing in wake-up order gives ascending values. That hope requires timing conditions real systems do not generally promise, so this is a demonstration trick rather than a reliable general sort.",
+      "steps": [
+        "Restrict values to nonnegative numbers and choose a scale, such as one second per value unit. All delays should refer to a common starting time.",
+        "Arrange one task per value. For x, the planned print time is the common start plus x times the scale. Separate task-creation times are not automatically a common start.",
+        "Collect the values actually printed and wait for every task to finish. Actual order depends on when each task can run and write.",
+        "If actual output order differs from planned time order, the result is wrong. A normal sleep or timer call does not by itself provide a sorting guarantee."
+      ],
+      "example": [
+        "Take [3,1,2]. Assume a common start at zero, one second per unit, and no delays. One prints at one second, two at two seconds, and three at three seconds: [1,2,3].",
+        "No pair of values was compared and no array positions were exchanged. Values were encoded as planned waiting times.",
+        "Now take [1,2]. The task for one becomes ready at one second, but a busy processor delays its output until 2.5 seconds. The task for two prints at two seconds. The collected result is [2,1].",
+        "Starting the tasks at different times creates another problem. A task for three can start much earlier than a task for one. A shared starting time fixes that issue, but does not remove later scheduling delays."
+      ],
+      "cost": "In an ideal delay-free model, launching and collecting n tasks requires Θ(n) work. Elapsed waiting is roughly the scale times the largest value M. Here n counts inputs, M is their maximum, and Θ means the same growth order. Task resources are usually O(n), an upper bound proportional to n. A maximum represented with b bits can approach 2^b, producing enormous waiting. Real scheduling generally provides neither guaranteed output order nor a universal delay bound, so ordinary best, usual, and worst sorting times cannot be ranked using n alone.",
+      "why": "It replaces numeric size with real waiting instead of removing that cost. Shortening the scale increases sensitivity to timer resolution and delays.",
+      "use": "Use it to learn timers, concurrency, and the difference between becoming ready and actually running. Do not use it when order must be correct.",
+      "details": "Equal records have uncertain order. Offsets for negatives and finer scales for fractions do not fix scheduling. A dependable ordered event queue may already use a heap or another ordering structure whose work must be counted."
+    },
+    "sources": [
+      {
+        "title": "Kevlin Henney: Need Something Sorted? Sleep On It!",
+        "url": "https://accu.org/journals/overload/31/175/henney/"
+      }
+    ]
+  },
+  {
+    "id": 71,
+    "group": "F",
+    "zh_title": "穷举全排列排序",
+    "en_title": "Exhaustive permutation sort",
+    "kind": "joke",
+    "zh_alias": "确定性排列排序；deterministic Bogosort 在部分资料中的称呼",
+    "en_alias": "Permutation sort; sometimes deterministic Bogosort",
+    "zh": {
+      "foundation": [
+        "一个排列，就是同一批记录的一种摆法，不添加也不丢掉记录。例如 [3,1,2] 和 [1,3,2] 是两种摆法。",
+        "可以先选第一格放谁，再从剩余记录里选第二格。一次选到底得到一个候选；不成功就退回最近的选择，换一个还没试过的选项。"
+      ],
+      "idea": "按一个确定顺序，把可能的摆法逐一试出来。每得到一串完整候选，就检查是否从小到大；找到一串就停。它保证最后能找到答案，但前面失败的摆法几乎没给下一次提供帮助。",
+      "steps": [
+        "准备当前候选和“哪些记录已经用过”的记号。从输入顺序开始，依次尝试第一格的各个可用记录。",
+        "选好第一格后，把它标为已用。第二格只尝试尚未用过的记录。这样继续，直到每一格都有记录。",
+        "从第一对相邻数开始检查候选。若每个数都不大于右边的数，返回这个候选。若发现前数更大，候选失败。",
+        "失败后退回最近还有其他选项的位置。撤销后面记录的已用记号，换一个未试的选择，再把后面的格子逐格填上。一个位置的选项都试完就再向前退。这个规则保证没有遗漏摆法。"
+      ],
+      "example": [
+        "输入 [3,1,2]，选项按原记录顺序尝试。第一格先放 3，第二格放 1，剩余 2 只能放第三格：候选 [3,1,2]，因为 3>1 失败。",
+        "退回第二格，把 1 放回可用记录，改选 2。第三格填剩余 1：候选 [3,2,1]，也失败。以 3 开头的选择已试完。",
+        "退回第一格，改放 1。剩余记录按顺序是 3、2，所以先得到 [1,3,2]，因为 3>2 失败。",
+        "再退回第二格，改放 2，第三格放 3，得到 [1,2,3]。两对相邻数都通过，停止。以 2 开头的两个候选不必再试。"
+      ],
+      "cost": "候选增长非常快：n 个不同记录有 n! 种摆法，! 表示 n×(n−1)×…×1。这里 n 是记录个数。若每个候选都完整检查 n−1 对，则第一候选已正确的最好时间 Θ(n)，最后才找到的最坏时间 Θ(n·n!)，Θ 表示同一增长数量级。若正确候选的位置大致均匀，通常也需要阶乘量级试验。一次只保留当前候选和选择状态，额外空间 O(n)，不用存所有候选。发现错误就提前停止检查，会改变单次检查成本，但候选数仍巨大。",
+      "why": "多一个不同记录，就把摆法数再乘一个越来越大的数。保证能结束，和能在合理时间内结束，是两件事。",
+      "use": "适合用极少记录学习穷举和逐格选择，也可作为小输入的答案核对方法。",
+      "details": "等值记录若各自有身份，默认可能改变顺序。按“数值、原下标”共同比较可规定唯一稳定目标。这里的排列枚举与排名排序不是同一方法：后者通过两两比较计算位置，不把所有摆法逐一尝试。"
+    },
+    "en": {
+      "foundation": [
+        "A permutation is one arrangement of the same records. No record is added or lost: [3,1,2] and [1,3,2] are different arrangements.",
+        "Choose a record for the first slot, then one of the remaining records for the second. Completing all choices gives a candidate. After failure, return to a choice and try another option."
+      ],
+      "idea": "Try possible arrangements in a fixed, systematic order. Check each complete candidate for ascending order and stop when one passes. The method eventually finds an answer, but failed candidates provide almost no useful guidance for the next attempt.",
+      "steps": [
+        "Keep a current candidate and marks showing which records are used. Try the options for its first slot in input order.",
+        "After choosing a record, mark it used. Try only unused records for the next slot. Continue until all slots are filled.",
+        "Check neighboring values from left to right. If each value is no greater than its right neighbor, return the candidate. A larger left value makes it fail.",
+        "After failure, return to the latest choice that has another option. Release the records used after that choice, select the next option, and fill the later slots again. If a choice has no options left, move back farther. This avoids missing arrangements."
+      ],
+      "example": [
+        "Start with [3,1,2], trying records in input order. Put 3 first, then 1, then the only remaining record, 2. Candidate [3,1,2] fails because 3>1.",
+        "Return to the second slot. Release 1 and try 2 there, leaving 1 for the last slot: [3,2,1]. It fails too. All candidates beginning with 3 have now been tried.",
+        "Return to the first slot and choose 1. The remaining records are 3 and 2, so the next candidate is [1,3,2]. It fails because 3>2.",
+        "Change the second choice to 2 and put 3 last: [1,2,3]. Both neighboring pairs pass, so stop. The two arrangements beginning with 2 need not be generated."
+      ],
+      "cost": "With n different records, there are n! arrangements. The exclamation mark means n×(n−1)×…×1. With a complete n−1-pair test for each candidate, best time is Θ(n), and worst time Θ(n·n!); Θ means the same growth order. If the target position is roughly uniform, usual waiting is also factorial-scale. Keeping only the current choices needs O(n) extra space, a linear upper bound. Stopping a check at its first error can save checks, but does not remove the huge candidate count.",
+      "why": "Adding one distinct record multiplies the possibilities by another growing factor. Guaranteed eventual success does not imply practical speed.",
+      "use": "Use tiny examples to learn exhaustive search or to check another method’s answer.",
+      "details": "Equal records may exchange identities. Comparing both value and original position defines a stable target. This permutation enumeration differs from rank/enumeration sort, which calculates positions from pairwise comparisons."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: permutation sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/permutationSort.html"
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "group": "F",
+    "zh_title": "Bogo 排序",
+    "en_title": "Bogosort",
+    "kind": "joke",
+    "zh_alias": "愚蠢排序；猴子排序；随机排列排序",
+    "en_alias": "Stupid sort; monkey sort; random permutation sort",
+    "zh": {
+      "foundation": [
+        "先检查相邻数：左边不大于右边就是这一对顺序正确；所有相邻对都正确，整串才正确。",
+        "洗牌是重新打乱整批记录。正确的随机洗牌不丢记录，并让每种排列有同样机会；不是随便交换一次就等价。"
+      ],
+      "idea": "检查当前摆法。若已经有序就结束，否则整串随机洗牌，再检查。每次失败后都丢掉已有顺序信息，希望某次碰巧摆对。答案正确来自最后一次完整检查；难题是等待它出现可能要很久。",
+      "steps": [
+        "从左到右检查相邻对。如果每对都满足左值不大于右值，就停止并返回当前数组。",
+        "发现错误后做均匀洗牌。一个办法是从最后一格开始，在第一格到当前格之间等机会选一格，和当前格交换；再把当前格向左缩一格，重复到第二格。",
+        "现在重新检查整串。洗牌之后，原来正确的前缀或后缀都不能继续当成已完成。",
+        "只要检查失败，就再洗牌。演示可以设尝试次数上限，但达到上限的含义是尚未完成，不能把最后一串当作排序答案。"
+      ],
+      "example": [
+        "从 [3,1,2] 开始，第一对 3、1 不对，准备洗牌。假设最后一格 2 抽中与第一格 3 交换，得到 [2,1,3]；再在前两格抽中交换，得到 [1,2,3]。这是一条成功的洗牌路径。",
+        "也完全可能第一轮得到 [2,3,1]，检查因 3>1 失败；下一轮又回到 [3,1,2]。前一次看起来的进步没有保证保留。",
+        "只有得到 [1,2,3]，并检查 1≤2、2≤3 后，才停止。上述结果是假设的随机结果，不能照着预测下一轮。",
+        "三个不同数有六种排列，均匀洗牌每次成功机会为六分之一。平均六轮不表示第六轮一定结束；第六十轮仍失败也可能发生。"
+      ],
+      "cost": "已经有序时只检查一遍，最好时间 Θ(n)，n 为记录个数，Θ 表示同一增长数量级。不同值共有 n! 种排列，其中一种有序；! 是从 n 连乘到 1。独立均匀洗牌平均需要 n! 轮，每轮洗牌和完整检查都花约 n 个动作，期望时间 Θ(n·n!)。原地洗牌只用固定几个临时变量，额外空间 O(1)。随机失败可以不断发生，没有有限的最坏终止时间。若有重复数，数值排列数减少；例如 [1,1,2] 只有三种数值摆法，不是六种。",
+      "why": "它完全不利用比较告诉我们的方向。巨大候选空间里反复抽签，即使最终结束的概率是 1，也没有某个有限时刻必定完成的承诺。",
+      "use": "适合极小例子，用来区分平均等待、概率和最坏情况。不是实用的大数据排序。",
+      "details": "通常不稳定，因为洗牌可能改变等值记录身份的先后。若重复值的数量分别为 c₁、c₂……，不同数值摆法数 D=n!/(c₁!c₂!……)，成功概率是 1/D。随机数或洗牌不符合前提会改变结论。只随机交换两个位置的是 Bozosort；stupid sort 也可能指侏儒排序，别名有歧义。"
+    },
+    "en": {
+      "foundation": [
+        "A neighboring pair is in order when its left value is no greater than its right value. All neighboring pairs must pass.",
+        "A shuffle rearranges all records without losing any. A uniform shuffle gives every permutation the same chance; a single arbitrary swap does not do that."
+      ],
+      "idea": "Check the current arrangement. If it is ordered, finish. Otherwise shuffle the whole array and check again. It throws away useful order and hopes to land on the answer by chance. The final check ensures correctness; the difficulty is how long success takes.",
+      "steps": [
+        "Check neighboring pairs from left to right. Stop if every pair has its smaller or equal value on the left.",
+        "After failure, shuffle uniformly. One method starts at the last slot: choose a slot uniformly from the first through the current slot and exchange their records. Move the current slot one place left and repeat through the second slot.",
+        "Check the complete array again. No prefix or suffix remains protected after a shuffle.",
+        "Repeat after every failure. A demonstration may impose an attempt limit, but reaching it means unfinished, not sorted."
+      ],
+      "example": [
+        "Start with [3,1,2]. The pair 3,1 fails. One possible shuffle exchanges the last record 2 with the first record 3, giving [2,1,3]. It then exchanges the first two slots, giving [1,2,3].",
+        "Another run might instead produce [2,3,1], which fails at 3>1, then shuffle back to [3,1,2]. Apparent progress can disappear.",
+        "Only [1,2,3], followed by checks of 1≤2 and 2≤3, makes this example stop. These are possible random outcomes, not a script predicting future attempts.",
+        "Three distinct values have six arrangements. A uniform shuffle succeeds with probability one sixth. An average of six attempts is not a promise to finish on attempt six, or even sixty."
+      ],
+      "cost": "For sorted input, one check gives best time Θ(n), where n counts records and Θ means the same growth order. Distinct records have n! permutations, with ! meaning multiplication from n down to 1. Independent uniform trials need n! attempts on average. Linear-cost shuffling and checking give expected time Θ(n·n!). In-place shuffling needs O(1) extra space: a fixed number of temporary values. There is no finite worst-case completion bound. Repeated values reduce the possibilities: [1,1,2] has three value arrangements, not six.",
+      "why": "The comparisons supply direction, but the method ignores it and draws another arrangement. Probability-one eventual termination does not supply a finite guaranteed deadline.",
+      "use": "Use very small examples to explain averages, probability, and worst cases.",
+      "details": "It is normally unstable. If equal-value counts are c₁,c₂,…, the number of value arrangements is D=n!/(c₁!c₂!…), giving success probability 1/D. The randomness assumptions matter. Randomly swapping just two slots defines Bozosort. The alias stupid sort can also mean gnome sort."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: bogosort",
+        "url": "https://xlinux.nist.gov/dads/HTML/bogosort.html"
+      },
+      {
+        "title": "Gruber, Holzer and Ruepp: Sorting the Slow Way",
+        "url": "https://link.springer.com/chapter/10.1007/978-3-540-72914-3_17"
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "group": "F",
+    "zh_title": "Bozo 排序",
+    "en_title": "Bozosort",
+    "kind": "joke",
+    "zh_alias": "随机两格交换排序",
+    "en_alias": "Random-transposition sort",
+    "zh": {
+      "foundation": [
+        "交换两格，要先暂存其中一个记录，再把另一格搬来，最后把暂存记录放进另一格。这样两个记录都还在。",
+        "随机选位置，是不根据数值大小决定选谁。交换后仍要检查全部相邻对，不能只看刚交换的两个数。"
+      ],
+      "idea": "每次随机选两个位置交换，然后检查整串是否已经有序。与整串洗牌不同，它一次只改两个位置。但交换不看数值方向，有时改好，有时把刚做好的关系改坏。",
+      "steps": [
+        "先检查全部相邻对。有序就停；否则准备一次随机交换。",
+        "这里约定从全部位置里随机选两个不同位置。把这两格的完整记录交换。另一种版本允许同一格选两次，那一轮相当于不动。",
+        "重新从头检查相邻对。只有全都通过才成功；有任何一对左边更大就继续。",
+        "再次随机选两格交换。任何位置以后仍可被选中，不能把碰巧正确的开头标为永久完成。"
+      ],
+      "example": [
+        "从 [3,1,2] 开始，3>1，所以失败。假设随机选第一、第二格。暂存 3，把 1 搬到第一格，把 3 放到第二格，得到 [1,3,2]。",
+        "检查：1≤3 通过，3>2 失败。假设这次选第二、第三格，交换得到 [1,2,3]。全部相邻对通过，于是结束。",
+        "但另一条路径会在 [1,3,2] 后又选第一、第二格，回到 [3,1,2]。第一格曾经正确，不代表以后被保护。",
+        "也可能一直交换同一对位置，来回往返。每轮都遵守规则，却没有保证在有限轮数内到达目标。"
+      ],
+      "cost": "已排序时只扫描一遍，最好时间 Θ(n)，n 是记录数，Θ 表示同一增长数量级。一次交换只要固定几个动作，额外空间 O(1)，即固定数量临时变量。困难是需要几轮：标准随机交换模型的等待可达阶乘量级；准确期望依赖选位置规则、起始排列与检查方式，不能给所有版本套同一个公式。每轮若完整检查就再做 Θ(n) 工作；发现第一处错误即停可少一些。没有有限的最坏终止时间，通常也不稳定。",
+      "why": "交换本身便宜，却不一定朝答案走。改好一对关系时也可能破坏其他关系，下一轮又可能撤销刚才的交换。",
+      "use": "适合用三四个数比较“一次洗全串”和“一次随机交换”的差别。不是实用排序。",
+      "details": "若总选两个不同位置，每次交换会改变排列的奇偶性；这不妨碍最终到达目标，只影响可能到达的步数。允许同一位置被选两次会多一些空转。理想随机选择可以使最终到达概率为 1，仍不能给出固定完成期限。"
+    },
+    "en": {
+      "foundation": [
+        "To exchange two records safely, save one, move the other into its slot, then put the saved record into the other slot. Both records survive.",
+        "Random position choices ignore the values. After the exchange, the whole neighboring-pair test must still pass, not merely the changed pair."
+      ],
+      "idea": "Choose two random positions, exchange their records, and check whether the array is ordered. Unlike a whole-array shuffle, this changes only two positions at a time. Because the choices ignore values, an exchange may help or undo an earlier improvement.",
+      "steps": [
+        "First check every neighboring pair. Stop if they are all ordered. Otherwise prepare a random exchange.",
+        "Here choose two different positions uniformly and exchange their complete records. Another version allows choosing the same position twice, creating an idle attempt.",
+        "Start the order check again from the beginning. Every pair must pass. Any larger left value means another attempt is needed.",
+        "Choose another random pair. All positions remain eligible; an accidentally correct first slot is not permanently finished."
+      ],
+      "example": [
+        "Start with [3,1,2]. The check fails at 3>1. Suppose the chosen positions are one and two. Save 3, move 1 into the first slot, and place 3 in the second: [1,3,2].",
+        "Check again: 1≤3 passes, but 3>2 fails. Suppose positions two and three are chosen next. Their exchange gives [1,2,3]. Every neighboring pair passes, so finish.",
+        "A different run can reach [1,3,2], then choose positions one and two again and return to [3,1,2]. The first slot looked finished but had no protection.",
+        "It is also possible to keep exchanging the same pair and travel back and forth. Each attempt follows the rule without guaranteeing success within a fixed number of attempts."
+      ],
+      "cost": "Already ordered input needs one scan: best time Θ(n), where n is the record count and Θ means the same growth order. Each swap uses a fixed number of actions and O(1) temporary space. Waiting is the main cost. Standard random-transposition models have factorial-scale waiting; exact expectations depend on pair selection, starting arrangement, and checking rules. A complete check adds Θ(n) work per attempt. Stopping at the first error can reduce that check. There is no finite worst-case completion bound, and equal records are normally not stable.",
+      "why": "A cheap swap does not necessarily point toward the answer. It can repair one relation while breaking another, or the next attempt can reverse it.",
+      "use": "Use three or four records to compare random pair swaps with complete shuffles.",
+      "details": "Exchanging distinct positions alternates permutation parity but does not prevent eventual reachability. Allowing identical choices adds idle steps. Ideal randomness can give probability-one eventual success without a fixed deadline."
+    },
+    "sources": [
+      {
+        "title": "NIST DADS: bozo sort",
+        "url": "https://xlinux.nist.gov/dads/HTML/bozoSort.html"
+      },
+      {
+        "title": "Gruber, Holzer and Ruepp: Sorting the Slow Way",
+        "url": "https://link.springer.com/chapter/10.1007/978-3-540-72914-3_17"
+      }
+    ]
+  },
+  {
+    "id": 74,
+    "group": "F",
+    "zh_title": "Bogo-Bogo 排序",
+    "en_title": "Bogobogosort",
+    "kind": "joke",
+    "zh_alias": "递归检查型 Bogobogosort；存在不统一变体",
+    "en_alias": "Recursive-check Bogobogosort; definitions vary",
+    "zh": {
+      "foundation": [
+        "副本是另一份独立记录。改副本，不会自动改原数组；下面会同时跟踪两份，不能混为一谈。",
+        "前缀是开头的一段。前缀若已经升序，它的最后一个数就是这段的最大数。再看全串最后一个数是否不小于它，就能知道整份副本是否有序。",
+        "递归是让同一方法处理更短的输入。较大任务先停在“等待小任务完成”处，小任务做完再回来继续；长度零或一时直接返回，避免一直拆下去。"
+      ],
+      "idea": "这是一种故意把检查做得很费劲的方法。普通随机排序直接检查相邻对；这里先复制原数组，再用同一个慢方法排副本的前面部分，想办法得到一份完全有序的副本，然后比较副本和原数组是否一模一样。若不同，明明已有正确副本，也不拿它当答案，而是重新洗原数组再试。",
+      "steps": [
+        "空串或一项直接完成。其余情况，要检查原数组 A，就先做独立副本 C。A 在这次检查过程中不动。",
+        "让同一方法排序 C 的前 n−1 项，n 是当前项数。这个小任务也要复制、检查、必要时洗牌；它没完成，当前任务就等着。",
+        "小任务完成后，C 的前面部分已经有序。看 C 最后一项是否不小于前缀最后一项。若更小，就把整个 C 随机洗牌，再重排它的前 n−1 项，再比这两个末尾值，直到 C 完全有序。",
+        "现在逐格比较有序副本 C 与检查前的 A。每格数值都相同，说明 A 本来就有序，本次检查通过；只要一格不同就失败。",
+        "失败后丢掉这次检查结果，对原数组 A 洗牌。重新从复制步骤开始。千万不要把有序 C 直接复制回 A；那会变成另一种、较合理的方法。"
+      ],
+      "example": [
+        "外层原数组 A=[2,1,3]，先复制 C=[2,1,3]。要排 C 的前两项 [2,1]，于是暂停三项任务，进入两项任务。",
+        "两项任务的原串 P=[2,1]，做副本 Q=[2,1]。Q 的前一项 [2] 无须动；最后的 1 小于 2，所以 Q 还没排好。假设洗 Q 得 [1,2]，再处理前一项 [1]，比较 2≥1，Q 有序。",
+        "Q=[1,2] 与 P=[2,1] 不同，两项检查失败。假设洗原串 P 得 [1,2]，下一次复制 Q=[1,2]，前一项直接返回，末尾比较通过，Q 与 P 相同。两项任务这才返回 [1,2]。",
+        "回到三项任务，现在 C=[1,2,3]。3≥2，所以 C 有序；但 C 不等于 A=[2,1,3]。外层检查失败，A 仍是原来的摆法。",
+        "假设洗 A 得 [1,3,2]。副本前两项 [1,3] 本来有序，其两项检查可直接通过；但副本末尾 2<3，所以要洗的是副本 C。假设洗 C 得 [2,1,3]，它的前两项像上面那样最终排成 [1,2]，C 又得到 [1,2,3]，仍与 A=[1,3,2] 不同。",
+        "外层再失败，再洗 A。假设这回 A=[1,2,3]。副本的前两项检查通过，末尾 3≥2，副本与原串逐格相同，外层终于通过。这些洗牌结果只是选来说明过程的可能路径，不保证实际轮数。"
+      ],
+      "cost": "即使输入本来有序，检查也要做长度 n、n−1……的副本，并逐层比较，所以这个版本最好也花 Θ(n²) 复制和检查工作；n 是项数，Θ 表示同一增长数量级。较大任务等待时仍保留自己的副本，基本实现同时保存的格子数为 n+(n−1)+…，额外空间 O(n²)，O 表示上界。随机重试还可能无限继续，没有有限的最坏终止时间。不同 Bogobogosort 定义没有统一公认的精确期望公式，不能把作者的估测写成定理。",
+      "why": "它把本可一遍完成的检查，换成套着套的排序，并且在检查失败后扔掉已排好的副本。内层等待与外层等待一起放大浪费。",
+      "use": "只适合极小例子，帮助看懂递归等待、副本与原数据的区别，以及为什么检查方法本身也有成本。",
+      "details": "这里用“大于或等于”检查末项，以支持重复的最大值；严格大于的原始写法对这些重复值有问题。数值相同的记录身份仍可能被洗乱，通常不稳定。还有逐步增长前缀等不同版本，它们不应继承本条的准确成本结论。"
+    },
+    "en": {
+      "foundation": [
+        "A copy is separate data. Changing it does not automatically change the original array. Keep track of both.",
+        "A prefix is the beginning part of an array. Once that part is ascending, its last value is its maximum. The full array is ordered if the final value is at least that maximum.",
+        "Recursion asks the same method to handle a smaller input. The larger task waits, then resumes where it stopped. Zero or one item returns immediately."
+      ],
+      "idea": "This method deliberately makes checking expensive. Instead of checking neighboring pairs, it copies the original, sorts the beginning of the copy using this same method, and tries to obtain an ordered copy. It then compares that copy with the original. If they differ, it discards the useful ordered copy and shuffles the original again.",
+      "steps": [
+        "Zero or one item needs no work. Otherwise, to check original array A, make an independent copy C. Leave A untouched during this check.",
+        "Ask this method to sort the first n−1 items of C, where n is the current item count. That smaller task also copies, checks, and sometimes shuffles. Wait until it finishes.",
+        "The prefix of C is now ordered. Compare its last value with the final value of C. If the final value is smaller, shuffle the whole copy C, sort its prefix again, and repeat this comparison until C is ordered.",
+        "Compare ordered C with A, slot by slot. Equality everywhere means A was already ordered and the check passes. Any difference makes it fail.",
+        "After failure, discard the check result, shuffle A, and restart with a fresh copy. Do not replace A with ordered C: that would define a different, more sensible method."
+      ],
+      "example": [
+        "Let A=[2,1,3], and copy it to C=[2,1,3]. Sorting the first two items pauses the three-item task and starts a two-item task on P=[2,1].",
+        "That task copies P to Q=[2,1]. Its one-item prefix [2] returns immediately. The final 1 is smaller than 2, so Q is not ordered. Suppose shuffling Q gives [1,2]. Its prefix [1] returns, and 2≥1 makes Q ordered.",
+        "But Q=[1,2] differs from P=[2,1], so the two-item check fails. Suppose P now shuffles to [1,2]. A new copy, one-item return, final comparison, and equality test all pass. The two-item task finally returns [1,2].",
+        "Resume the three-item task: C=[1,2,3]. Since 3≥2, C is ordered, but it differs from A=[2,1,3]. The outer check fails. A has not yet changed.",
+        "Suppose A shuffles to [1,3,2]. Its copy has an ordered prefix [1,3], but final 2<3. Shuffle that copy. A possible result [2,1,3] requires the two-item work above, eventually giving C=[1,2,3]. C still differs from A, so the outer check fails again.",
+        "Suppose A next shuffles to [1,2,3]. Its copy passes the prefix check, the final comparison, and equality with A. Only now does the outer task finish. These chosen shuffle outcomes illustrate a possible path, not a fixed waiting time."
+      ],
+      "cost": "Even already ordered input creates and checks copies of lengths n,n−1,… . Its best no-shuffle path takes Θ(n²) work; n counts items and Θ means the same growth order. Waiting parent tasks retain their copies, so a basic implementation needs O(n²) live extra space. Random retries have no finite worst-case completion bound. Definitions vary, and there is no universal established exact expected-time formula.",
+      "why": "It replaces a short check with nested sorts and can discard their completed work. Inner and outer retries compound the waste.",
+      "use": "Use only tiny examples to study recursive waiting and copies.",
+      "details": "This version uses at least, rather than strictly greater, to support duplicate maxima. Shuffling can reorder equal record identities, so stability is not assured. The original author gives complexity guesses. Prefix-growing variants should not inherit this version’s precise claims."
+    },
+    "sources": [
+      {
+        "title": "David Morgan-Mar: Bogobogosort definition and discussion",
+        "url": "https://www.dangermouse.net/esoteric/bogobogosort.html"
+      },
+      {
+        "title": "Lucas Werkmeister: recursive-check implementation",
+        "url": "https://github.com/lucaswerkmeister/Miscellaneous/blob/master/Sorting/src/Bogobogosort.java"
+      }
+    ]
+  },
+  {
+    "id": 75,
+    "group": "D",
+    "zh_title": "圆圈排序",
+    "en_title": "Circle sort",
+    "kind": "algorithm",
+    "zh_alias": "Circlesort；不是 circular sort 的所有同名方案",
+    "en_alias": "Circlesort; distinct from other circular-sort proposals",
+    "zh": {
+      "foundation": [
+        "两头向中间走：先看第一、最后一格，再看第二、倒数第二格。每次把较小值留在左边。",
+        "一个完整回合包含整串扫描和所有较小区间的扫描。局部不交换，不代表整个回合没有交换。",
+        "递归处理半段，是先暂停当前任务，完整处理左半，再处理右半，再回到当前任务结束；一格无须比较。"
+      ],
+      "idea": "先比较两端对应的数，一对一对向中间走，让小数向左、大数向右；再用同样规则处理两个半段。这样一个完整回合仍可能没排完，所以从整串再来一回，直到所有大小区间都没有发生交换。名字描绘了比较的配对方式，不要求真的把数组摆成圆。",
+      "steps": [
+        "对当前区间，左指针放第一格，右指针放最后一格。左值大于右值就交换；否则保留。两指针各向中间移动一格，继续，直到不能组成不同的两格。",
+        "奇数项会剩下一个中间项。本条的具体版本再把它与紧挨着的右边一项比较；中间值较大就交换。区间只有一项时直接结束，不做这一步。",
+        "把当前区间分成相邻的两半，奇数项时中间项归左半。先对左半完整执行上述方法，再对右半执行，逐层缩小到一项。",
+        "记下这一整回合是否有任何交换。只有从整串开始、连所有小任务都没有交换，才停止；只要有一次交换就再从整串开始。"
+      ],
+      "example": [
+        "输入 [4,1,3,2]。先比较外端 4 与 2，交换得 [2,1,3,4]。两指针向内，比较 1 与 3，顺序已正确，不交换。",
+        "暂停整串任务，处理左半 [2,1]：外端 2>1，交换，于是整体为 [1,2,3,4]。左半的单项任务结束。再处理右半 [3,4]，不交换。第一个完整回合结束。",
+        "这一回合曾经交换，不能只靠眼看结果就按规则宣布结束。再做完整一回，所有外端、内端和半段比较都不交换，才停。",
+        "奇数例子 [1,3,2]：外端 1、2 正确，但中间 3 还没得到合适的位置。加做中间与右邻居的比较，3>2，交换成 [1,2,3]。",
+        "这时分成左半 [1,2] 与右半 [3]，左半无需交换，右半直接返回。再一个完整无交换回合，证明完成。漏掉本版本的奇数中心比较，会漏过关键关系。"
+      ],
+      "cost": "每个完整回合不是只扫一遍：整段比一批，两个半段又比一批，再拆小段。约有 log n 层，log n 在这里表示反复减半的层数；每层总工作约 n，因此每回合 Θ(n log n)。若需要 p 回合，总时间 Θ(p n log n)，Θ 是同一增长数量级。有序输入一回合即可，最好 Θ(n log n)。调用层数额外空间 O(log n)。作者报告常见 O(n log² n) 表现，不能当所有版本的严格最坏保证。",
+      "why": "远距离交换能让数一下移动很远，小区间再修补局部。但对称扫描不保证左右两半已经完全分开，局部修补以后可能还需要再做整串扫描。",
+      "use": "适合学习比较配对、递归分段和“整个回合无变化”的停止条件。实际工作通常更愿意选有明确保证的成熟方法。",
+      "details": "一般不稳定。本条使用中心归左半、额外比较右邻居的具体规则；还有中心重叠等版本。为何无交换能够证明有序？二项区间检查内部相邻关系，偶数区间的内端检查两半边界，奇数区间的额外比较检查中间与右半边界，所有相邻关系都被覆盖。一个非常松的上界是 O(n³ log n)：至多 O(n²) 个有交换回合，因为交换倒置的两项会减少至少一个逆序关系，每回合又花 O(n log n)。这只是保守上界，不是速度预测。"
+    },
+    "en": {
+      "foundation": [
+        "Work inward from both ends: compare the first with the last, then the second with the second-last. Keep the smaller value on the left.",
+        "A complete pass includes the whole-array scan and every smaller-region scan. A quiet local scan does not mean the full pass was quiet.",
+        "Recursive half processing means waiting for the left task to finish, then the right task, before the current task ends. One item needs no comparison."
+      ],
+      "idea": "Compare pairs from the outside inward, sending smaller values left and larger values right. Apply the same rule to both halves. A complete pass can leave the array unordered, so start again at the whole array until every region makes no exchanges. The name describes the pairing pattern; the records need not form a physical circle.",
+      "steps": [
+        "Put one pointer at each end of the current region. Exchange the values only if the left is larger. Move both pointers one slot inward and repeat while they refer to different slots.",
+        "An odd-length region leaves a middle item. In this version, also compare that item with its immediate right neighbor and exchange if the middle is larger. A one-item region returns without doing this.",
+        "Split into neighboring halves, assigning the middle item to the left half for odd lengths. Process the left half completely, then the right, using these same rules down to single items.",
+        "Track whether any exchange occurred anywhere in the full pass. Finish only when a pass starting at the whole array, including every smaller task, makes no exchanges. Otherwise start another full pass."
+      ],
+      "example": [
+        "For [4,1,3,2], compare outside values 4 and 2. Exchange them: [2,1,3,4]. Move inward and compare 1 and 3; they stay.",
+        "Process the left half [2,1]. Exchanging its endpoints gives the full array [1,2,3,4]. Its one-item tasks return. Process the right half [3,4], which needs no exchange.",
+        "The first pass did exchange records. Follow the stopping rule by doing another complete pass. Every whole-array and smaller-region comparison is now quiet, so finish.",
+        "For [1,3,2], the outside pair 1,2 is already ordered. The unpaired middle 3 still matters: compare it with its right neighbor 2 and exchange, giving [1,2,3].",
+        "The halves are [1,2] and [3]. The first stays and the second returns immediately. A later quiet full pass confirms completion. Leaving out the specified middle comparison would miss an essential relation."
+      ],
+      "cost": "A full pass checks the region, both halves, their smaller halves, and so on. There are about log n halving levels, each doing about n total work. With n items, one pass costs Θ(n log n); p passes cost Θ(p n log n). Θ means the same growth order. Already sorted input needs one pass, giving best time Θ(n log n). Waiting calls use O(log n) extra space. The author reports common O(n log² n) behavior, not a universal worst-case theorem.",
+      "why": "Long exchanges move records far, and smaller tasks repair local relations. But a symmetric scan does not fully separate the halves; their repairs may require another whole-array pass.",
+      "use": "Use it to study pairing, smaller tasks, and full-pass stopping rules.",
+      "details": "It is unstable. Odd-middle variants differ. A quiet pass covers internal adjacent boundaries through smaller tasks and the halves’ boundary through the central comparison. A very loose upper bound is O(n³ log n): at most O(n²) exchanging passes, since each decreases the number of inverted pairs, times O(n log n) work per pass. This is not a speed prediction."
+    },
+    "sources": [
+      {
+        "title": "Hans Bezemer: Circle sort, original author discussion",
+        "url": "https://sourceforge.net/p/forth-4th/wiki/Circle%20sort/"
+      }
+    ]
+  },
+  {
+    "id": 76,
+    "group": "D",
+    "zh_title": "烧焦煎饼排序",
+    "en_title": "Burnt pancake sort",
+    "kind": "variant",
+    "zh_alias": "带方向前缀翻转排序",
+    "en_alias": "Signed prefix-reversal sorting",
+    "zh": {
+      "foundation": [
+        "这里 3、2、1 是煎饼大小，正负号表示朝向。+3 是朝向正确的三号煎饼，−3 是翻面的三号；不是普通数轴上负三小于正一。",
+        "翻开头 k 个时，先把这 k 项前后顺序反转，并把它们的正负号全部反过来。只翻一项也有效：位置不变，但朝向改变。"
+      ],
+      "idea": "与普通煎饼排序一样，只能翻开头的一整叠；还要求最后每块都朝向正确。每轮把未完成部分中最大的煎饼送到该部分末尾，并同时保证它变成正号。随后缩短未完成部分，不再碰已完成的大煎饼。",
+      "steps": [
+        "只看未完成的开头部分，按大小而非正负找最大煎饼。若它已经在这部分末尾且是正号，就把这一格标为完成。",
+        "否则先让它到第一格：它在第 k 格时，翻开头 k 项。先反转这些项的顺序，再反转每项符号。若它本来就在第一格，可以省略这个搬到开头的翻转。",
+        "接下来要把整段开头翻一次，将最大煎饼送到末尾。那次还会反转符号，所以它在第一格时必须先是负号。若现在是正号，就单独翻第一项，变成负号。",
+        "翻整个未完成开头：最大煎饼落到末尾，负号变正号，于是大小与方向都正确。未完成长度减一，继续。最后剩一项时仍检查方向：负号就翻一下，正号不用动。"
+      ],
+      "example": [
+        "输入 [−3,+1,−2]，目标 [+1,+2,+3]。最大大小 3 已在开头且是负号，可以直接翻三项。",
+        "先反转次序：原来 −2 到第一格，+1 留中间，−3 到第三格；再反转三个符号，得到 [+2,−1,+3]。第三格 +3 完成，不再包含进后面的翻转。",
+        "剩下 [+2,−1]，最大大小 2 已在第一格，却是正号。若直接翻两项，它会以负号到末尾，所以先翻一项，得到 [−2,−1,+3]。",
+        "再翻两项：交换前两项次序，并把它们符号反转，得到 [+1,+2,+3]。第二格完成。最后第一格 +1 方向也对，结束。",
+        "如果最后剩的是 [−1,+2,+3]，还必须翻第一项，成为 [+1,+2,+3]。只有大小顺序正确不算完成。"
+      ],
+      "cost": "基本版本每轮都扫描未完成段找最大大小，长度依次 n、n−1……，所以最好、通常、最坏都做 Θ(n²) 工作。n 是煎饼个数，Θ 是同一增长数量级。每轮至多三次翻转，总翻转次数 O(n)，但翻长段需要逐项交换、改符号，实际总元素工作仍可达 Θ(n²)。固定几个临时变量即可，额外空间 O(1)。这里 O 是上界；翻转次数少不等于每次翻转免费。",
+      "why": "普通煎饼排序只管位置，这里一次翻转同时改变方向，所以要提前安排最大项在开头的符号。单项翻转就是修正方向的小动作。",
+      "use": "适合理解带方向的排列、片段反转以及煎饼问题。普通数字升序没有正负朝向要求。",
+      "details": "这是一个简单可行的贪心方法，不保证翻转次数最少。相同大小记录若带身份，翻转可能改变它们先后，通常不稳定；若还要求特定等值次序，要另定规则。比较使用绝对大小，完成检查还要检查正号。"
+    },
+    "en": {
+      "foundation": [
+        "Here size and orientation are separate. +3 is a size-three pancake facing correctly; −3 is the same size upside down. It is not ordinary numeric order in which negative three is smaller than positive one.",
+        "Flipping the first k items reverses their order and changes every sign. Flipping one item changes its orientation without moving its position."
+      ],
+      "idea": "Only a whole beginning stack can be flipped. The goal is increasing sizes with every sign positive. Each round sends the largest unfinished pancake to the end of the unfinished region with the correct orientation. Shorten that region and leave the completed large pancakes alone.",
+      "steps": [
+        "Search the unfinished beginning for the greatest size, ignoring signs. If it is already at that region’s end and positive, mark it finished.",
+        "Otherwise bring it to the first slot. If it is in slot k, flip the first k items: reverse their order and invert all their signs. Skip this move if it is already first.",
+        "The next flip will send it to the region’s end and invert its sign again. Therefore it must be negative before that flip. If it is positive at the front, flip the first item alone.",
+        "Flip the whole unfinished beginning. The largest pancake arrives at its final end slot and becomes positive. Reduce the unfinished length by one and repeat. Check the last single item too: flip if negative; leave if positive."
+      ],
+      "example": [
+        "Start with [−3,+1,−2], aiming for [+1,+2,+3]. Greatest size three is already first and negative, so flip all three.",
+        "Reverse the positions: −2 comes first, +1 remains in the middle, and −3 goes last. Invert all signs to obtain [+2,−1,+3]. The final +3 is complete.",
+        "Only [+2,−1] remains unfinished. Greatest size two is first but positive. A direct two-item flip would send it to the end negative. First flip one item: [−2,−1,+3].",
+        "Flip the first two, reversing their positions and signs: [+1,+2,+3]. Two is complete. The remaining +1 already has the right orientation, so finish.",
+        "If the final state were [−1,+2,+3], one more single-item flip would still be required. Correct size order alone is insufficient."
+      ],
+      "cost": "The basic method scans each unfinished region to find the largest size. Region lengths are n,n−1,…, so best, usual, and worst time are Θ(n²), where n counts pancakes and Θ means the same growth order. Each placement uses at most three flips, making O(n) flips overall. However, a long flip exchanges many records and changes many signs, so element work can still be Θ(n²). A fixed number of temporary values gives O(1) extra space. O states an upper bound; it does not make a long flip free.",
+      "why": "A flip changes both position and direction. Preparing the front sign makes the final placement correct in both respects. A one-item flip repairs direction alone.",
+      "use": "Use it to learn oriented arrangements and prefix reversals.",
+      "details": "This workable greedy method does not minimize flips. Equal-size record identities can reverse, so it is normally unstable. Comparisons use absolute size; completion also checks positive signs."
+    },
+    "sources": [
+      {
+        "title": "Anupam Gupta: Sorting Pancakes and burnt variant",
+        "url": "https://cs.nyu.edu/~anupamg/251-notes/pancakes.pdf"
+      },
+      {
+        "title": "Cohen and Blum: On the problem of sorting burnt pancakes",
+        "url": "https://www.sciencedirect.com/science/article/pii/0166218X94000093"
+      }
+    ]
+  }
+]
